@@ -1,0 +1,135 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Shop extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'tagline',
+        'address_line_1',
+        'address_line_2',
+        'city',
+        'postcode',
+        'country',
+        'phone',
+        'email',
+        'support_email',
+        'business_type',
+        'specialization',
+        'has_halal_products',
+        'has_organic_products',
+        'has_international_products',
+        'delivery_enabled',
+        'collection_enabled',
+        'online_payment',
+        'loyalty_program',
+        'reviews_enabled',
+        'delivery_radius_km',
+        'min_order_amount',
+        'delivery_fee',
+        'free_delivery_threshold',
+        'currency',
+        'currency_symbol',
+        'primary_color',
+        'secondary_color',
+        'logo_url',
+        'favicon_url',
+        'facebook_url',
+        'instagram_url',
+        'twitter_url',
+        'whatsapp_number',
+        'monday_hours',
+        'tuesday_hours',
+        'wednesday_hours',
+        'thursday_hours',
+        'friday_hours',
+        'saturday_hours',
+        'sunday_hours',
+        'domain',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'has_halal_products' => 'boolean',
+        'has_organic_products' => 'boolean',
+        'has_international_products' => 'boolean',
+        'delivery_enabled' => 'boolean',
+        'collection_enabled' => 'boolean',
+        'online_payment' => 'boolean',
+        'loyalty_program' => 'boolean',
+        'reviews_enabled' => 'boolean',
+        'is_active' => 'boolean',
+        'min_order_amount' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'free_delivery_threshold' => 'decimal:2',
+    ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function deliverySlots()
+    {
+        return $this->hasMany(DeliverySlot::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function fullAddress(): string
+    {
+        $parts = array_filter([
+            $this->address_line_1,
+            $this->address_line_2,
+            $this->city,
+            $this->postcode,
+        ]);
+        return implode(', ', $parts);
+    }
+
+    public function isFeatureEnabled($feature): bool
+    {
+        return (bool) $this->{"{$feature}_enabled"} ?? false;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeByDomain($query, $domain)
+    {
+        return $query->where('domain', $domain);
+    }
+
+    public function scopeBySlug($query, $slug)
+    {
+        return $query->where('slug', $slug);
+    }
+}

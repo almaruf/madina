@@ -1,0 +1,60 @@
+{
+    "shop_name": "ABC Grocery Shop",
+    "shop_slug": "abc-grocery",
+    "description": "Fresh groceries delivered to your door",
+    "tagline": "Quality products at affordable prices",
+    "location": {
+        "address": "Your Shop Address",
+        "city": "Your City",
+        "postcode": "YOUR POSTCODE",
+        "country": "United Kingdom"
+    },
+    "contact": {
+        "phone": "+44 1234 567890",
+        "email": "info@example.com",
+        "support_email": "support@example.com"
+    },
+    "business": {
+        "business_type": "grocery",
+        "specialization": "general",
+        "has_halal_products": true,
+        "has_organic_products": false,
+        "has_international_products": false
+    },
+    "features": {
+        "delivery_enabled": true,
+        "collection_enabled": true,
+        "online_payment": false,
+        "loyalty_program": false,
+        "reviews_enabled": false
+    },
+    "delivery": {
+        "radius_km": 10,
+        "min_order_amount": 20.00,
+        "delivery_fee": 3.99,
+        "free_delivery_threshold": 50.00,
+        "currency": "GBP",
+        "currency_symbol": "£"
+    },
+    "branding": {
+        "primary_color": "#10b981",
+        "secondary_color": "#059669",
+        "logo_url": null,
+        "favicon_url": null
+    },
+    "social_media": {
+        "facebook": null,
+        "instagram": null,
+        "twitter": null,
+        "whatsapp": null
+    },
+    "operating_hours": {
+        "monday": "09:00-20:00",
+        "tuesday": "09:00-20:00",
+        "wednesday": "09:00-20:00",
+        "thursday": "09:00-20:00",
+        "friday": "09:00-20:00",
+        "saturday": "09:00-18:00",
+        "sunday": "10:00-16:00"
+    }
+}
