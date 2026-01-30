@@ -18,7 +18,6 @@ class Address extends Model
         'city',
         'county',
         'postcode',
-        'phone',
         'delivery_instructions',
         'is_default',
         'latitude',

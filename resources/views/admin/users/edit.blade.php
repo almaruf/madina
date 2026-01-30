@@ -110,23 +110,24 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            
-            <form id="address-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                    <input type="tel" id="address-phone" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+            <!-- Postcode Search -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Search by Postcode *</label>
+                <div class="flex gap-2">
+                    <input type="text" id="postcode-search" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Enter postcode (e.g. SW1A 1AA)">
+                    <button type="button" onclick="searchPostcode()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Search</button>
                 </div>
-
+                <div id="postcode-results" class="mt-2"></div>
+            </div>
+            <form id="address-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1 *</label>
                     <input type="text" id="address-line-1" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
                     <input type="text" id="address-line-2" class="w-full border border-gray-300 rounded-lg px-4 py-2">
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
@@ -141,14 +142,12 @@
                         <input type="text" id="address-country" value="United Kingdom" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
                     </div>
                 </div>
-
                 <div>
                     <label class="flex items-center gap-2">
                         <input type="checkbox" id="address-is-default" class="rounded">
                         <span class="text-sm font-medium text-gray-700">Set as default address</span>
                     </label>
                 </div>
-                
                 <div class="flex justify-end gap-3 pt-4 border-t">
                     <button type="button" onclick="closeAddressModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
@@ -158,6 +157,44 @@
                     </button>
                 </div>
             </form>
+        <script>
+        // --- Postcode.io integration ---
+        async function searchPostcode() {
+            const postcode = document.getElementById('postcode-search').value.trim();
+            const resultsDiv = document.getElementById('postcode-results');
+            resultsDiv.innerHTML = '';
+            if (!postcode) return;
+            resultsDiv.innerHTML = '<span class="text-gray-500">Searching...</span>';
+            try {
+                // Use postcodes.io API
+                const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`);
+                const data = await res.json();
+                if (data.status !== 200 || !data.result) {
+                    resultsDiv.innerHTML = '<span class="text-red-600">No address found for this postcode.</span>';
+                    return;
+                }
+                // Show address lines (for UK, usually one result)
+                const address = data.result;
+                // Compose address line options (simulate multiple for demo)
+                const line1 = address.parliamentary_constituency || address.admin_ward || address.admin_district || address.region || '';
+                const city = address.admin_district || address.region || '';
+                const country = address.country || 'United Kingdom';
+                resultsDiv.innerHTML = `<button type="button" class="block w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-blue-50 mb-2" onclick="autofillAddressFromPostcode('${address.postcode.replace(/'/g, '')}','${line1.replace(/'/g, '')}','${city.replace(/'/g, '')}','${country.replace(/'/g, '')}')">
+                    ${line1 ? line1 + ', ' : ''}${city}, ${address.postcode}, ${country}
+                </button>`;
+            } catch (e) {
+                resultsDiv.innerHTML = '<span class="text-red-600">Failed to fetch address.</span>';
+            }
+        }
+
+        function autofillAddressFromPostcode(postcode, line1, city, country) {
+            document.getElementById('address-line-1').value = line1;
+            document.getElementById('address-city').value = city;
+            document.getElementById('address-postcode').value = postcode;
+            document.getElementById('address-country').value = country;
+            document.getElementById('postcode-results').innerHTML = '';
+        }
+        </script>
         </div>
     </div>
 </div>
@@ -240,7 +277,6 @@
                         ${address.address_line_2 ? `<p class="text-gray-700">${address.address_line_2}</p>` : ''}
                         <p class="text-gray-700">${address.city}, ${address.postcode}</p>
                         <p class="text-gray-700">${address.country || 'United Kingdom'}</p>
-                        <p class="text-gray-600 text-sm mt-2"><i class="fas fa-phone"></i> ${address.phone}</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="editAddress(${address.id})" class="text-blue-600 hover:text-blue-800">
@@ -271,17 +307,14 @@
     function editAddress(addressId) {
         const address = addresses.find(a => a.id === addressId);
         if (!address) return;
-
         editingAddressId = addressId;
         document.getElementById('address-modal-title').textContent = 'Edit Address';
-        document.getElementById('address-phone').value = address.phone;
         document.getElementById('address-line-1').value = address.address_line_1;
         document.getElementById('address-line-2').value = address.address_line_2 || '';
         document.getElementById('address-city').value = address.city;
         document.getElementById('address-postcode').value = address.postcode;
         document.getElementById('address-country').value = address.country || 'United Kingdom';
         document.getElementById('address-is-default').checked = address.is_default;
-        
         document.getElementById('address-modal').classList.remove('hidden');
     }
 
@@ -333,13 +366,12 @@
         
         const addressData = {
             user_id: userId,
-            phone: document.getElementById('address-phone').value,
-            address_line_1: document.getElementById('address-line-1').value,
-            address_line_2: document.getElementById('address-line-2').value,
-            city: document.getElementById('address-city').value,
-            postcode: document.getElementById('address-postcode').value,
-            country: document.getElementById('address-country').value,
-            is_default: document.getElementById('address-is-default').checked
+            address_line_1: document.getElementById('address-line-1')?.value || '',
+            address_line_2: document.getElementById('address-line-2')?.value || '',
+            city: document.getElementById('address-city')?.value || '',
+            postcode: document.getElementById('address-postcode')?.value || '',
+            country: document.getElementById('address-country')?.value || '',
+            is_default: document.getElementById('address-is-default')?.checked || false
         };
         
         try {

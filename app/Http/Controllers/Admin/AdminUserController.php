@@ -47,7 +47,12 @@ class AdminUserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|unique:users,phone',
+            'phone' => [
+                'required',
+                'string',
+                'unique:users,phone',
+                'regex:/^\+44[0-9]{10}$/'
+            ],
             'email' => 'required|email|unique:users,email',
             'name' => 'required|string|max:255',
             'shop_id' => 'required|integer|exists:shops,id',
@@ -282,7 +287,6 @@ class AdminUserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|max:20',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
@@ -330,7 +334,6 @@ class AdminUserController extends Controller
         $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);
 
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|max:20',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',

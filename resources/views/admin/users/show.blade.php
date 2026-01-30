@@ -167,7 +167,6 @@
                             ${address.address_line_2 ? `<p class="text-gray-700 text-sm">${address.address_line_2}</p>` : ''}
                             <p class="text-gray-700 text-sm">${address.city}, ${address.postcode}</p>
                             <p class="text-gray-700 text-sm">${address.country}</p>
-                            <p class="text-gray-600 text-sm mt-2"><i class="fas fa-phone"></i> ${address.phone}</p>
                         </div>
                     `;
                 });

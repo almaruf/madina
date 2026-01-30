@@ -28,7 +28,6 @@ class AddressController extends Controller
             'city' => 'required|string|max:255',
             'county' => 'nullable|string|max:255',
             'postcode' => 'required|string|max:20',
-            'phone' => 'nullable|string|max:20',
             'delivery_instructions' => 'nullable|string',
             'is_default' => 'nullable|boolean',
         ]);
@@ -76,7 +75,6 @@ class AddressController extends Controller
             'city' => 'required|string|max:255',
             'county' => 'nullable|string|max:255',
             'postcode' => 'required|string|max:20',
-            'phone' => 'nullable|string|max:20',
             'delivery_instructions' => 'nullable|string',
             'is_default' => 'nullable|boolean',
         ]);

@@ -45,9 +45,15 @@
             <div id="new-address-form" class="hidden mt-4 pt-4 border-t">
                 <h3 class="font-semibold mb-3">Add New Address</h3>
                 <div class="space-y-4">
+
+                    <!-- Postcode Search -->
                     <div>
-                        <label class="block text-sm font-medium mb-1">Phone Number *</label>
-                        <input type="tel" id="new_phone" placeholder="+44..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <label class="block text-sm font-medium mb-1">Search by Postcode *</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="postcode-search" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Enter postcode (e.g. SW1A 1AA)">
+                            <button type="button" onclick="searchPostcode()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Search</button>
+                        </div>
+                        <div id="postcode-results" class="mt-2"></div>
                     </div>
 
                     <div>
@@ -247,7 +253,6 @@
                                 <div class="font-semibold">${addr.address_line_1}</div>
                                 ${addr.address_line_2 ? `<div class="text-sm text-gray-600">${addr.address_line_2}</div>` : ''}
                                 <div class="text-sm text-gray-600">${addr.city}, ${addr.postcode}</div>
-                                ${addr.phone ? `<div class="text-sm text-gray-500">Phone: ${addr.phone}</div>` : ''}
                                 ${addr.is_default ? '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded mt-1 inline-block">Default</span>' : ''}
                             </div>
                         </label>
@@ -273,7 +278,6 @@
                 address_line_2: document.getElementById('new_address_line_2').value,
                 city: document.getElementById('new_city').value,
                 postcode: document.getElementById('new_postcode').value,
-                phone: document.getElementById('new_phone').value,
             };
 
             if (!addressData.address_line_1 || !addressData.city || !addressData.postcode) {
@@ -294,7 +298,7 @@
                 document.getElementById('new_address_line_2').value = '';
                 document.getElementById('new_city').value = '';
                 document.getElementById('new_postcode').value = '';
-                document.getElementById('new_phone').value = '';
+                document.getElementById('new_country').value = 'United Kingdom';
             } catch (error) {
                 this.showError('Failed to save address: ' + (error.response?.data?.message || error.message));
             }
