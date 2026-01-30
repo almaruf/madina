@@ -63,7 +63,7 @@
             }
             
             tbody.innerHTML = orders.map(order => {
-                const totalAmount = parseFloat(order.total_amount || 0).toFixed(2);
+                const totalAmount = parseFloat(order.total || 0).toFixed(2);
                 const userName = order.user?.name || order.user?.phone || 'N/A';
                 const createdDate = new Date(order.created_at).toLocaleDateString();
                 

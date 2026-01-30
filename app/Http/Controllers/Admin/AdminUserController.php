@@ -282,14 +282,12 @@ class AdminUserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
             'postcode' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
+            'country' => 'nullable|string|max:255',
             'is_default' => 'nullable|boolean',
         ]);
 
@@ -332,14 +330,12 @@ class AdminUserController extends Controller
         $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);
 
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',
             'postcode' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
+            'country' => 'nullable|string|max:255',
             'is_default' => 'nullable|boolean',
         ]);
 
