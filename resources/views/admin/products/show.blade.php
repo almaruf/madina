@@ -20,12 +20,12 @@
 </div>
 
 <script>
-    const productId = {{ request()->route('id') }};
+    const productSlug = '{{ request()->route("slug") }}';
     let productData = null;
     
     async function loadProduct() {
         try {
-            const response = await axios.get(`/api/admin/products/${productId}`);
+            const response = await axios.get(`/api/admin/products/${productSlug}`);
             productData = response.data.data || response.data;
             renderProduct();
         } catch (error) {
@@ -41,7 +41,7 @@
     
     function renderProduct() {
         const price = productData.variations?.[0]?.price ? parseFloat(productData.variations[0].price).toFixed(2) : '0.00';
-        const stock = productData.variations?.[0]?.stock || 0;
+        const stock = productData.variations?.[0]?.stock_quantity || 0;
         const categories = productData.categories?.map(c => c.name).join(', ') || 'None';
         const isArchived = productData.deleted_at !== null;
         
@@ -133,7 +133,7 @@
                                     <tr>
                                         <td class="px-4 py-3 text-sm">${v.name}</td>
                                         <td class="px-4 py-3 text-sm font-semibold">£${parseFloat(v.price).toFixed(2)}</td>
-                                        <td class="px-4 py-3 text-sm">${v.stock}</td>
+                                        <td class="px-4 py-3 text-sm">${v.stock_quantity || 0}</td>
                                         <td class="px-4 py-3 text-sm text-gray-500">${v.sku || 'N/A'}</td>
                                     </tr>
                                 `).join('')}

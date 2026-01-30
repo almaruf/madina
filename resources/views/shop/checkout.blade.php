@@ -47,17 +47,6 @@
             <div id="new-address-form" class="hidden mt-4 pt-4 border-t">
                 <h3 class="font-semibold mb-3">Add New Address</h3>
                 <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">First Name *</label>
-                            <input type="text" id="new_first_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Last Name *</label>
-                            <input type="text" id="new_last_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        </div>
-                    </div>
-
                     <div>
                         <label class="block text-sm font-medium mb-1">Phone Number *</label>
                         <input type="tel" id="new_phone" placeholder="+44..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">

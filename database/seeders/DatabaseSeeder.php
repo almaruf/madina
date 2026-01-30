@@ -366,6 +366,26 @@ class DatabaseSeeder extends Seeder
             'is_default' => true,
         ]);
 
+        // Create addresses for super admin
+        $superAdminAddress1 = Address::create([
+            'shop_id' => $shop->id,
+            'user_id' => $superAdmin->id,
+            'address_line_1' => '456 Oxford Street',
+            'address_line_2' => 'Apartment 12',
+            'city' => 'London',
+            'postcode' => 'W1D 1BS',
+            'is_default' => true,
+        ]);
+
+        $superAdminAddress2 = Address::create([
+            'shop_id' => $shop->id,
+            'user_id' => $superAdmin->id,
+            'address_line_1' => '789 Baker Street',
+            'city' => 'London',
+            'postcode' => 'NW1 6XE',
+            'is_default' => false,
+        ]);
+
         // Get products and variations for orders
         $allProducts = Product::where('shop_id', $shop->id)->with('variations')->get();
         $deliverySlot = DeliverySlot::where('shop_id', $shop->id)->first();
@@ -428,6 +448,72 @@ class DatabaseSeeder extends Seeder
             ]);
             
             // Create order items
+            foreach ($items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product']->id,
+                    'product_variation_id' => $item['variation']->id,
+                    'product_name' => $item['product']->name,
+                    'variation_name' => $item['variation']->name,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['price'],
+                    'subtotal' => $item['total'],
+                    'total' => $item['total'],
+                ]);
+            }
+        }
+
+        // Create orders for super admin
+        $superAdminOrders = [
+            ['status' => 'delivered', 'payment_status' => 'paid', 'address' => $superAdminAddress1],
+            ['status' => 'processing', 'payment_status' => 'paid', 'address' => $superAdminAddress1],
+            ['status' => 'pending', 'payment_status' => 'pending', 'address' => $superAdminAddress2],
+        ];
+
+        foreach ($superAdminOrders as $index => $orderData) {
+            $orderProducts = $allProducts->random(rand(3, 5));
+            
+            $subtotal = 0;
+            $items = [];
+            
+            foreach ($orderProducts as $product) {
+                $variation = $product->variations->first();
+                if (!$variation) continue;
+                
+                $quantity = rand(1, 3);
+                $price = $variation->price;
+                $itemTotal = $price * $quantity;
+                $subtotal += $itemTotal;
+                
+                $items[] = [
+                    'product' => $product,
+                    'variation' => $variation,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                    'total' => $itemTotal,
+                ];
+            }
+            
+            $deliveryFee = 3.99;
+            $total = $subtotal + $deliveryFee;
+            
+            $order = Order::create([
+                'shop_id' => $shop->id,
+                'user_id' => $superAdmin->id,
+                'order_number' => 'ORD-SA-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+                'status' => $orderData['status'],
+                'payment_status' => $orderData['payment_status'],
+                'payment_method' => $orderData['payment_status'] === 'paid' ? 'card' : 'cash',
+                'fulfillment_type' => 'delivery',
+                'subtotal' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'total' => $total,
+                'address_id' => $orderData['address']->id,
+                'delivery_slot_id' => $deliverySlot->id,
+                'created_at' => now()->subDays(5 - $index),
+                'updated_at' => now()->subDays(5 - $index),
+            ]);
+            
             foreach ($items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,

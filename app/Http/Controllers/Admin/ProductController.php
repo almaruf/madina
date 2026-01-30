@@ -75,7 +75,12 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::withTrashed()->where('slug', $slug)->with(['variations', 'images', 'categories'])->firstOrFail();
+        $shopId = \App\Services\ShopContext::getShopId();
+        $product = Product::withTrashed()
+            ->where('slug', $slug)
+            ->where('shop_id', $shopId)
+            ->with(['variations', 'images', 'categories'])
+            ->firstOrFail();
 
         return response()->json($product);
     }

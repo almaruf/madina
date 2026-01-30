@@ -8,4 +8,14 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'probable-goggles-v676qw94rjcwgxr-5173.app.github.dev',
+            protocol: 'wss',
+            clientPort: 443,
+        },
+    },
 });

@@ -70,7 +70,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('users/{userId}/addresses/{addressId}', [\App\Http\Controllers\Admin\AdminUserController::class, 'deleteUserAddress']);
 
     // Products
-    Route::apiResource('products', \App\Http\Controllers\Admin\ProductController::class);
+    Route::get('products', [\App\Http\Controllers\Admin\ProductController::class, 'index']);
+    Route::post('products', [\App\Http\Controllers\Admin\ProductController::class, 'store']);
+    Route::get('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'show']);
+    Route::put('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'update']);
+    Route::patch('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'update']);
+    Route::delete('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'destroy']);
     Route::post('products/{slug}/images', [\App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
     Route::post('products/{slug}/restore', [\App\Http\Controllers\Admin\ProductController::class, 'restore']);
     Route::delete('products/{slug}/force', [\App\Http\Controllers\Admin\ProductController::class, 'forceDelete']);
