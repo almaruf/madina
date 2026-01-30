@@ -290,7 +290,7 @@
             shop = response.data;
             populateForm();
         } catch (error) {
-            alert('Failed to load shop: ' + (error.response?.data?.message || error.message));
+            toast.error('Failed to load shop: ' + (error.response?.data?.message || error.message));
         }
     }
 
@@ -391,7 +391,7 @@
             await axios.put(`/api/admin/shops/${shopSlug}`, data);
             window.location = '/admin/shops';
         } catch (error) {
-            alert('Failed to update shop: ' + (error.response?.data?.message || error.message));
+            toast.error('Failed to update shop: ' + (error.response?.data?.message || error.message));
         }
     }
 

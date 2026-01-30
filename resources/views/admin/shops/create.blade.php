@@ -337,7 +337,7 @@
             await axios.post('/api/admin/shops', data);
             window.location = '/admin/shops';
         } catch (error) {
-            alert('Failed to create shop: ' + (error.response?.data?.message || error.message));
+            toast.error('Failed to create shop: ' + (error.response?.data?.message || error.message));
         }
     }
 </script>

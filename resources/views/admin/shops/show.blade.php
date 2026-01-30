@@ -154,10 +154,10 @@
                 <a href="/admin/shops/${shop.slug}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Edit Shop
                 </a>
-                <button onclick="toggleShopStatus()" class="px-4 py-2 ${shop.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-lg">
+                <button onclick="confirmToggleStatus()" class="px-4 py-2 ${shop.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-lg">
                     ${shop.is_active ? 'Deactivate' : 'Activate'} Shop
                 </button>
-                <button onclick="archiveShop()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button onclick="confirmArchiveShop()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                     Archive Shop
                 </button>
             `);
@@ -166,7 +166,7 @@
                 <button onclick="restoreShop()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     Restore Shop
                 </button>
-                <button onclick="permanentlyDeleteShop()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button onclick="confirmPermanentDeleteShop()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                     Permanently Delete
                 </button>
             `);
@@ -175,13 +175,23 @@
         document.getElementById('shop-actions').innerHTML = actionsHtml.join('');
     }
 
+    function confirmToggleStatus() {
+        const newStatus = !currentShop.is_active;
+        const action = newStatus ? 'activate' : 'deactivate';
+        toast.warning(`Click again to ${action} shop`, 3000);
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+        btn.onclick = toggleShopStatus;
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.onclick = confirmToggleStatus;
+        }, 3000);
+    }
+
     async function toggleShopStatus() {
         const newStatus = !currentShop.is_active;
         const action = newStatus ? 'activate' : 'deactivate';
-        
-        if (!confirm(`Are you sure you want to ${action} this shop?`)) {
-            return;
-        }
 
         try {
             await axios.patch(`/api/admin/shops/${shopSlug}`, { is_active: newStatus });
@@ -193,11 +203,18 @@
         }
     }
 
-    async function archiveShop() {
-        if (!confirm('Are you sure you want to archive this shop? All shop data will be hidden but preserved.')) {
-            return;
-        }
+    function confirmArchiveShop() {
+        toast.warning('Click Archive again to confirm', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Archive';
+        btn.onclick = archiveShop;
+        setTimeout(() => {
+            btn.textContent = 'Archive';
+            btn.onclick = confirmArchiveShop;
+        }, 3000);
+    }
 
+    async function archiveShop() {
         try {
             await axios.delete(`/api/admin/shops/${shopSlug}`);
             toast.success('Shop archived successfully!');
@@ -219,15 +236,25 @@
         }
     }
 
-    async function permanentlyDeleteShop() {
-        if (!confirm('Are you sure you want to PERMANENTLY delete this shop? This action cannot be undone and will delete all associated data!')) {
-            return;
-        }
+    function confirmPermanentDeleteShop() {
+        toast.warning('Click Delete again to PERMANENTLY delete shop and all data', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Delete';
+        btn.onclick = permanentlyDeleteShop;
+        setTimeout(() => {
+            btn.textContent = 'Permanent Delete';
+            btn.onclick = confirmPermanentDeleteShop;
+        }, 3000);
+    }
 
-        const confirmText = prompt('Type "DELETE" to confirm permanent deletion:');
-        if (confirmText !== 'DELETE') {
-            toast.warning('Deletion cancelled');
-            return;
+    async function permanentlyDeleteShop() {
+        try {
+            await axios.delete(`/api/admin/shops/${shopSlug}/force`);
+            toast.success('Shop permanently deleted!');
+            setTimeout(() => window.location.href = '/admin/shops', 1000);
+        } catch (error) {
+            console.error('Error deleting shop:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete shop');
         }
 
         try {

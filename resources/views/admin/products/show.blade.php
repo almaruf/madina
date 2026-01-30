@@ -25,15 +25,27 @@
     
     async function loadProduct() {
         try {
-            const response = await axios.get(`/api/admin/products/${productSlug}`);
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            const response = await axios.get(`/api/admin/products/${productSlug}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             productData = response.data.data || response.data;
             renderProduct();
         } catch (error) {
             console.error('Error loading product:', error);
+            const message = error.response?.data?.message || 'Failed to load product details';
             document.getElementById('product-container').innerHTML = `
                 <div class="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg">
                     <i class="fas fa-exclamation-circle mr-2"></i>
-                    Failed to load product details
+                    ${message}
                 </div>
             `;
         }
@@ -52,14 +64,14 @@
                     <a href="/admin/products/${productSlug}/edit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold inline-flex items-center">
                         <i class="fas fa-edit mr-2"></i>Edit Product
                     </a>
-                    <button onclick="archiveProduct()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <button onclick="confirmArchive()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
                         <i class="fas fa-archive mr-2"></i>Archive
                     </button>
                 ` : `
                     <button onclick="restoreProduct()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
                         <i class="fas fa-undo mr-2"></i>Restore
                     </button>
-                    <button onclick="permanentDelete()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <button onclick="confirmPermanentDelete()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
                         <i class="fas fa-trash mr-2"></i>Permanent Delete
                     </button>
                 `}
@@ -145,43 +157,110 @@
         `;
     }
     
+    function confirmArchive() {
+        toast.warning('Click Archive again to confirm', 3000);
+        const btn = event.target.closest('button');
+        btn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Archive';
+        btn.onclick = archiveProduct;
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-archive mr-2"></i>Archive';
+            btn.onclick = confirmArchive;
+        }, 3000);
+    }
+    
     async function archiveProduct() {
-        if (!confirm('Are you sure you want to archive this product?')) return;
-        
         try {
-            await axios.delete(`/api/admin/products/${productSlug}`);
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            await axios.delete(`/api/admin/products/${productSlug}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             toast.success('Product archived successfully');
             setTimeout(() => window.location.href = '/admin/products', 1500);
         } catch (error) {
             console.error('Error archiving product:', error);
-            toast.error('Failed to archive product');
+            const message = error.response?.data?.message || 'Failed to archive product';
+            toast.error(message);
         }
     }
     
     async function restoreProduct() {
         try {
-            await axios.post(`/api/admin/products/${productSlug}/restore`);
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            await axios.post(`/api/admin/products/${productSlug}/restore`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             toast.success('Product restored successfully');
             loadProduct();
         } catch (error) {
             console.error('Error restoring product:', error);
-            toast.error('Failed to restore product');
+            const message = error.response?.data?.message || 'Failed to restore product';
+            toast.error(message);
         }
     }
     
+    function confirmPermanentDelete() {
+        toast.warning('Click Delete again to permanently delete', 3000);
+        const btn = event.target.closest('button');
+        btn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Confirm Delete';
+        btn.onclick = permanentDelete;
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-trash mr-2"></i>Permanent Delete';
+            btn.onclick = confirmPermanentDelete;
+        }, 3000);
+    }
+    
     async function permanentDelete() {
-        if (!confirm('Are you sure you want to PERMANENTLY delete this product? This cannot be undone!')) return;
-        
         try {
-            await axios.delete(`/api/admin/products/${productSlug}/force`);
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            await axios.delete(`/api/admin/products/${productSlug}/force`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             toast.success('Product permanently deleted');
             setTimeout(() => window.location.href = '/admin/products', 1500);
         } catch (error) {
             console.error('Error deleting product:', error);
-            toast.error('Failed to delete product');
+            const message = error.response?.data?.message || 'Failed to delete product';
+            toast.error(message);
         }
     }
     
-    loadProduct();
+    const waitForAuth = setInterval(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token && axios.defaults.headers.common['Authorization']) {
+            clearInterval(waitForAuth);
+            loadProduct();
+        }
+    }, 100);
+
+    setTimeout(() => {
+        clearInterval(waitForAuth);
+        if (!productData) {
+            loadProduct();
+        }
+    }, 1000);
 </script>
 @endsection

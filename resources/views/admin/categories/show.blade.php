@@ -121,7 +121,7 @@
                 <a href="/admin/categories/${categorySlug}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Edit Category
                 </a>
-                <button onclick="archiveCategory()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                <button onclick="confirmArchiveCategory()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
                     Archive Category
                 </button>
             `);
@@ -130,7 +130,7 @@
                 <button onclick="restoreCategory()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     Restore Category
                 </button>
-                <button onclick="permanentlyDeleteCategory()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button onclick="confirmPermanentDeleteCategory()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                     Permanently Delete
                 </button>
             `);
@@ -139,11 +139,18 @@
         document.getElementById('category-actions').innerHTML = actionsHtml.join('');
     }
 
-    async function archiveCategory() {
-        if (!confirm('Are you sure you want to archive this category?')) {
-            return;
-        }
+    function confirmArchiveCategory() {
+        toast.warning('Click Archive again to confirm', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Archive';
+        btn.onclick = archiveCategory;
+        setTimeout(() => {
+            btn.textContent = 'Archive';
+            btn.onclick = confirmArchiveCategory;
+        }, 3000);
+    }
 
+    async function archiveCategory() {
         try {
             await axios.delete(`/api/admin/categories/${categorySlug}`);
             toast.success('Category archived successfully!');
@@ -165,11 +172,18 @@
         }
     }
 
-    async function permanentlyDeleteCategory() {
-        if (!confirm('Are you sure you want to PERMANENTLY delete this category? This action cannot be undone!')) {
-            return;
-        }
+    function confirmPermanentDeleteCategory() {
+        toast.warning('Click Delete again to PERMANENTLY delete', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Delete';
+        btn.onclick = permanentlyDeleteCategory;
+        setTimeout(() => {
+            btn.textContent = 'Permanent Delete';
+            btn.onclick = confirmPermanentDeleteCategory;
+        }, 3000);
+    }
 
+    async function permanentlyDeleteCategory() {
         try {
             await axios.delete(`/api/admin/categories/${categorySlug}/force`);
             toast.success('Category permanently deleted!');

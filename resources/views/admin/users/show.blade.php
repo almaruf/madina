@@ -123,7 +123,7 @@
                 <a href="/admin/users/${userId}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-block">
                     Edit User
                 </a>
-                <button onclick="archiveUser()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                <button onclick="confirmArchiveUser()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
                     Archive User
                 </button>
             `);
@@ -132,7 +132,7 @@
                 <button onclick="restoreUser()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     Restore User
                 </button>
-                <button onclick="permanentlyDeleteUser()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                <button onclick="confirmPermanentDeleteUser()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                     Permanently Delete
                 </button>
             `);
@@ -240,11 +240,18 @@
 
 
 
-    async function archiveUser() {
-        if (!confirm('Are you sure you want to archive this user?')) {
-            return;
-        }
+    function confirmArchiveUser() {
+        toast.warning('Click Archive again to confirm', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Archive';
+        btn.onclick = archiveUser;
+        setTimeout(() => {
+            btn.textContent = 'Archive';
+            btn.onclick = confirmArchiveUser;
+        }, 3000);
+    }
 
+    async function archiveUser() {
         try {
             await axios.delete(`/api/admin/users/${userId}`);
             toast.success('User archived successfully!');
@@ -266,11 +273,18 @@
         }
     }
 
-    async function permanentlyDeleteUser() {
-        if (!confirm('Are you sure you want to PERMANENTLY delete this user? This action cannot be undone!')) {
-            return;
-        }
+    function confirmPermanentDeleteUser() {
+        toast.warning('Click Delete again to PERMANENTLY delete', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Delete';
+        btn.onclick = permanentlyDeleteUser;
+        setTimeout(() => {
+            btn.textContent = 'Permanent Delete';
+            btn.onclick = confirmPermanentDeleteUser;
+        }, 3000);
+    }
 
+    async function permanentlyDeleteUser() {
         try {
             await axios.delete(`/api/admin/users/${userId}/force`);
             toast.success('User permanently deleted!');

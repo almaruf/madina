@@ -67,8 +67,24 @@
 
     async function loadCategories() {
         try {
+            // Ensure token is set
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                console.error('No auth token found');
+                window.location.href = '/admin/login';
+                return;
+            }
+            
             const url = currentTab === 'archived' ? '/api/admin/categories?archived=1' : '/api/admin/categories';
-            const response = await axios.get(url);
+            console.log('Loading categories from:', url);
+            
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
             const categories = response.data.data || response.data;
             const tbody = document.querySelector('#categories-table tbody');
             
@@ -99,7 +115,17 @@
             `).join('');
         } catch (error) {
             console.error('Error loading categories:', error);
-            toast.error('Failed to load categories');
+            console.error('Error details:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            if (error.response?.status === 401) {
+                console.error('Authentication failed - redirecting to login');
+                localStorage.removeItem('auth_token');
+                window.location.href = '/admin/login';
+            } else {
+                const message = error.response?.data?.message || 'Failed to load categories';
+                toast.error(message);
+            }
         }
     }
     
@@ -107,7 +133,22 @@
         toast.info('Category creation form coming soon!');
     }
     
-    loadCategories();
+    // Wait for authentication to be verified before loading categories
+    const waitForAuth = setInterval(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token && axios.defaults.headers.common['Authorization']) {
+            clearInterval(waitForAuth);
+            loadCategories();
+        }
+    }, 100);
+    
+    // Fallback: load after 1 second regardless
+    setTimeout(() => {
+        clearInterval(waitForAuth);
+        if (!document.querySelector('#categories-table tbody tr')) {
+            loadCategories();
+        }
+    }, 1000);
 </script>
 @endsection
 

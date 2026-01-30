@@ -119,7 +119,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm">
-                        <button onclick="deleteSlot(${slot.id})" class="text-red-600 hover:text-red-900">Delete</button>
+                        <button onclick="confirmDeleteSlot(${slot.id})" class="text-red-600 hover:text-red-900">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -171,9 +171,19 @@
         }
     });
     
+    function confirmDeleteSlot(id) {
+        toast.warning('Click delete again to confirm', 3000);
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        btn.onclick = () => deleteSlot(id);
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.onclick = () => confirmDeleteSlot(id);
+        }, 3000);
+    }
+
     async function deleteSlot(id) {
-        if (!confirm('Are you sure you want to delete this slot?')) return;
-        
         try {
             await axios.delete(`/api/admin/delivery-slots/${id}`);
             toast.success('Delivery slot deleted successfully');

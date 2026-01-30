@@ -246,7 +246,7 @@
                         <button onclick="editAddress(${address.id})" class="text-blue-600 hover:text-blue-800">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="deleteAddress(${address.id})" class="text-red-600 hover:text-red-800">
+                        <button onclick="confirmDeleteAddress(${address.id})" class="text-red-600 hover:text-red-800">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -285,9 +285,19 @@
         document.getElementById('address-modal').classList.remove('hidden');
     }
 
-    async function deleteAddress(addressId) {
-        if (!confirm('Are you sure you want to delete this address?')) return;
+    function confirmDeleteAddress(addressId) {
+        toast.warning('Click delete again to confirm', 3000);
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        btn.onclick = () => deleteAddress(addressId);
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.onclick = () => confirmDeleteAddress(addressId);
+        }, 3000);
+    }
 
+    async function deleteAddress(addressId) {
         try {
             await axios.delete(`/api/admin/users/${userId}/addresses/${addressId}`);
             toast.success('Address deleted successfully!');

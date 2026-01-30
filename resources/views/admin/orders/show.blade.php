@@ -68,7 +68,7 @@
                 <h2 class="text-2xl font-bold">Order #${orderData.id}</h2>
                 <div class="flex gap-3">
                     ${!isArchived ? `
-                        <button onclick="archiveOrder()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
+                        <button onclick="confirmArchiveOrder()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
                             <i class="fas fa-archive mr-2"></i>Archive
                         </button>
                     ` : `
@@ -198,9 +198,18 @@
         }
     }
     
+    function confirmArchiveOrder() {
+        toast.warning('Click Archive again to confirm', 3000);
+        const btn = event.target;
+        btn.textContent = 'Confirm Archive';
+        btn.onclick = archiveOrder;
+        setTimeout(() => {
+            btn.textContent = 'Archive Order';
+            btn.onclick = confirmArchiveOrder;
+        }, 3000);
+    }
+
     async function archiveOrder() {
-        if (!confirm('Are you sure you want to archive this order?')) return;
-        
         try {
             await axios.delete(`/api/admin/orders/${orderId}`, {
                 headers: {

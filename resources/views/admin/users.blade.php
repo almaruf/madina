@@ -74,6 +74,14 @@
 
     async function loadUsers() {
         try {
+            // Ensure token is set
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                console.error('No auth token found');
+                window.location.href = '/admin/login';
+                return;
+            }
+            
             const search = document.getElementById('search').value;
             const role = document.getElementById('role-filter').value;
             
@@ -82,7 +90,16 @@
             if (role) params.append('role', role);
             if (currentTab === 'archived') params.append('archived', '1');
             
-            const response = await axios.get(`/api/admin/users?${params}`);
+            const url = `/api/admin/users?${params}`;
+            console.log('Loading users from:', url);
+            
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
             const users = response.data.data || response.data;
             const tbody = document.querySelector('#users-table tbody');
             
@@ -112,7 +129,17 @@
             `).join('');
         } catch (error) {
             console.error('Error loading users:', error);
-            toast.error('Failed to load users');
+            console.error('Error details:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            if (error.response?.status === 401) {
+                console.error('Authentication failed - redirecting to login');
+                localStorage.removeItem('auth_token');
+                window.location.href = '/admin/login';
+            } else {
+                const message = error.response?.data?.message || 'Failed to load users';
+                toast.error(message);
+            }
         }
     }
     
@@ -123,6 +150,21 @@
     
     document.getElementById('role-filter').addEventListener('change', loadUsers);
     
-    loadUsers();
+    // Wait for authentication to be verified before loading users
+    const waitForAuth = setInterval(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token && axios.defaults.headers.common['Authorization']) {
+            clearInterval(waitForAuth);
+            loadUsers();
+        }
+    }, 100);
+    
+    // Fallback: load after 1 second regardless
+    setTimeout(() => {
+        clearInterval(waitForAuth);
+        if (!document.querySelector('#users-table tbody tr')) {
+            loadUsers();
+        }
+    }, 1000);
 </script>
 @endsection
