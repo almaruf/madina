@@ -107,10 +107,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
     
-    // Queue Management
-    Route::get('queue/jobs', [\App\Http\Controllers\Admin\QueueController::class, 'jobs']);
-    Route::post('queue/failed/{id}/retry', [\App\Http\Controllers\Admin\QueueController::class, 'retryFailed']);
-    Route::post('queue/failed/retry-all', [\App\Http\Controllers\Admin\QueueController::class, 'retryAllFailed']);
-    Route::delete('queue/failed/{id}', [\App\Http\Controllers\Admin\QueueController::class, 'deleteFailed']);
-    Route::delete('queue/failed/flush', [\App\Http\Controllers\Admin\QueueController::class, 'flushFailed']);
+    // Queue Management (super admin only)
+    Route::middleware('super_admin')->group(function () {
+        Route::get('queue/jobs', [\App\Http\Controllers\Admin\QueueController::class, 'jobs']);
+        Route::post('queue/failed/{id}/retry', [\App\Http\Controllers\Admin\QueueController::class, 'retryFailed']);
+        Route::post('queue/failed/retry-all', [\App\Http\Controllers\Admin\QueueController::class, 'retryAllFailed']);
+        Route::delete('queue/failed/{id}', [\App\Http\Controllers\Admin\QueueController::class, 'deleteFailed']);
+        Route::delete('queue/failed/flush', [\App\Http\Controllers\Admin\QueueController::class, 'flushFailed']);
+    });
 });
