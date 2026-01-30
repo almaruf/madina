@@ -145,16 +145,97 @@
         document.getElementById('addresses-section').innerHTML = '<p class="text-gray-600">Loading addresses...</p>';
         document.getElementById('orders-section').innerHTML = '<p class="text-gray-600">Loading orders...</p>';
         
-        // In a real app, you'd fetch these from API
-        document.getElementById('addresses-section').innerHTML = `
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Saved Addresses</h3>
-            <p class="text-gray-700">Address information not available in detail view</p>
-        `;
+        // Load addresses
+        try {
+            const addressResponse = await axios.get(`/api/admin/users/${userId}/addresses`);
+            const addresses = addressResponse.data;
+            
+            let addressesHtml = '<h3 class="text-lg font-semibold text-gray-900 mb-4">Saved Addresses</h3>';
+            
+            if (addresses.length === 0) {
+                addressesHtml += '<p class="text-gray-600">No addresses saved</p>';
+            } else {
+                addressesHtml += '<div class="space-y-3">';
+                addresses.forEach(address => {
+                    addressesHtml += `
+                        <div class="border border-gray-200 rounded-lg p-4 ${address.is_default ? 'border-green-500 bg-green-50' : ''}">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h4 class="font-semibold">${address.first_name} ${address.last_name}</h4>
+                                ${address.is_default ? '<span class="px-2 py-1 bg-green-600 text-white text-xs rounded">Default</span>' : ''}
+                            </div>
+                            <p class="text-gray-700 text-sm">${address.address_line_1}</p>
+                            ${address.address_line_2 ? `<p class="text-gray-700 text-sm">${address.address_line_2}</p>` : ''}
+                            <p class="text-gray-700 text-sm">${address.city}, ${address.postcode}</p>
+                            <p class="text-gray-700 text-sm">${address.country}</p>
+                            <p class="text-gray-600 text-sm mt-2"><i class="fas fa-phone"></i> ${address.phone}</p>
+                        </div>
+                    `;
+                });
+                addressesHtml += '</div>';
+            }
+            
+            document.getElementById('addresses-section').innerHTML = addressesHtml;
+        } catch (error) {
+            console.error('Error loading addresses:', error);
+            document.getElementById('addresses-section').innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Saved Addresses</h3>
+                <p class="text-red-600">Failed to load addresses</p>
+            `;
+        }
         
-        document.getElementById('orders-section').innerHTML = `
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Order History</h3>
-            <p class="text-gray-700">Order history not available in detail view</p>
-        `;
+        // Load orders
+        try {
+            const ordersResponse = await axios.get(`/api/admin/orders?user_id=${userId}`);
+            const orders = ordersResponse.data.data || ordersResponse.data;
+            
+            let ordersHtml = '<h3 class="text-lg font-semibold text-gray-900 mb-4">Order History</h3>';
+            
+            if (orders.length === 0) {
+                ordersHtml += '<p class="text-gray-600">No orders placed yet</p>';
+            } else {
+                ordersHtml += '<div class="space-y-3">';
+                orders.forEach(order => {
+                    const statusColors = {
+                        'pending': 'bg-yellow-100 text-yellow-800',
+                        'confirmed': 'bg-blue-100 text-blue-800',
+                        'processing': 'bg-indigo-100 text-indigo-800',
+                        'ready': 'bg-purple-100 text-purple-800',
+                        'out_for_delivery': 'bg-orange-100 text-orange-800',
+                        'delivered': 'bg-green-100 text-green-800',
+                        'completed': 'bg-green-100 text-green-800',
+                        'cancelled': 'bg-red-100 text-red-800',
+                        'refunded': 'bg-gray-100 text-gray-800'
+                    };
+                    
+                    ordersHtml += `
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="window.location.href='/admin/orders/${order.id}'">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Order #${order.id}</h4>
+                                    <p class="text-sm text-gray-600">${new Date(order.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs rounded ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">
+                                    ${order.status.replace(/_/g, ' ')}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-600">${order.items?.length || 0} items</p>
+                                <p class="font-semibold text-gray-900">£${parseFloat(order.total).toFixed(2)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                ordersHtml += '</div>';
+            }
+            
+            document.getElementById('orders-section').innerHTML = ordersHtml;
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            document.getElementById('orders-section').innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Order History</h3>
+                <p class="text-red-600">Failed to load order history</p>
+            `;
+        }
     }
 
 

@@ -5,9 +5,13 @@ use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\ProductController;
 
 Route::get('/', [HomeController::class, 'index'])->name('shop.home');
+Route::get('/shop/products', [ProductController::class, 'index'])->name('shop.products');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('shop.products.show');
 Route::get('/cart', function () { return view('shop.cart'); })->name('shop.cart');
 Route::get('/checkout', function () { return view('shop.checkout'); })->name('shop.checkout');
+Route::get('/order-confirmation/{orderId}', function ($orderId) { 
+    return view('shop.order-confirmation', ['orderId' => $orderId]); 
+})->name('shop.order-confirmation');
 
 // Generic login redirect (for Sanctum)
 Route::get('/login', function () {

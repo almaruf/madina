@@ -389,12 +389,12 @@
                     // Use authenticated order endpoint
                     const response = await axios.post('/api/orders', formData);
 
-                    this.showSuccess('Order placed successfully! Order ID: ' + response.data.id);
+                    this.showSuccess('Order placed successfully! Order ID: ' + response.data.order.id);
                     localStorage.removeItem('shopping_cart');
                     localStorage.removeItem('cart_for_checkout');
                     
                     setTimeout(() => {
-                        window.location.href = '/order-confirmation/' + response.data.id;
+                        window.location.href = '/order-confirmation/' + response.data.order.id;
                     }, 2000);
                 } catch (error) {
                     submitBtn.disabled = false;

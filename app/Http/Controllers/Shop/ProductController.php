@@ -8,6 +8,11 @@ use App\Services\ShopContext;
 
 class ProductController extends Controller
 {
+    public function index()
+    {
+        return view('shop.products');
+    }
+
     public function show($slug)
     {
         $shopId = ShopContext::getShopId();
