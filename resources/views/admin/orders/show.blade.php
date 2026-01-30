@@ -25,7 +25,11 @@
     
     async function loadOrder() {
         try {
-            const response = await axios.get(`/api/admin/orders/${orderId}`);
+            const response = await axios.get(`/api/admin/orders/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
             orderData = response.data.data || response.data;
             renderOrder();
         } catch (error) {
@@ -171,8 +175,22 @@
         try {
             const data = {};
             data[field] = value;
-            await axios.patch(`/api/admin/orders/${orderId}`, data);
+            
+            // Use the correct endpoint based on the field being updated
+            const endpoint = field === 'status' 
+                ? `/api/admin/orders/${orderId}/status`
+                : `/api/admin/orders/${orderId}/payment-status`;
+            
+            const response = await axios.patch(endpoint, data, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
+            
             toast.success('Order updated successfully');
+            
+            // Reload to show updated data
+            loadOrder();
         } catch (error) {
             console.error('Error updating order:', error);
             toast.error('Failed to update order');
@@ -184,7 +202,11 @@
         if (!confirm('Are you sure you want to archive this order?')) return;
         
         try {
-            await axios.delete(`/api/admin/orders/${orderId}`);
+            await axios.delete(`/api/admin/orders/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
             toast.success('Order archived successfully');
             setTimeout(() => window.location.href = '/admin/orders', 1500);
         } catch (error) {
@@ -195,7 +217,11 @@
     
     async function restoreOrder() {
         try {
-            await axios.post(`/api/admin/orders/${orderId}/restore`);
+            await axios.post(`/api/admin/orders/${orderId}/restore`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
             toast.success('Order restored successfully');
             loadOrder();
         } catch (error) {

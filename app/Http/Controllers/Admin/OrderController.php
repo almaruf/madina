@@ -77,6 +77,11 @@ class OrderController extends Controller
 
         $order->update($updates);
 
+        // Dispatch email notification when order is confirmed
+        if ($request->status === 'confirmed') {
+            \App\Jobs\SendOrderConfirmationEmail::dispatch($order);
+        }
+
         return response()->json($order);
     }
 

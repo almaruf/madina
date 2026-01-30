@@ -78,6 +78,8 @@ Route::prefix('admin')->group(function () {
         return view('admin.users.edit', ['id' => $id]);
     })->name('admin.users.edit');
     
+    Route::get('/queue', [\App\Http\Controllers\Admin\QueueController::class, 'index'])->name('admin.queue');
+    
     Route::get('/shops', function () {
         return view('admin.shops');
     })->name('admin.shops');

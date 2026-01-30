@@ -198,6 +198,10 @@
                     <i class="fas fa-clock w-5"></i>
                     <span>Delivery Slots</span>
                 </a>
+                <a href="/admin/queue" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/queue*') ? 'bg-green-600' : '' }}">
+                    <i class="fas fa-tasks w-5"></i>
+                    <span>Queue Jobs</span>
+                </a>
 
                 <div class="pt-4 border-t border-gray-700 mt-4">
                     <a href="/admin/shops" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/shops*') ? 'bg-green-600' : '' }}">
