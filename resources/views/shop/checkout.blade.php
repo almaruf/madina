@@ -400,7 +400,23 @@
                 } catch (error) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Place Order';
-                    const message = error.response?.data?.message || error.response?.data?.errors?.[0] || 'Failed to place order';
+                    console.error('Order error:', error.response?.data);
+                    
+                    // Extract error message - check multiple possible locations
+                    let message = 'Failed to place order';
+                    if (error.response?.data) {
+                        const data = error.response.data;
+                        if (data.error) {
+                            message = data.message + ': ' + data.error;
+                        } else if (data.message) {
+                            message = data.message;
+                        } else if (data.errors) {
+                            // Validation errors
+                            const firstError = Object.values(data.errors)[0];
+                            message = Array.isArray(firstError) ? firstError[0] : firstError;
+                        }
+                    }
+                    
                     this.showError(message);
                 }
             });

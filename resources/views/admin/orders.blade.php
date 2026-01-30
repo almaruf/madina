@@ -52,8 +52,24 @@
     
     async function loadOrders() {
         try {
+            // Ensure token is set
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                console.error('No auth token found');
+                window.location.href = '/admin/login';
+                return;
+            }
+            
             const url = currentTab === 'archived' ? '/api/admin/orders?archived=1' : '/api/admin/orders';
-            const response = await axios.get(url);
+            console.log('Loading orders from:', url);
+            
+            const response = await axios.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
             const orders = response.data.data || response.data;
             const tbody = document.querySelector('#orders-table tbody');
             
@@ -91,7 +107,17 @@
             }).join('');
         } catch (error) {
             console.error('Error loading orders:', error);
-            toast.error('Failed to load orders');
+            console.error('Error details:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            if (error.response?.status === 401) {
+                console.error('Authentication failed - redirecting to login');
+                localStorage.removeItem('auth_token');
+                window.location.href = '/admin/login';
+            } else {
+                const message = error.response?.data?.message || 'Failed to load orders';
+                toast.error(message);
+            }
         }
     }
     
@@ -122,6 +148,21 @@
     
 
     
-    loadOrders();
+    // Wait for authentication to be verified before loading orders
+    const waitForAuth = setInterval(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token && axios.defaults.headers.common['Authorization']) {
+            clearInterval(waitForAuth);
+            loadOrders();
+        }
+    }, 100);
+    
+    // Fallback: load after 1 second regardless
+    setTimeout(() => {
+        clearInterval(waitForAuth);
+        if (!document.querySelector('#orders-table tbody tr')) {
+            loadOrders();
+        }
+    }, 1000);
 </script>
 @endsection

@@ -12,13 +12,18 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $shopId = \App\Services\ShopContext::getShopId();
-        $query = Order::where('shop_id', $shopId)
-            ->with(['user', 'items.product', 'deliverySlot', 'address']);
-
-        // Handle archived filter
+        
+        // Start with the base Order query
+        $query = Order::query();
+        
+        // Handle archived filter first (must be before where clauses)
         if ($request->has('archived') && $request->archived == '1') {
             $query->onlyTrashed();
         }
+        
+        // Now apply shop_id filter and other conditions
+        $query->where('shop_id', $shopId)
+            ->with(['user', 'items.product', 'deliverySlot', 'address']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
