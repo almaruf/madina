@@ -133,4 +133,9 @@ class Shop extends Model
     {
         return $query->where('slug', $slug);
     }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }

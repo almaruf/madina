@@ -45,12 +45,12 @@
 </div>
 
 <script>
-    const categoryId = {{ request()->route('id') }};
+    const categorySlug = '{{ $slug }}';
     let currentCategory = null;
 
     async function loadCategory() {
         try {
-            const response = await axios.get(`/api/admin/categories/${categoryId}`);
+            const response = await axios.get(`/api/admin/categories/${categorySlug}`);
             currentCategory = response.data;
             renderCategory(currentCategory);
         } catch (error) {
@@ -149,7 +149,7 @@
         }
 
         try {
-            await axios.delete(`/api/admin/categories/${categoryId}`);
+            await axios.delete(`/api/admin/categories/${categorySlug}`);
             toast.success('Category archived successfully!');
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -160,7 +160,7 @@
 
     async function restoreCategory() {
         try {
-            await axios.post(`/api/admin/categories/${categoryId}/restore`);
+            await axios.post(`/api/admin/categories/${categorySlug}/restore`);
             toast.success('Category restored successfully!');
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -175,7 +175,7 @@
         }
 
         try {
-            await axios.delete(`/api/admin/categories/${categoryId}/force`);
+            await axios.delete(`/api/admin/categories/${categorySlug}/force`);
             toast.success('Category permanently deleted!');
             setTimeout(() => window.location.href = '/admin/categories', 1000);
         } catch (error) {

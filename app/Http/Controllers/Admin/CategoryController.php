@@ -45,12 +45,24 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
-    public function update(Request $request, $id)
+    public function show($slug)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::withTrashed()
+            ->where('slug', $slug)
+            ->with(['children', 'parent'])
+            ->withCount('products')
+            ->firstOrFail();
+
+        return response()->json($category);
+    }
+
+    public function update(Request $request, $slug)
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:categories,slug,' . $category->id,
             'parent_id' => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'is_active' => 'nullable|boolean',
@@ -65,11 +77,27 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::where('slug', $slug)->firstOrFail();
         $category->delete();
 
-        return response()->json(['message' => 'Category deleted successfully']);
+        return response()->json(['message' => 'Category archived successfully']);
+    }
+
+    public function restore($slug)
+    {
+        $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();
+        $category->restore();
+
+        return response()->json(['message' => 'Category restored successfully']);
+    }
+
+    public function forceDelete($slug)
+    {
+        $category = Category::withTrashed()->where('slug', $slug)->firstOrFail();
+        $category->forceDelete();
+
+        return response()->json(['message' => 'Category permanently deleted']);
     }
 }

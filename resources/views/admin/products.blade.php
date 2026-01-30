@@ -87,7 +87,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm">
-                            <a href="/admin/products/${product.id}" class="text-blue-600 hover:text-blue-900">View Details</a>
+                            <a href="/admin/products/${product.slug}" class="text-blue-600 hover:text-blue-900">View Details</a>
                         </td>
                     </tr>
                 `;

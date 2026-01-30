@@ -58,20 +58,20 @@ class ShopController extends Controller
         return response()->json($shop, 201);
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        $shop = Shop::withTrashed()->findOrFail($id);
+        $shop = Shop::withTrashed()->where('slug', $slug)->firstOrFail();
         return response()->json($shop);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        $shop = Shop::findOrFail($id);
+        $shop = Shop::where('slug', $slug)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:shops,slug,' . $id,
-            'domain' => 'nullable|string|unique:shops,domain,' . $id,
+            'slug' => 'required|string|max:255|unique:shops,slug,' . $shop->id,
+            'domain' => 'nullable|string|unique:shops,domain,' . $shop->id,
             'phone' => 'required|string|max:20',
             'email' => 'required|email',
         ]);
@@ -127,9 +127,9 @@ class ShopController extends Controller
         return response()->json($shop);
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $shop = Shop::findOrFail($id);
+        $shop = Shop::where('slug', $slug)->firstOrFail();
         $shop->delete();
 
         ShopContext::clearCache();
@@ -137,9 +137,9 @@ class ShopController extends Controller
         return response()->json(['message' => 'Shop archived successfully']);
     }
 
-    public function restore($id)
+    public function restore($slug)
     {
-        $shop = Shop::onlyTrashed()->findOrFail($id);
+        $shop = Shop::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $shop->restore();
 
         ShopContext::clearCache();
@@ -147,9 +147,9 @@ class ShopController extends Controller
         return response()->json(['message' => 'Shop restored successfully']);
     }
 
-    public function forceDelete($id)
+    public function forceDelete($slug)
     {
-        $shop = Shop::withTrashed()->findOrFail($id);
+        $shop = Shop::withTrashed()->where('slug', $slug)->firstOrFail();
         $shop->forceDelete();
 
         ShopContext::clearCache();

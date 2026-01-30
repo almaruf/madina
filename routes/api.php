@@ -47,8 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     // Shop management (super admin only)
     Route::apiResource('shops', \App\Http\Controllers\Admin\ShopController::class);
-    Route::post('shops/{id}/restore', [\App\Http\Controllers\Admin\ShopController::class, 'restore']);
-    Route::delete('shops/{id}/force', [\App\Http\Controllers\Admin\ShopController::class, 'forceDelete']);
+    Route::post('shops/{slug}/restore', [\App\Http\Controllers\Admin\ShopController::class, 'restore']);
+    Route::delete('shops/{slug}/force', [\App\Http\Controllers\Admin\ShopController::class, 'forceDelete']);
     Route::get('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'current']);
     Route::patch('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'updateCurrent']);
 
@@ -65,9 +65,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
 
     // Products
     Route::apiResource('products', \App\Http\Controllers\Admin\ProductController::class);
-    Route::post('products/{id}/images', [\App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
-    Route::post('products/{id}/restore', [\App\Http\Controllers\Admin\ProductController::class, 'restore']);
-    Route::delete('products/{id}/force', [\App\Http\Controllers\Admin\ProductController::class, 'forceDelete']);
+    Route::post('products/{slug}/images', [\App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
+    Route::post('products/{slug}/restore', [\App\Http\Controllers\Admin\ProductController::class, 'restore']);
+    Route::delete('products/{slug}/force', [\App\Http\Controllers\Admin\ProductController::class, 'forceDelete']);
 
     // Orders
     Route::get('orders', [\App\Http\Controllers\Admin\OrderController::class, 'index']);
@@ -82,9 +82,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     // Delivery Slots
     Route::apiResource('delivery-slots', \App\Http\Controllers\Admin\DeliverySlotController::class);
     Route::post('delivery-slots/generate', [\App\Http\Controllers\Admin\DeliverySlotController::class, 'generateSlots']);
+    Route::post('delivery-slots/bulk', [\App\Http\Controllers\Admin\DeliverySlotController::class, 'bulkCreate']);
 
     // Categories
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-    Route::post('categories/{id}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
-    Route::delete('categories/{id}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
+    Route::post('categories/{slug}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
+    Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
 });

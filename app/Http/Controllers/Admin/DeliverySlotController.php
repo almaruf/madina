@@ -137,4 +137,10 @@ class DeliverySlotController extends Controller
             'count' => count($created)
         ], 201);
     }
+
+    public function bulkCreate(Request $request)
+    {
+        // Alias for generateSlots - accepts same parameters
+        return $this->generateSlots($request);
+    }
 }

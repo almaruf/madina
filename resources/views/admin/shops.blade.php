@@ -89,7 +89,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-right">
-                        <a href="/admin/shops/${shop.id}" class="text-blue-600 hover:text-blue-900 font-medium">
+                        <a href="/admin/shops/${shop.slug}" class="text-blue-600 hover:text-blue-900 font-medium">
                             View Details
                         </a>
                     </td>

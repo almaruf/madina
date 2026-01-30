@@ -281,12 +281,12 @@
 </div>
 
 <script>
-    const shopId = {{ $id }};
+    const shopSlug = '{{ $slug }}';
     let shop = null;
 
     async function loadShop() {
         try {
-            const response = await axios.get(`/api/admin/shops/${shopId}`);
+            const response = await axios.get(`/api/admin/shops/${shopSlug}`);
             shop = response.data;
             populateForm();
         } catch (error) {
@@ -388,7 +388,7 @@
         };
 
         try {
-            await axios.put(`/api/admin/shops/${shopId}`, data);
+            await axios.put(`/api/admin/shops/${shopSlug}`, data);
             window.location = '/admin/shops';
         } catch (error) {
             alert('Failed to update shop: ' + (error.response?.data?.message || error.message));

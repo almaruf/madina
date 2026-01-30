@@ -73,4 +73,9 @@ class Category extends Model
     {
         return $query->where('is_featured', true);
     }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }

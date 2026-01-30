@@ -45,12 +45,12 @@
 </div>
 
 <script>
-    const shopId = {{ request()->route('id') }};
+    const shopSlug = '{{ $slug }}';
     let currentShop = null;
 
     async function loadShop() {
         try {
-            const response = await axios.get(`/api/admin/shops/${shopId}`);
+            const response = await axios.get(`/api/admin/shops/${shopSlug}`);
             currentShop = response.data;
             renderShop(currentShop);
         } catch (error) {
@@ -151,7 +151,7 @@
         
         if (!isArchived) {
             actionsHtml.push(`
-                <a href="/admin/shops/${shop.id}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <a href="/admin/shops/${shop.slug}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Edit Shop
                 </a>
                 <button onclick="toggleShopStatus()" class="px-4 py-2 ${shop.is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded-lg">
@@ -184,7 +184,7 @@
         }
 
         try {
-            await axios.patch(`/api/admin/shops/${shopId}`, { is_active: newStatus });
+            await axios.patch(`/api/admin/shops/${shopSlug}`, { is_active: newStatus });
             toast.success(`Shop ${action}d successfully!`);
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -199,7 +199,7 @@
         }
 
         try {
-            await axios.delete(`/api/admin/shops/${shopId}`);
+            await axios.delete(`/api/admin/shops/${shopSlug}`);
             toast.success('Shop archived successfully!');
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -210,7 +210,7 @@
 
     async function restoreShop() {
         try {
-            await axios.post(`/api/admin/shops/${shopId}/restore`);
+            await axios.post(`/api/admin/shops/${shopSlug}/restore`);
             toast.success('Shop restored successfully!');
             setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -231,7 +231,7 @@
         }
 
         try {
-            await axios.delete(`/api/admin/shops/${shopId}/force`);
+            await axios.delete(`/api/admin/shops/${shopSlug}/force`);
             toast.success('Shop permanently deleted!');
             setTimeout(() => window.location.href = '/admin/shops', 1000);
         } catch (error) {

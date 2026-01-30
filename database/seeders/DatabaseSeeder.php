@@ -9,6 +9,10 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\ProductImage;
 use App\Models\ShopBanner;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Address;
+use App\Models\DeliverySlot;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -320,6 +324,123 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Add more sample products as needed
+        // Create delivery slots for next 7 days
+        $startDate = now();
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startDate->copy()->addDays($i);
+            
+            DeliverySlot::create([
+                'shop_id' => $shop->id,
+                'date' => $date->toDateString(),
+                'start_time' => '09:00',
+                'end_time' => '12:00',
+                'type' => 'delivery',
+                'max_orders' => 10,
+                'current_orders' => 0,
+                'is_active' => true,
+            ]);
+
+            DeliverySlot::create([
+                'shop_id' => $shop->id,
+                'date' => $date->toDateString(),
+                'start_time' => '14:00',
+                'end_time' => '18:00',
+                'type' => 'delivery',
+                'max_orders' => 15,
+                'current_orders' => 0,
+                'is_active' => true,
+            ]);
+        }
+
+        // Get customer for orders
+        $customer = User::where('role', 'customer')->where('shop_id', $shop->id)->first();
+
+        // Create customer address
+        $address = Address::create([
+            'shop_id' => $shop->id,
+            'user_id' => $customer->id,
+            'address_line_1' => '123 High Street',
+            'address_line_2' => 'Flat 4B',
+            'city' => 'London',
+            'postcode' => 'SW1A 1AA',
+            'is_default' => true,
+        ]);
+
+        // Get products and variations for orders
+        $allProducts = Product::where('shop_id', $shop->id)->with('variations')->get();
+        $deliverySlot = DeliverySlot::where('shop_id', $shop->id)->first();
+
+        // Create sample orders
+        $orderStatuses = [
+            ['status' => 'pending', 'payment_status' => 'pending'],
+            ['status' => 'confirmed', 'payment_status' => 'paid'],
+            ['status' => 'processing', 'payment_status' => 'paid'],
+            ['status' => 'ready', 'payment_status' => 'paid'],
+            ['status' => 'out_for_delivery', 'payment_status' => 'paid'],
+            ['status' => 'delivered', 'payment_status' => 'paid'],
+            ['status' => 'completed', 'payment_status' => 'paid'],
+        ];
+
+        foreach ($orderStatuses as $index => $orderStatus) {
+            // Select 2-4 random products for each order
+            $orderProducts = $allProducts->random(rand(2, 4));
+            
+            $subtotal = 0;
+            $items = [];
+            
+            foreach ($orderProducts as $product) {
+                $variation = $product->variations->first();
+                if (!$variation) continue;
+                
+                $quantity = rand(1, 3);
+                $price = $variation->price;
+                $itemTotal = $price * $quantity;
+                $subtotal += $itemTotal;
+                
+                $items[] = [
+                    'product' => $product,
+                    'variation' => $variation,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                    'total' => $itemTotal,
+                ];
+            }
+            
+            $deliveryFee = 3.99;
+            $total = $subtotal + $deliveryFee;
+            
+            // Create order
+            $order = Order::create([
+                'shop_id' => $shop->id,
+                'user_id' => $customer->id,
+                'order_number' => 'ORD-' . str_pad($index + 1, 6, '0', STR_PAD_LEFT),
+                'status' => $orderStatus['status'],
+                'payment_status' => $orderStatus['payment_status'],
+                'payment_method' => $orderStatus['payment_status'] === 'paid' ? 'card' : 'cash',
+                'fulfillment_type' => 'delivery',
+                'subtotal' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'total' => $total,
+                'address_id' => $address->id,
+                'delivery_slot_id' => $deliverySlot->id,
+                'created_at' => now()->subDays(7 - $index),
+                'updated_at' => now()->subDays(7 - $index),
+            ]);
+            
+            // Create order items
+            foreach ($items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product']->id,
+                    'product_variation_id' => $item['variation']->id,
+                    'product_name' => $item['product']->name,
+                    'variation_name' => $item['variation']->name,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['price'],
+                    'subtotal' => $item['total'],
+                    'total' => $item['total'],
+                ]);
+            }
+        }
     }
 }

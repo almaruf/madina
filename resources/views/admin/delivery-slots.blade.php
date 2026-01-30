@@ -151,14 +151,16 @@
         const data = {
             start_date: formData.get('start_date'),
             end_date: formData.get('end_date'),
-            start_time: formData.get('start_time'),
-            end_time: formData.get('end_time'),
             type: formData.get('type'),
-            max_orders: parseInt(formData.get('max_orders'))
+            slots: [{
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time'),
+                max_orders: parseInt(formData.get('max_orders'))
+            }]
         };
         
         try {
-            await axios.post('/api/admin/delivery-slots/bulk', data);
+            await axios.post('/api/admin/delivery-slots/generate', data);
             toast.success('Delivery slots created successfully');
             closeModal();
             loadSlots();

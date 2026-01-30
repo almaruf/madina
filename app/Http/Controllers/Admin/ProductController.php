@@ -73,16 +73,16 @@ class ProductController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        $product = Product::withTrashed()->with(['variations', 'images', 'categories'])->findOrFail($id);
+        $product = Product::withTrashed()->where('slug', $slug)->with(['variations', 'images', 'categories'])->firstOrFail();
 
         return response()->json($product);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('slug', $slug)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -112,25 +112,25 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('slug', $slug)->firstOrFail();
         $product->delete();
 
         return response()->json(['message' => 'Product archived successfully']);
     }
 
-    public function restore($id)
+    public function restore($slug)
     {
-        $product = Product::onlyTrashed()->findOrFail($id);
+        $product = Product::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $product->restore();
 
         return response()->json(['message' => 'Product restored successfully']);
     }
 
-    public function forceDelete($id)
+    public function forceDelete($slug)
     {
-        $product = Product::withTrashed()->findOrFail($id);
+        $product = Product::withTrashed()->where('slug', $slug)->firstOrFail();
         
         // Delete images from S3
         foreach ($product->images as $image) {
@@ -142,9 +142,9 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product permanently deleted']);
     }
 
-    public function uploadImage(Request $request, $id)
+    public function uploadImage(Request $request, $slug)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('slug', $slug)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
             'image' => 'required|image|max:5120', // 5MB

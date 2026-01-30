@@ -153,7 +153,7 @@
         if (!confirm('Are you sure you want to archive this product?')) return;
         
         try {
-            await axios.delete(`/api/admin/products/${productId}`);
+            await axios.delete(`/api/admin/products/${productSlug}`);
             toast.success('Product archived successfully');
             setTimeout(() => window.location.href = '/admin/products', 1500);
         } catch (error) {
@@ -164,7 +164,7 @@
     
     async function restoreProduct() {
         try {
-            await axios.post(`/api/admin/products/${productId}/restore`);
+            await axios.post(`/api/admin/products/${productSlug}/restore`);
             toast.success('Product restored successfully');
             loadProduct();
         } catch (error) {
@@ -177,7 +177,7 @@
         if (!confirm('Are you sure you want to PERMANENTLY delete this product? This cannot be undone!')) return;
         
         try {
-            await axios.delete(`/api/admin/products/${productId}/force`);
+            await axios.delete(`/api/admin/products/${productSlug}/force`);
             toast.success('Product permanently deleted');
             setTimeout(() => window.location.href = '/admin/products', 1500);
         } catch (error) {

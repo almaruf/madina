@@ -125,4 +125,9 @@ class Product extends Model
     {
         return $this->stock_quantity <= $this->low_stock_threshold;
     }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }
