@@ -24,6 +24,7 @@
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="/" class="text-gray-700 hover:text-green-600 font-medium">Home</a>
                     <a href="/shop/products" class="text-gray-700 hover:text-green-600 font-medium">Shop</a>
+                    <a href="/account" class="text-gray-700 hover:text-green-600 font-medium">Account</a>
                 </div>
 
                 <div class="flex items-center space-x-4">
@@ -57,6 +58,7 @@
                     <ul class="text-gray-400 space-y-2">
                         <li><a href="/" class="hover:text-white">Home</a></li>
                         <li><a href="/cart" class="hover:text-white">Cart</a></li>
+                        <li><a href="/account" class="hover:text-white">Account</a></li>
                     </ul>
                 </div>
             </div>

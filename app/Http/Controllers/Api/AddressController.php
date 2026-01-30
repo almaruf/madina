@@ -37,8 +37,11 @@ class AddressController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        $existingCount = Address::where('user_id', $request->user()->id)->count();
+        $shouldBeDefault = $request->is_default || $existingCount === 0;
+
         // If this is default, unset other defaults
-        if ($request->is_default) {
+        if ($shouldBeDefault) {
             Address::where('user_id', $request->user()->id)
                 ->update(['is_default' => false]);
         }
@@ -47,7 +50,8 @@ class AddressController extends Controller
             $request->all(),
             [
                 'shop_id' => \App\Services\ShopContext::getShopId(),
-                'user_id' => $request->user()->id
+                'user_id' => $request->user()->id,
+                'is_default' => $shouldBeDefault,
             ]
         ));
 
@@ -81,14 +85,20 @@ class AddressController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        $totalCount = Address::where('user_id', $request->user()->id)->count();
+        $shouldBeDefault = $request->is_default || $totalCount === 1;
+
         // If this is default, unset other defaults
-        if ($request->is_default) {
+        if ($shouldBeDefault) {
             Address::where('user_id', $request->user()->id)
                 ->where('id', '!=', $id)
                 ->update(['is_default' => false]);
         }
 
-        $address->update($request->all());
+        $address->update(array_merge(
+            $request->all(),
+            ['is_default' => $shouldBeDefault]
+        ));
 
         return response()->json($address);
     }
@@ -96,6 +106,11 @@ class AddressController extends Controller
     public function destroy(Request $request, $id)
     {
         $address = Address::where('user_id', $request->user()->id)->findOrFail($id);
+        if ($address->is_default) {
+            return response()->json([
+                'message' => 'Default address cannot be deleted. Set another address as default first.'
+            ], 422);
+        }
         $address->delete();
 
         return response()->json(['message' => 'Address deleted successfully']);

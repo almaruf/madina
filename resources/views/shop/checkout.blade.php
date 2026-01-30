@@ -18,11 +18,8 @@
 
     <div id="checkout-content">
         <!-- Page Header -->
-        <div class="mb-8">
-            <a href="/cart" class="text-green-600 hover:text-green-700 mb-4 inline-flex items-center gap-2">
-                <i class="fas fa-arrow-left"></i>
-                Back to Cart
-            </a>
+
+        <div>
             <h1 class="text-3xl font-bold mt-4">Checkout</h1>
         </div>
 
@@ -84,9 +81,9 @@
                 </div>
             </div>
 
-            <button type="button" onclick="checkout.toggleNewAddressForm()" class="mt-4 text-green-600 hover:text-green-700 font-semibold">
+            <a href="/account?tab=addresses&open=1" class="mt-4 inline-block text-green-600 hover:text-green-700 font-semibold">
                 + Add New Address
-            </button>
+            </a>
             </div>
 
                 <!-- Delivery Slot -->
@@ -127,7 +124,7 @@
             </div>
 
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24 mt-8">
                     <!-- Order Summary -->
                     <h2 class="text-xl font-bold mb-4">Order Summary</h2>
                     
@@ -150,6 +147,11 @@
                         <span>Total:</span>
                         <span id="summary-total">£0.00</span>
                     </div>
+
+                    <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Cart
+                    </a>
 
                 </div>
             </div>
@@ -253,8 +255,7 @@
                     document.getElementById('user-addresses').innerHTML = html;
                     this.selectedAddressId = addresses.find(a => a.is_default)?.id || addresses[0].id;
                 } else {
-                    document.getElementById('user-addresses').innerHTML = '<p class="text-gray-600">No saved addresses. Please add a new one below.</p>';
-                    document.getElementById('new-address-form').classList.remove('hidden');
+                    document.getElementById('user-addresses').innerHTML = '<p class="text-gray-600">No saved addresses. <a href="/account?tab=addresses&open=1" class="text-green-600 hover:text-green-700 font-semibold">Add an address in your account</a>.</p>';
                 }
             } catch (error) {
                 console.error('Error loading addresses:', error);
@@ -263,8 +264,7 @@
         }
 
         toggleNewAddressForm() {
-            const form = document.getElementById('new-address-form');
-            form.classList.toggle('hidden');
+            window.location.href = '/account?tab=addresses&open=1';
         }
 
         async saveNewAddress() {
@@ -277,7 +277,7 @@
             };
 
             if (!addressData.address_line_1 || !addressData.city || !addressData.postcode) {
-                alert('Please fill in all required fields');
+                this.showError('Please fill in all required fields');
                 return;
             }
 
@@ -296,7 +296,7 @@
                 document.getElementById('new_postcode').value = '';
                 document.getElementById('new_phone').value = '';
             } catch (error) {
-                alert('Failed to save address: ' + (error.response?.data?.message || error.message));
+                this.showError('Failed to save address: ' + (error.response?.data?.message || error.message));
             }
         }
 

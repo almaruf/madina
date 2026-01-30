@@ -9,6 +9,7 @@ Route::get('/shop/products', [ProductController::class, 'index'])->name('shop.pr
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('shop.products.show');
 Route::get('/cart', function () { return view('shop.cart'); })->name('shop.cart');
 Route::get('/checkout', function () { return view('shop.checkout'); })->name('shop.checkout');
+Route::get('/account', function () { return view('shop.account'); })->name('shop.account');
 Route::get('/order-confirmation/{orderId}', function ($orderId) { 
     return view('shop.order-confirmation', ['orderId' => $orderId]); 
 })->name('shop.order-confirmation');

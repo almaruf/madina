@@ -6,10 +6,6 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-        <a href="/" class="text-green-600 hover:text-green-700 mb-4 inline-flex items-center gap-2">
-            <i class="fas fa-arrow-left"></i>
-            Back to Shopping
-        </a>
         <h1 class="text-3xl font-bold mt-4">Shopping Cart</h1>
     </div>
 

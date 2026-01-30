@@ -46,6 +46,35 @@
     </div>
 </div>
 
+<!-- Cart Message -->
+<div id="cart-message" class="hidden fixed top-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50">
+    <span></span>
+</div>
+
+<!-- Variation Modal -->
+<div id="variation-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <h3 class="text-lg font-semibold" id="variation-modal-title">Select Variation</h3>
+            <button class="text-gray-500 hover:text-gray-700" onclick="closeVariationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div id="variation-modal-options" class="space-y-3"></div>
+
+            <div class="mt-4">
+                <label class="block text-sm font-medium mb-1">Quantity</label>
+                <input type="number" id="variation-qty" min="1" value="1" class="w-24 border border-gray-300 rounded-lg px-3 py-2">
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t flex items-center justify-end gap-3">
+            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50" onclick="closeVariationModal()">Cancel</button>
+            <button id="variation-add-btn" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700" onclick="confirmVariationAdd()">Add to Cart</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let allProducts = [];
     let categories = [];
@@ -146,11 +175,16 @@
                     <div class="p-4">
                         <h3 class="font-semibold text-gray-900 mb-1 line-clamp-2">${product.name}</h3>
                         ${product.description ? `<p class="text-sm text-gray-600 mb-2 line-clamp-2">${product.description}</p>` : ''}
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-2">
                             <span class="text-lg font-bold text-green-600">£${minPrice.toFixed(2)}</span>
-                            <button onclick="event.stopPropagation(); viewProduct('${product.slug}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
-                                View
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="event.stopPropagation(); addToCartFromCard(${product.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Add to Cart
+                                </button>
+                                <button onclick="event.stopPropagation(); viewProduct('${product.slug}')" class="border border-green-600 text-green-600 hover:bg-green-50 px-3 py-2 rounded-lg text-sm">
+                                    View
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -165,6 +199,94 @@
 
     function viewProduct(slug) {
         window.location.href = '/products/' + slug;
+    }
+
+    let currentProduct = null;
+
+    function addToCartFromCard(productId) {
+        const product = allProducts.find(item => item.id === productId);
+        if (!product) return;
+
+        const variations = product.variations || [];
+        if (variations.length === 1) {
+            addToCart(product.id, variations[0].id, 1);
+            showCartMessage('Added to cart');
+            return;
+        }
+
+        currentProduct = product;
+        openVariationModal(product);
+    }
+
+    function openVariationModal(product) {
+        document.getElementById('variation-modal-title').textContent = `Select Variation - ${product.name}`;
+        const options = product.variations || [];
+        const optionsHtml = options.map((variation, index) => {
+            const price = parseFloat(variation.price).toFixed(2);
+            const stock = variation.stock_quantity ?? variation.stock ?? null;
+            const outOfStock = stock !== null && stock <= 0;
+            return `
+                <label class="flex items-start p-3 border border-gray-300 rounded-lg ${outOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-green-50'}">
+                    <input type="radio" name="variation_id" value="${variation.id}" class="mt-1 w-4 h-4" ${index === 0 && !outOfStock ? 'checked' : ''} ${outOfStock ? 'disabled' : ''}>
+                    <div class="ml-3 flex-1">
+                        <div class="font-semibold">${variation.name || 'Standard'}</div>
+                        <div class="text-sm text-gray-600">£${price}</div>
+                        ${stock !== null ? `<div class="text-xs text-gray-500">${stock} in stock</div>` : ''}
+                    </div>
+                </label>
+            `;
+        }).join('');
+
+        document.getElementById('variation-modal-options').innerHTML = optionsHtml || '<p class="text-gray-600">No variations available.</p>';
+        document.getElementById('variation-qty').value = 1;
+        document.getElementById('variation-modal').classList.remove('hidden');
+
+        const hasAvailable = options.some(v => {
+            const stock = v.stock_quantity ?? v.stock ?? null;
+            return stock === null || stock > 0;
+        });
+        document.getElementById('variation-add-btn').disabled = !hasAvailable;
+        document.getElementById('variation-add-btn').classList.toggle('opacity-50', !hasAvailable);
+    }
+
+    function closeVariationModal() {
+        document.getElementById('variation-modal').classList.add('hidden');
+        currentProduct = null;
+    }
+
+    function confirmVariationAdd() {
+        if (!currentProduct) return;
+        const selected = document.querySelector('input[name="variation_id"]:checked');
+        if (!selected) {
+            showCartMessage('Please select a variation', 'error');
+            return;
+        }
+        const qty = Math.max(1, parseInt(document.getElementById('variation-qty').value || '1'));
+        addToCart(currentProduct.id, parseInt(selected.value), qty);
+        showCartMessage('Added to cart');
+        closeVariationModal();
+    }
+
+    function addToCart(productId, variationId, quantity = 1) {
+        const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+        const existing = cart.find(item => item.product_id === productId && item.variation_id === variationId);
+        if (existing) {
+            existing.quantity += quantity;
+        } else {
+            cart.push({ product_id: productId, variation_id: variationId, quantity });
+        }
+        localStorage.setItem('shopping_cart', JSON.stringify(cart));
+        if (typeof updateCartCount === 'function') {
+            updateCartCount();
+        }
+    }
+
+    function showCartMessage(message, type = 'success') {
+        const el = document.getElementById('cart-message');
+        el.querySelector('span').textContent = message;
+        el.className = 'fixed top-6 right-6 px-4 py-3 rounded-lg shadow-lg z-50 ' + (type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white');
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 2000);
     }
 
     // Event listeners
