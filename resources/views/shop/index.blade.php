@@ -136,7 +136,8 @@
                         </div>
                     </a>
                     <div class="px-4 pb-4">
-                        <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition">
+                        <button onclick="addToCart({{ $product->id }}, {{ $product->variations->first()->id }}, 1)" 
+                                class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition">
                             Add to Cart
                         </button>
                     </div>
@@ -195,6 +196,46 @@
             } else {
                 badge.classList.add('hidden');
             }
+        }
+        
+        // Add to cart function
+        function addToCart(productId, variationId, quantity) {
+            // Get existing cart
+            const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+            
+            // Ensure values are numbers
+            variationId = parseInt(variationId);
+            quantity = parseInt(quantity);
+            
+            // Find if product already in cart
+            const existing = cart.find(item => item.product_id === productId && item.variation_id === variationId);
+            
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                cart.push({
+                    product_id: productId,
+                    variation_id: variationId,
+                    quantity: quantity
+                });
+            }
+            
+            // Save cart
+            localStorage.setItem('shopping_cart', JSON.stringify(cart));
+            
+            // Update cart count
+            updateCartCount();
+            
+            // Show notification
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✓ Added!';
+            button.classList.add('bg-green-700');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-700');
+            }, 1500);
         }
         
         // Update on page load and when storage changes

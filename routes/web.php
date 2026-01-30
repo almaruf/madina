@@ -38,6 +38,26 @@ Route::prefix('admin')->group(function () {
         return view('admin.orders');
     })->name('admin.orders');
     
+    Route::get('/categories', function () {
+        return view('admin.categories');
+    })->name('admin.categories');
+    
+    Route::get('/users', function () {
+        return view('admin.users');
+    })->name('admin.users');
+    
+    Route::get('/shops', function () {
+        return view('admin.shops');
+    })->name('admin.shops');
+    
+    Route::get('/shops/create', function () {
+        return view('admin.shops.create');
+    })->name('admin.shops.create');
+    
+    Route::get('/shops/{id}/edit', function ($id) {
+        return view('admin.shops.edit', ['shopId' => $id]);
+    })->name('admin.shops.edit');
+    
     Route::get('/delivery-slots', function () {
         return view('admin.delivery-slots');
     })->name('admin.delivery-slots');

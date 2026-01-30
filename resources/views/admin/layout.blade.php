@@ -53,25 +53,25 @@
                     <i class="fas fa-list w-5"></i>
                     <span>Categories</span>
                 </a>
+                <a href="/admin/users" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/users*') ? 'bg-green-600' : '' }}">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Users</span>
+                </a>
                 <a href="/admin/delivery-slots" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/delivery-slots*') ? 'bg-green-600' : '' }}">
                     <i class="fas fa-clock w-5"></i>
                     <span>Delivery Slots</span>
                 </a>
 
-                @if(auth()->user() && auth()->user()->hasRoleLevel(4))
                 <div class="pt-4 border-t border-gray-700 mt-4">
-                    @if(auth()->user()->role === 'super_admin')
                     <a href="/admin/shops" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/shops*') ? 'bg-green-600' : '' }}">
                         <i class="fas fa-store-alt w-5"></i>
                         <span>Shops</span>
                     </a>
-                    @endif
                     <a href="/admin/admin-users" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/admin-users*') ? 'bg-green-600' : '' }}">
                         <i class="fas fa-users-cog w-5"></i>
                         <span>Admin Users</span>
                     </a>
                 </div>
-                @endif
             </nav>
 
             <div class="p-4 border-t border-gray-700">
