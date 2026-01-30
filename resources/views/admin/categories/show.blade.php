@@ -118,9 +118,9 @@
         
         if (!isArchived) {
             actionsHtml.push(`
-                <button onclick="editCategory()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <a href="/admin/categories/${categorySlug}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Edit Category
-                </button>
+                </a>
                 <button onclick="archiveCategory()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
                     Archive Category
                 </button>
@@ -137,10 +137,6 @@
         }
 
         document.getElementById('category-actions').innerHTML = actionsHtml.join('');
-    }
-
-    function editCategory() {
-        toast.info('Edit functionality coming soon!');
     }
 
     async function archiveCategory() {

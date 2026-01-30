@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') - {{ app(\App\Services\ShopConfigService::class)->name() }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -87,39 +87,71 @@
 </head>
 <body class="bg-gray-100">
     <script>
-        // Authentication and Axios setup - MUST run before any page scripts
-        (function() {
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-            
-            if (!token) {
-                window.location.href = '/admin/login';
-                return;
-            }
-            
+        // Authentication and Axios setup - runs after axios is loaded
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if (!token) {
+            window.location.href = '/admin/login';
+        } else {
             // Store in localStorage for persistence
             localStorage.setItem('auth_token', token);
             
-            // Configure axios globally before anything else
-            if (window.axios) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                axios.defaults.headers.common['Accept'] = 'application/json';
-                axios.defaults.headers.common['Content-Type'] = 'application/json';
-                
-                // Set up error interceptor
-                axios.interceptors.response.use(
-                    response => response,
-                    error => {
-                        if (error.response?.status === 401 || error.response?.status === 403) {
-                            console.error('Authentication failed:', error);
-                            localStorage.removeItem('auth_token');
-                            sessionStorage.removeItem('auth_token');
-                            window.location.href = '/admin/login';
-                        }
+            // Configure axios globally
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Accept'] = 'application/json';
+            axios.defaults.headers.common['Content-Type'] = 'application/json';
+            
+            // Request interceptor to ensure token is always sent
+            axios.interceptors.request.use(
+                config => {
+                    const currentToken = localStorage.getItem('auth_token');
+                    if (currentToken) {
+                        config.headers.Authorization = `Bearer ${currentToken}`;
+                    }
+                    return config;
+                },
+                error => Promise.reject(error)
+            );
+            
+            // Set up error interceptor
+            axios.interceptors.response.use(
+                response => response,
+                error => {
+                    // Handle 401 Unauthorized errors
+                    if (error.response?.status === 401) {
+                        console.warn('Token expired or invalid, redirecting to login...');
+                        localStorage.removeItem('auth_token');
+                        sessionStorage.removeItem('auth_token');
+                        // Use replace to prevent back button from returning to protected page
+                        window.location.replace('/admin/login');
                         return Promise.reject(error);
                     }
-                );
-            }
-        })();
+                    
+                    // Handle 403 Forbidden errors
+                    if (error.response?.status === 403) {
+                        console.error('Access forbidden:', error);
+                        toast.error('You do not have permission to perform this action');
+                        return Promise.reject(error);
+                    }
+                    
+                    return Promise.reject(error);
+                }
+            );
+            
+            // Verify token is valid on page load
+            axios.get('/api/auth/user')
+                .then(() => {
+                    console.log('Authentication verified');
+                })
+                .catch(error => {
+                    if (error.response?.status === 401) {
+                        console.warn('Invalid token detected on page load');
+                        localStorage.removeItem('auth_token');
+                        sessionStorage.removeItem('auth_token');
+                        window.location.replace('/admin/login');
+                    }
+                });
+        }
     </script>
     
     <!-- Toast Notification Container -->
@@ -220,8 +252,26 @@
         };
         
         function showToast(message, type = 'info') {
-
-        // Mobile menu and navigation handlers            });
+            const container = document.getElementById('toast-container');
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast ${type}`;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            toastEl.innerHTML = `
+                <i class="fas ${icons[type]} toast-icon"></i>
+                <span class="flex-1">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toastEl);
             
             // Auto remove after 4 seconds
             setTimeout(() => {
@@ -235,29 +285,8 @@
                 toastEl.remove();
             }, 300);
         }
-        
-        // Set up axios with stored token
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        }
-        
-        if (window.axios) {
-            axios.defaults.withCredentials = true;
-        }
 
-        // Check authentication and redirect if not logged in
-        axios.interceptors.response.use(
-            response => response,
-            error => {
-                if (error.response?.status === 401) {
-                    localStorage.removeItem('auth_token');
-                    window.location.href = '/admin/login';
-                }
-                return Promise.reject(error);
-            }
-        );
-
+        // Mobile menu and navigation handlers
         document.getElementById('mobile-menu-btn').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('active');
         });

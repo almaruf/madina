@@ -96,7 +96,13 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('delivery-slots/bulk', [\App\Http\Controllers\Admin\DeliverySlotController::class, 'bulkCreate']);
 
     // Categories
-    Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::get('categories', [\App\Http\Controllers\Admin\CategoryController::class, 'index']);
+    Route::post('categories', [\App\Http\Controllers\Admin\CategoryController::class, 'store']);
+    Route::get('categories/{slug}', [\App\Http\Controllers\Admin\CategoryController::class, 'show']);
+    Route::put('categories/{slug}', [\App\Http\Controllers\Admin\CategoryController::class, 'update']);
+    Route::patch('categories/{slug}', [\App\Http\Controllers\Admin\CategoryController::class, 'update']);
+    Route::delete('categories/{slug}', [\App\Http\Controllers\Admin\CategoryController::class, 'destroy']);
     Route::post('categories/{slug}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
+    Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
 });

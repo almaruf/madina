@@ -49,9 +49,9 @@
             <!-- Action Buttons -->
             <div class="flex gap-3">
                 ${!isArchived ? `
-                    <button onclick="editProduct()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <a href="/admin/products/${productSlug}/edit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold inline-flex items-center">
                         <i class="fas fa-edit mr-2"></i>Edit Product
-                    </button>
+                    </a>
                     <button onclick="archiveProduct()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
                         <i class="fas fa-archive mr-2"></i>Archive
                     </button>
@@ -143,10 +143,6 @@
                 </div>
             ` : ''}
         `;
-    }
-    
-    function editProduct() {
-        toast.info('Edit functionality coming soon!');
     }
     
     async function archiveProduct() {

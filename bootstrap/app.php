@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'super_admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
         ]);
 
+        // Apply CORS middleware globally first
+        $middleware->prepend(\App\Http\Middleware\Cors::class);
+        
         // Apply DetectShop middleware globally to all routes
         $middleware->append(\App\Http\Middleware\DetectShop::class);
     })

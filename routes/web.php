@@ -42,6 +42,10 @@ Route::prefix('admin')->group(function () {
         return view('admin.products.show', ['slug' => $slug]);
     })->name('admin.products.show');
     
+    Route::get('/products/{slug}/edit', function ($slug) {
+        return view('admin.products.edit', ['slug' => $slug]);
+    })->name('admin.products.edit');
+    
     Route::get('/orders', function () {
         return view('admin.orders');
     })->name('admin.orders');
@@ -57,6 +61,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/categories/{slug}', function ($slug) {
         return view('admin.categories.show', ['slug' => $slug]);
     })->name('admin.categories.show');
+    
+    Route::get('/categories/{slug}/edit', function ($slug) {
+        return view('admin.categories.edit', ['slug' => $slug]);
+    })->name('admin.categories.edit');
     
     Route::get('/users', function () {
         return view('admin.users');
