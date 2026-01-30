@@ -6,6 +6,8 @@ use App\Http\Controllers\Shop\ProductController;
 
 Route::get('/', [HomeController::class, 'index'])->name('shop.home');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('shop.products.show');
+Route::get('/cart', function () { return view('shop.cart'); })->name('shop.cart');
+Route::get('/checkout', function () { return view('shop.checkout'); })->name('shop.checkout');
 
 // Generic login redirect (for Sanctum)
 Route::get('/login', function () {

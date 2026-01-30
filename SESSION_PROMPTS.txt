@@ -1,0 +1,30 @@
+for development use https://probable-goggles-v676qw94rjcwgxr-8000.app.github.dev/ instead of localhost and make this available with this url
+Unable to locate file in Vite manifest: resources/js/shop.js.
+In the shop homepage use a banner photo. show a featured products section. show few featured categories section (3 categories). show 15 most bought products. admin should be able to choose featured products, featured categories themselves
+we need a sub category. for example under a category Oil we can have optional sub categories Frying Oil, Cooking Oil, Other Oils sub categories which will have many products each. the products can be under few sub categories as well as few categories too.
+check admin side, create them if not preset. also make it possible to create categories, sub-categories etc by admins.
+seed some data to populate the homepage completely. use placeholder photos
+User types and level definition
+super_admin (level 5)-> can add admin and shops
+admin (level 4)-> can deal with any shop and everything else below level 4
+owner (level 3) -> can deal with everything related to their own shop and everything else below level 3
+staff (level 2) -> can only deal with certain things under a shop like add edit products, categories, sub categories, see orders.
+customer (level 1) -> can track their orders, their information, addresses etc.
+or all api calls use slug_id instead of integer id's . add this to copilot instruction for every request in future.
+shopfront product page isnt working (404). product page can have many photos of the product selected. Also should have a section for related products (6 products from same category if available) .
+https://probable-goggles-v676qw94rjcwgxr-8000.app.github.dev/shop/products?category=oil page showing all possible products
+products in all listing page should have a quick add button with option to select quantity
+Auth guard [sanctum] is not defined. 
+need to add product pricing information. sizes are possible too. sometimes sizes are in weight, sometimes in ml, Litlre. different price for different size and different weight possible. sometimes the product has a set weight and none of size or weight matters and has a set price in that case
+sub categories list on add/edit product page should be based on category selected. also bring category and subcategory right after name and desc.
+let me view/add/edit shops and all its properties
+create view blade scripts for individual product, shop, category in admin site
+product needs photo(s). category must have one photo, same in sho - should have a cover photo
+move the edit /delete button from the list page to the shop details page instead. sop line show be clickable and that should take us to the shop details page
+dont delete shop, product, category - just archieve (soft delete)
+product and category edit/delete buttons should be in details page - and the first two columns of the row in the listing page should take people to details page.
+products, categories, shops listing page should have a link to see all archieved items. But only visible to owners or higher level
+on the shop details page, we need the list of shop users. anyone above the owner can add new user for that shop there.
+shop page needs to show only the owner and staff for that shop. no need to show admins or customers
+do admin and super admin need to be related to the shop at all? they should be able to perform their job without this relationship
+all user phone number fields should come with the prefix +44 selectable , the phone field should just allow to put the number in 078.... format

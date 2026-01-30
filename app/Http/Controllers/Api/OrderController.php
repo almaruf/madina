@@ -183,7 +183,173 @@ class OrderController extends Controller
             DB::rollBack();
 
             return response()->json([
+                'message' => 'Order cannot be cancelled'
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Restore stock
+            foreach ($order->items as $item) {
+                if ($item->product_variation_id) {
+                    ProductVariation::find($item->product_variation_id)
+                        ->increment('stock_quantity', $item->quantity);
+                }
+            }
+
+            // Update delivery slot
+            if ($order->delivery_slot_id) {
+                DeliverySlot::find($order->delivery_slot_id)->decrement('current_orders');
+            }
+
+            $order->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Order cancelled successfully',
+                'order' => $order,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
                 'message' => 'Failed to cancel order',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Create a guest checkout order
+     */
+    public function guestStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.variation_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer|min:1',
+            'delivery_slot_id' => 'required|integer|exists:delivery_slots,id',
+            'payment_method' => 'required|in:cash,card,online',
+            'address.first_name' => 'required|string|max:255',
+            'address.last_name' => 'required|string|max:255',
+            'address.phone' => 'required|string',
+            'address.address_line_1' => 'required|string',
+            'address.address_line_2' => 'nullable|string',
+            'address.city' => 'required|string',
+            'address.postcode' => 'required|string',
+            'address.country' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $shopId = \App\Services\ShopContext::getShopId();
+            $items = $request->get('items', []);
+            $subtotal = 0;
+            $deliveryFee = 5.00;
+            $orderItems = [];
+
+            // Validate stock and calculate totals
+            foreach ($items as $item) {
+                $variation = ProductVariation::find($item['variation_id']);
+
+                if (!$variation || $variation->stock < $item['quantity']) {
+                    return response()->json([
+                        'message' => 'Insufficient stock for one or more items',
+                        'errors' => ['stock' => 'Some items are out of stock']
+                    ], 422);
+                }
+
+                $itemTotal = $variation->price * $item['quantity'];
+                $subtotal += $itemTotal;
+
+                $orderItems[] = [
+                    'product_id' => $item['product_id'],
+                    'product_variation_id' => $item['variation_id'],
+                    'product_name' => $variation->product->name,
+                    'variation_name' => $variation->name,
+                    'price' => $variation->price,
+                    'quantity' => $item['quantity'],
+                    'subtotal' => $itemTotal,
+                ];
+            }
+
+            // Create address
+            $address = \App\Models\Address::create([
+                'shop_id' => $shopId,
+                'first_name' => $request->get('address.first_name'),
+                'last_name' => $request->get('address.last_name'),
+                'phone' => $request->get('address.phone'),
+                'address_line_1' => $request->get('address.address_line_1'),
+                'address_line_2' => $request->get('address.address_line_2'),
+                'city' => $request->get('address.city'),
+                'postcode' => $request->get('address.postcode'),
+                'country' => $request->get('address.country'),
+            ]);
+
+            // Create order
+            $order = Order::create([
+                'shop_id' => $shopId,
+                'user_id' => null, // Guest order
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'payment_method' => $request->get('payment_method'),
+                'fulfillment_type' => 'delivery',
+                'delivery_slot_id' => $request->get('delivery_slot_id'),
+                'address_id' => $address->id,
+                'subtotal' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'total' => $subtotal + $deliveryFee,
+                'customer_notes' => $request->get('customer_notes'),
+            ]);
+
+            // Create order items and reduce stock
+            foreach ($orderItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_variation_id' => $item['product_variation_id'],
+                    'product_name' => $item['product_name'],
+                    'variation_name' => $item['variation_name'],
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'subtotal' => $item['subtotal'],
+                ]);
+
+                // Reduce stock
+                ProductVariation::find($item['product_variation_id'])
+                    ->decrement('stock', $item['quantity']);
+            }
+
+            // Increment delivery slot
+            DeliverySlot::find($request->get('delivery_slot_id'))->increment('current_orders');
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Order created successfully',
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'total' => $order->total,
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Failed to create order',
                 'error' => $e->getMessage()
             ], 500);
         }

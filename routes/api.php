@@ -21,6 +21,12 @@ Route::get('/categories', [ProductController::class, 'categories']);
 // Delivery slots (public)
 Route::get('/delivery-slots', [DeliverySlotController::class, 'index']);
 
+// Cart routes (public)
+Route::post('/cart/validate', [\App\Http\Controllers\Api\CartController::class, 'validateCart']);
+
+// Guest checkout order
+Route::post('/orders/guest', [\App\Http\Controllers\Api\OrderController::class, 'guestStore']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
