@@ -46,12 +46,6 @@ class CartController extends Controller
                 continue;
             }
 
-            // Check stock
-            if ($variation->stock_quantity < $item['quantity']) {
-                $errors[] = "{$product->name} ({$variation->name}) - Only {$variation->stock_quantity} available";
-                continue;
-            }
-
             $itemTotal = $variation->price * $item['quantity'];
             $subtotal += $itemTotal;
 

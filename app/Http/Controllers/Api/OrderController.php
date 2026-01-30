@@ -52,11 +52,6 @@ class OrderController extends Controller
             foreach ($request->items as $item) {
                 $variation = ProductVariation::with('product')->findOrFail($item['product_variation_id']);
 
-                // Check stock
-                if ($variation->stock_quantity < $item['quantity']) {
-                    throw new \Exception("Insufficient stock for {$variation->product->name}");
-                }
-
                 $itemSubtotal = $variation->price * $item['quantity'];
                 $subtotal += $itemSubtotal;
 
@@ -71,9 +66,6 @@ class OrderController extends Controller
                     'subtotal' => $itemSubtotal,
                     'total' => $itemSubtotal,
                 ];
-
-                // Reduce stock
-                $variation->decrement('stock_quantity', $item['quantity']);
             }
 
             // Calculate delivery fee
@@ -154,13 +146,6 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            // Restore stock
-            foreach ($order->items as $item) {
-                if ($item->product_variation_id) {
-                    ProductVariation::find($item->product_variation_id)
-                        ->increment('stock_quantity', $item->quantity);
-                }
-            }
 
             // Update delivery slot
             if ($order->delivery_slot_id) {
@@ -190,14 +175,6 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            // Restore stock
-            foreach ($order->items as $item) {
-                if ($item->product_variation_id) {
-                    ProductVariation::find($item->product_variation_id)
-                        ->increment('stock_quantity', $item->quantity);
-                }
-            }
-
             // Update delivery slot
             if ($order->delivery_slot_id) {
                 DeliverySlot::find($order->delivery_slot_id)->decrement('current_orders');
@@ -260,14 +237,14 @@ class OrderController extends Controller
             $deliveryFee = 5.00;
             $orderItems = [];
 
-            // Validate stock and calculate totals
+            // Calculate totals
             foreach ($items as $item) {
                 $variation = ProductVariation::find($item['variation_id']);
 
-                if (!$variation || $variation->stock < $item['quantity']) {
+                if (!$variation) {
                     return response()->json([
-                        'message' => 'Insufficient stock for one or more items',
-                        'errors' => ['stock' => 'Some items are out of stock']
+                        'message' => 'Product variation not found',
+                        'errors' => ['variation' => 'Invalid product variation']
                     ], 422);
                 }
 
@@ -315,7 +292,7 @@ class OrderController extends Controller
                 'customer_notes' => $request->get('customer_notes'),
             ]);
 
-            // Create order items and reduce stock
+            // Create order items
             foreach ($orderItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -327,10 +304,6 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'subtotal' => $item['subtotal'],
                 ]);
-
-                // Reduce stock
-                ProductVariation::find($item['product_variation_id'])
-                    ->decrement('stock', $item['quantity']);
             }
 
             // Increment delivery slot

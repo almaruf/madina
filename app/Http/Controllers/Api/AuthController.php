@@ -67,25 +67,45 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Find or create user
-        $user = User::where('shop_id', app(\App\Services\ShopContext::class)->getShopId())
-            ->where('phone', $request->phone)
-            ->first();
+        $shopId = app(\App\Services\ShopContext::class)->getShopId();
 
-        if (!$user) {
-            $user = User::create([
-                'shop_id' => app(\App\Services\ShopContext::class)->getShopId(),
-                'phone' => $request->phone,
-                'phone_verified' => true,
-                'phone_verified_at' => now(),
-                'role' => 'customer',
-            ]);
-        } else if (!$user->phone_verified) {
-            $user->update([
-                'phone_verified' => true,
-                'phone_verified_at' => now(),
-            ]);
+        // First check if user exists with this phone number (regardless of shop)
+        $existingUser = User::where('phone', $request->phone)->first();
+
+        if ($existingUser) {
+            // User exists - check if they can access this shop
+            if ($existingUser->role === 'super_admin' || $existingUser->shop_id === $shopId) {
+                // Allow super_admin or users from this shop
+                if (!$existingUser->phone_verified) {
+                    $existingUser->update([
+                        'phone_verified' => true,
+                        'phone_verified_at' => now(),
+                    ]);
+                }
+                
+                $token = $existingUser->createToken('auth-token')->plainTextToken;
+
+                return response()->json([
+                    'message' => 'Login successful',
+                    'user' => $existingUser,
+                    'token' => $token,
+                ]);
+            } else {
+                // User exists but belongs to a different shop
+                return response()->json([
+                    'message' => 'This phone number is already registered with another shop.'
+                ], 403);
+            }
         }
+
+        // Create new customer user for this shop
+        $user = User::create([
+            'shop_id' => $shopId,
+            'phone' => $request->phone,
+            'phone_verified' => true,
+            'phone_verified_at' => now(),
+            'role' => 'customer',
+        ]);
 
         // Create token
         $token = $user->createToken('auth-token')->plainTextToken;

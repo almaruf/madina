@@ -24,9 +24,6 @@ Route::get('/delivery-slots', [DeliverySlotController::class, 'index']);
 // Cart routes (public)
 Route::post('/cart/validate', [\App\Http\Controllers\Api\CartController::class, 'validateCart']);
 
-// Guest checkout order
-Route::post('/orders/guest', [\App\Http\Controllers\Api\OrderController::class, 'guestStore']);
-
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
@@ -45,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Dashboard stats
+    Route::get('dashboard/stats', [\App\Http\Controllers\Admin\DashboardController::class, 'stats']);
+
     // Shop management (super admin only)
     Route::apiResource('shops', \App\Http\Controllers\Admin\ShopController::class);
     Route::post('shops/{slug}/restore', [\App\Http\Controllers\Admin\ShopController::class, 'restore']);

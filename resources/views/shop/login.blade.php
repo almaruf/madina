@@ -139,8 +139,12 @@
                     loadingDiv.classList.add('hidden');
                     showSuccess('Login successful! Redirecting...');
                     
+                    // Get redirect URL from query parameter
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect') || '/shop/products';
+                    
                     setTimeout(() => {
-                        window.location.href = '/shop/products';
+                        window.location.href = redirectUrl;
                     }, 1500);
                 } catch (error) {
                     loadingDiv.classList.add('hidden');
@@ -165,7 +169,9 @@
         }
 
         if (localStorage.getItem('token')) {
-            window.location.href = '/shop/products';
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect') || '/shop/products';
+            window.location.href = redirectUrl;
         }
     </script>
 </body>

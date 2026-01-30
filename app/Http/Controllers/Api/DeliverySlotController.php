@@ -29,11 +29,6 @@ class DeliverySlotController extends Controller
 
         $slots = $query->orderBy('date')->orderBy('start_time')->get();
 
-        // Group by date
-        $grouped = $slots->groupBy(function($slot) {
-            return $slot->date->format('Y-m-d');
-        });
-
-        return response()->json($grouped);
+        return response()->json($slots);
     }
 }

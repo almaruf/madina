@@ -4,14 +4,27 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 py-8">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <a href="/cart" class="text-green-600 hover:text-green-700 mb-4 inline-flex items-center gap-2">
-            <i class="fas fa-arrow-left"></i>
-            Back to Cart
-        </a>
-        <h1 class="text-3xl font-bold mt-4">Checkout</h1>
+    <!-- Auth Check -->
+    <div id="auth-check" class="hidden">
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-8 rounded-lg text-center">
+            <i class="fas fa-lock text-4xl mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Please Login to Continue</h2>
+            <p class="mb-4">You need to be logged in to complete your purchase.</p>
+            <a href="/shop/login?redirect=/checkout" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+                Login / Sign Up
+            </a>
+        </div>
     </div>
+
+    <div id="checkout-content">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <a href="/cart" class="text-green-600 hover:text-green-700 mb-4 inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                Back to Cart
+            </a>
+            <h1 class="text-3xl font-bold mt-4">Checkout</h1>
+        </div>
 
     <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded mb-6 flex items-center gap-2">
         <i class="fas fa-exclamation-circle"></i>
@@ -23,52 +36,66 @@
     </div>
 
     <form id="checkout-form" class="space-y-8">
-        <!-- Delivery Address -->
+        <!-- User Addresses -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
             
-            <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">First Name *</label>
-                        <input type="text" name="first_name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Last Name *</label>
-                        <input type="text" name="last_name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    </div>
-                </div>
+            <div id="user-addresses" class="space-y-3">
+                <p class="text-gray-600">Loading your addresses...</p>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Phone Number *</label>
-                    <input type="tel" name="phone" placeholder="+44..." required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Address Line 1 *</label>
-                    <input type="text" name="address_line_1" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Address Line 2</label>
-                    <input type="text" name="address_line_2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">City *</label>
-                        <input type="text" name="city" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <div id="new-address-form" class="hidden mt-4 pt-4 border-t">
+                <h3 class="font-semibold mb-3">Add New Address</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">First Name *</label>
+                            <input type="text" id="new_first_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Last Name *</label>
+                            <input type="text" id="new_last_name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium mb-1">Postcode *</label>
-                        <input type="text" name="postcode" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <label class="block text-sm font-medium mb-1">Phone Number *</label>
+                        <input type="tel" id="new_phone" placeholder="+44..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium mb-1">Country *</label>
-                        <input type="text" name="country" value="United Kingdom" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <label class="block text-sm font-medium mb-1">Address Line 1 *</label>
+                        <input type="text" id="new_address_line_1" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Address Line 2</label>
+                        <input type="text" id="new_address_line_2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">City *</label>
+                            <input type="text" id="new_city" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Postcode *</label>
+                            <input type="text" id="new_postcode" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Country *</label>
+                            <input type="text" id="new_country" value="United Kingdom" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="checkout.saveNewAddress()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                        Save Address
+                    </button>
                 </div>
             </div>
+
+            <button type="button" onclick="checkout.toggleNewAddressForm()" class="mt-4 text-green-600 hover:text-green-700 font-semibold">
+                + Add New Address
+            </button>
         </div>
 
         <!-- Delivery Slot -->
@@ -136,8 +163,33 @@
 <script>
     class CheckoutPage {
         constructor() {
-            this.cart = this.loadCart();
+            this.cart = [];
             this.deliveryFee = 5.00;
+            this.user = null;
+            this.selectedAddressId = null;
+            this.checkAuthAndInit();
+        }
+
+        async checkAuthAndInit() {
+            // Set authorization token from localStorage
+            const token = localStorage.getItem('token');
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+            }
+
+            // Check authentication first
+            try {
+                const response = await axios.get('/api/auth/user');
+                this.user = response.data;
+            } catch (error) {
+                this.user = null;
+                document.getElementById('auth-check').classList.remove('hidden');
+                document.getElementById('checkout-content').classList.add('hidden');
+                return;
+            }
+
+            // Load cart
+            this.cart = this.loadCart();
             
             if (!this.cart.length) {
                 window.location.href = '/cart';
@@ -163,9 +215,78 @@
         }
 
         async init() {
+            await this.loadUserAddresses();
             await this.loadDeliverySlots();
             await this.renderOrderSummary();
             this.setupFormSubmission();
+        }
+
+        async loadUserAddresses() {
+            try {
+                const response = await axios.get('/api/addresses');
+                const addresses = response.data;
+
+                if (addresses && addresses.length > 0) {
+                    const html = addresses.map(addr => `
+                        <label class="flex items-start p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-green-50 transition ${addr.is_default ? 'border-green-500 bg-green-50' : ''}">
+                            <input type="radio" name="address_id" value="${addr.id}" ${addr.is_default ? 'checked' : ''} required class="mt-1 w-4 h-4">
+                            <div class="ml-3 flex-1">
+                                <div class="font-semibold">${addr.address_line_1}</div>
+                                ${addr.address_line_2 ? `<div class="text-sm text-gray-600">${addr.address_line_2}</div>` : ''}
+                                <div class="text-sm text-gray-600">${addr.city}, ${addr.postcode}</div>
+                                ${addr.phone ? `<div class="text-sm text-gray-500">Phone: ${addr.phone}</div>` : ''}
+                                ${addr.is_default ? '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded mt-1 inline-block">Default</span>' : ''}
+                            </div>
+                        </label>
+                    `).join('');
+                    document.getElementById('user-addresses').innerHTML = html;
+                    this.selectedAddressId = addresses.find(a => a.is_default)?.id || addresses[0].id;
+                } else {
+                    document.getElementById('user-addresses').innerHTML = '<p class="text-gray-600">No saved addresses. Please add a new one below.</p>';
+                    document.getElementById('new-address-form').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading addresses:', error);
+                document.getElementById('user-addresses').innerHTML = '<p class="text-red-600">Failed to load addresses</p>';
+            }
+        }
+
+        toggleNewAddressForm() {
+            const form = document.getElementById('new-address-form');
+            form.classList.toggle('hidden');
+        }
+
+        async saveNewAddress() {
+            const addressData = {
+                address_line_1: document.getElementById('new_address_line_1').value,
+                address_line_2: document.getElementById('new_address_line_2').value,
+                city: document.getElementById('new_city').value,
+                postcode: document.getElementById('new_postcode').value,
+                phone: document.getElementById('new_phone').value,
+            };
+
+            if (!addressData.address_line_1 || !addressData.city || !addressData.postcode) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                await axios.post('/api/addresses', addressData);
+                this.showSuccess('Address saved successfully');
+                setTimeout(() => {
+                    document.getElementById('success-message').classList.add('hidden');
+                }, 3000);
+                await this.loadUserAddresses();
+                this.toggleNewAddressForm();
+                // Clear form
+                document.getElementById('new_address_line_1').value = '';
+                document.getElementById('new_address_line_2').value = '';
+                document.getElementById('new_city').value = '';
+                document.getElementById('new_postcode').value = '';
+                document.getElementById('new_phone').value = '';
+            } catch (error) {
+                alert('Failed to save address: ' + (error.response?.data?.message || error.message));
+            }
         }
 
         async loadDeliverySlots() {
@@ -236,7 +357,14 @@
             document.getElementById('checkout-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                const addressId = document.querySelector('input[name="address_id"]:checked')?.value;
                 const deliverySlotId = document.querySelector('input[name="delivery_slot_id"]:checked')?.value;
+                
+                if (!addressId) {
+                    this.showError('Please select a delivery address');
+                    return;
+                }
+                
                 if (!deliverySlotId) {
                     this.showError('Please select a delivery slot');
                     return;
@@ -248,24 +376,18 @@
 
                 try {
                     const formData = {
-                        items: this.cart,
+                        items: this.cart.map(item => ({
+                            product_variation_id: item.variation_id,
+                            quantity: item.quantity
+                        })),
+                        address_id: parseInt(addressId),
                         delivery_slot_id: parseInt(deliverySlotId),
                         payment_method: document.querySelector('input[name="payment_method"]:checked').value,
-                        address: {
-                            first_name: document.querySelector('input[name="first_name"]').value,
-                            last_name: document.querySelector('input[name="last_name"]').value,
-                            phone: document.querySelector('input[name="phone"]').value,
-                            address_line_1: document.querySelector('input[name="address_line_1"]').value,
-                            address_line_2: document.querySelector('input[name="address_line_2"]').value,
-                            city: document.querySelector('input[name="city"]').value,
-                            postcode: document.querySelector('input[name="postcode"]').value,
-                            country: document.querySelector('input[name="country"]').value,
-                        }
+                        fulfillment_type: 'delivery'
                     };
 
-                    // For now, create a guest checkout order
-                    // You would need to implement this endpoint
-                    const response = await axios.post('/api/orders/guest', formData);
+                    // Use authenticated order endpoint
+                    const response = await axios.post('/api/orders', formData);
 
                     this.showSuccess('Order placed successfully! Order ID: ' + response.data.id);
                     localStorage.removeItem('shopping_cart');
