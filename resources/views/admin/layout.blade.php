@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard')</title>
+    <title>@yield('title', 'Admin Dashboard') - {{ app(\App\Services\ShopConfigService::class)->name() }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -17,9 +17,114 @@
             .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
             .sidebar.active { transform: translateX(0); }
         }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            min-width: 300px;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        .toast.warning { background: #f59e0b; }
+        .toast.info { background: #3b82f6; }
+        
+        .toast-icon { font-size: 20px; flex-shrink: 0; }
+        .toast-close {
+            margin-left: auto;
+            cursor: pointer;
+            opacity: 0.8;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .toast-close:hover { opacity: 1; }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .toast.removing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
+    <script>
+        // Authentication and Axios setup - MUST run before any page scripts
+        (function() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+            
+            // Store in localStorage for persistence
+            localStorage.setItem('auth_token', token);
+            
+            // Configure axios globally before anything else
+            if (window.axios) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                axios.defaults.headers.common['Accept'] = 'application/json';
+                axios.defaults.headers.common['Content-Type'] = 'application/json';
+                
+                // Set up error interceptor
+                axios.interceptors.response.use(
+                    response => response,
+                    error => {
+                        if (error.response?.status === 401 || error.response?.status === 403) {
+                            console.error('Authentication failed:', error);
+                            localStorage.removeItem('auth_token');
+                            sessionStorage.removeItem('auth_token');
+                            window.location.href = '/admin/login';
+                        }
+                        return Promise.reject(error);
+                    }
+                );
+            }
+        })();
+    </script>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
     <!-- Mobile Menu Toggle -->
     <button id="mobile-menu-btn" class="fixed md:hidden bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg z-40 hover:bg-green-700">
         <i class="fas fa-bars text-xl"></i>
@@ -106,6 +211,31 @@
     </div>
 
     <script>
+        // Toast Notification System
+        const toast = {
+            success: (message) => showToast(message, 'success'),
+            error: (message) => showToast(message, 'error'),
+            warning: (message) => showToast(message, 'warning'),
+            info: (message) => showToast(message, 'info')
+        };
+        
+        function showToast(message, type = 'info') {
+
+        // Mobile menu and navigation handlers            });
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                removeToast(toastEl);
+            }, 4000);
+        }
+        
+        function removeToast(toastEl) {
+            toastEl.classList.add('removing');
+            setTimeout(() => {
+                toastEl.remove();
+            }, 300);
+        }
+        
         // Set up axios with stored token
         const token = localStorage.getItem('auth_token');
         if (token) {

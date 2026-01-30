@@ -16,9 +16,16 @@ class ShopController extends Controller
         $this->middleware('super_admin')->except(['current', 'updateCurrent']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $shops = Shop::paginate(50);
+        $query = Shop::query();
+
+        // Handle archived filter
+        if ($request->has('archived') && $request->archived == '1') {
+            $query->onlyTrashed();
+        }
+
+        $shops = $query->paginate(50);
         return response()->json($shops);
     }
 
@@ -53,7 +60,7 @@ class ShopController extends Controller
 
     public function show($id)
     {
-        $shop = Shop::findOrFail($id);
+        $shop = Shop::withTrashed()->findOrFail($id);
         return response()->json($shop);
     }
 
@@ -78,16 +85,6 @@ class ShopController extends Controller
         ShopContext::clearCache();
 
         return response()->json($shop);
-    }
-
-    public function destroy($id)
-    {
-        $shop = Shop::findOrFail($id);
-        $shop->delete();
-
-        ShopContext::clearCache();
-
-        return response()->json(['message' => 'Shop deleted successfully']);
     }
 
     public function current()
@@ -128,5 +125,35 @@ class ShopController extends Controller
         ShopContext::clearCache();
 
         return response()->json($shop);
+    }
+
+    public function destroy($id)
+    {
+        $shop = Shop::findOrFail($id);
+        $shop->delete();
+
+        ShopContext::clearCache();
+
+        return response()->json(['message' => 'Shop archived successfully']);
+    }
+
+    public function restore($id)
+    {
+        $shop = Shop::onlyTrashed()->findOrFail($id);
+        $shop->restore();
+
+        ShopContext::clearCache();
+
+        return response()->json(['message' => 'Shop restored successfully']);
+    }
+
+    public function forceDelete($id)
+    {
+        $shop = Shop::withTrashed()->findOrFail($id);
+        $shop->forceDelete();
+
+        ShopContext::clearCache();
+
+        return response()->json(['message' => 'Shop permanently deleted']);
     }
 }

@@ -34,31 +34,55 @@ Route::prefix('admin')->group(function () {
         return view('admin.products');
     })->name('admin.products');
     
+    Route::get('/products/{id}', function ($id) {
+        return view('admin.products.show', ['id' => $id]);
+    })->name('admin.products.show');
+    
     Route::get('/orders', function () {
         return view('admin.orders');
     })->name('admin.orders');
+    
+    Route::get('/orders/{id}', function ($id) {
+        return view('admin.orders.show', ['id' => $id]);
+    })->name('admin.orders.show');
     
     Route::get('/categories', function () {
         return view('admin.categories');
     })->name('admin.categories');
     
+    Route::get('/categories/{id}', function ($id) {
+        return view('admin.categories.show', ['id' => $id]);
+    })->name('admin.categories.show');
+    
     Route::get('/users', function () {
         return view('admin.users');
     })->name('admin.users');
     
+    Route::get('/users/{id}', function ($id) {
+        return view('admin.users.show', ['id' => $id]);
+    })->name('admin.users.show');
+    
     Route::get('/shops', function () {
         return view('admin.shops');
     })->name('admin.shops');
+    
+    Route::get('/shops/{id}', function ($id) {
+        return view('admin.shops.show', ['id' => $id]);
+    })->name('admin.shops.show');
     
     Route::get('/shops/create', function () {
         return view('admin.shops.create');
     })->name('admin.shops.create');
     
     Route::get('/shops/{id}/edit', function ($id) {
-        return view('admin.shops.edit', ['shopId' => $id]);
+        return view('admin.shops.edit', ['id' => $id]);
     })->name('admin.shops.edit');
     
     Route::get('/delivery-slots', function () {
         return view('admin.delivery-slots');
     })->name('admin.delivery-slots');
+    
+    Route::get('/admin-users', function () {
+        return view('admin.admin-users');
+    })->name('admin.admin-users');
 });

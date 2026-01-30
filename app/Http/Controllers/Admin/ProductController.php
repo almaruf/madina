@@ -19,6 +19,11 @@ class ProductController extends Controller
         $query = Product::where('shop_id', $shopId)
             ->with(['variations', 'primaryImage', 'categories']);
 
+        // Handle archived filter
+        if ($request->has('archived') && $request->archived == '1') {
+            $query->onlyTrashed();
+        }
+
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
@@ -70,7 +75,7 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['variations', 'images', 'categories'])->findOrFail($id);
+        $product = Product::withTrashed()->with(['variations', 'images', 'categories'])->findOrFail($id);
 
         return response()->json($product);
     }
@@ -112,7 +117,29 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        return response()->json(['message' => 'Product deleted successfully']);
+        return response()->json(['message' => 'Product archived successfully']);
+    }
+
+    public function restore($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->restore();
+
+        return response()->json(['message' => 'Product restored successfully']);
+    }
+
+    public function forceDelete($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        
+        // Delete images from S3
+        foreach ($product->images as $image) {
+            Storage::disk('s3')->delete($image->path);
+        }
+        
+        $product->forceDelete();
+
+        return response()->json(['message' => 'Product permanently deleted']);
     }
 
     public function uploadImage(Request $request, $id)

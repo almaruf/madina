@@ -113,4 +113,109 @@ class AdminUserController extends Controller
 
         return response()->json(['message' => 'Admin user deleted successfully']);
     }
+
+    /**
+     * Get all users (customers and admins) for shop admin
+     */
+    public function allUsers(Request $request)
+    {
+        $shopId = ShopContext::getShopId();
+        $query = User::where('shop_id', $shopId)->withCount('orders');
+
+        // Handle archived filter
+        if ($request->has('archived') && $request->archived == '1') {
+            $query->onlyTrashed();
+        }
+
+        // Search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('phone', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Role filter
+        if ($request->has('role')) {
+            $query->where('role', $request->role);
+        }
+
+        return response()->json($query->latest()->paginate(50));
+    }
+
+    /**
+     * Get a single user (for detail view)
+     */
+    public function showUser($id)
+    {
+        $shopId = ShopContext::getShopId();
+        $user = User::withTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        
+        return response()->json($user);
+    }
+
+    /**
+     * Update any user (for user management page)
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $shopId = ShopContext::getShopId();
+        $user = User::where('shop_id', $shopId)->findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'role' => 'sometimes|in:customer,admin,shop_manager,shop_admin',
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->update($request->only(['role', 'name', 'email', 'is_active']));
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Archive (soft delete) a user
+     */
+    public function destroyUser($id)
+    {
+        $shopId = ShopContext::getShopId();
+        $user = User::where('shop_id', $shopId)->findOrFail($id);
+        $user->delete();
+
+        return response()->json(['message' => 'User archived successfully']);
+    }
+
+    /**
+     * Restore an archived user
+     */
+    public function restoreUser($id)
+    {
+        $shopId = ShopContext::getShopId();
+        $user = User::onlyTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        $user->restore();
+
+        return response()->json(['message' => 'User restored successfully']);
+    }
+
+    /**
+     * Permanently delete a user
+     */
+    public function forceDeleteUser($id)
+    {
+        $shopId = ShopContext::getShopId();
+        $user = User::withTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        $user->forceDelete();
+
+        return response()->json(['message' => 'User permanently deleted']);
+    }
 }

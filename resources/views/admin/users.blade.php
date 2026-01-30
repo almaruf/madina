@@ -5,6 +5,18 @@
 @section('content')
 <h2 class="text-3xl font-bold mb-6">Users</h2>
 
+<!-- Tabs -->
+<div class="mb-6 border-b border-gray-200">
+    <nav class="-mb-px flex space-x-8">
+        <button onclick="switchTab('active')" id="active-tab" class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
+            Active
+        </button>
+        <button onclick="switchTab('archived')" id="archived-tab" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            Archived
+        </button>
+    </nav>
+</div>
+
 <div class="bg-white rounded-lg shadow mb-6">
     <div class="p-4 border-b">
         <div class="flex gap-4">
@@ -36,6 +48,30 @@
 </div>
 
 <script>
+    let currentTab = 'active';
+
+    function switchTab(tab) {
+        currentTab = tab;
+        
+        // Update tab styling
+        const activeTab = document.getElementById('active-tab');
+        const archivedTab = document.getElementById('archived-tab');
+        
+        if (tab === 'active') {
+            activeTab.classList.add('border-blue-500', 'text-blue-600');
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            archivedTab.classList.remove('border-blue-500', 'text-blue-600');
+            archivedTab.classList.add('border-transparent', 'text-gray-500');
+        } else {
+            archivedTab.classList.add('border-blue-500', 'text-blue-600');
+            archivedTab.classList.remove('border-transparent', 'text-gray-500');
+            activeTab.classList.remove('border-blue-500', 'text-blue-600');
+            activeTab.classList.add('border-transparent', 'text-gray-500');
+        }
+        
+        loadUsers();
+    }
+
     async function loadUsers() {
         try {
             const search = document.getElementById('search').value;
@@ -44,9 +80,10 @@
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (role) params.append('role', role);
+            if (currentTab === 'archived') params.append('archived', '1');
             
             const response = await axios.get(`/api/admin/users?${params}`);
-            const users = response.data.data;
+            const users = response.data.data || response.data;
             const tbody = document.querySelector('#users-table tbody');
             
             if (users.length === 0) {
@@ -66,32 +103,16 @@
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-900">${user.orders_count || 0}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${new Date(user.created_at).toLocaleDateString()}</td>
-                    <td class="px-6 py-4 text-sm">
-                        <button onclick="viewUser(${user.id})" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                        ${user.role !== 'admin' ? `<button onclick="makeAdmin(${user.id})" class="text-green-600 hover:text-green-900">Make Admin</button>` : ''}
+                    <td class="px-6 py-4 text-sm text-right">
+                        <a href="/admin/users/${user.id}" class="text-blue-600 hover:text-blue-900 font-medium">
+                            View Details
+                        </a>
                     </td>
                 </tr>
             `).join('');
         } catch (error) {
             console.error('Error loading users:', error);
-            alert('Failed to load users');
-        }
-    }
-    
-    function viewUser(id) {
-        alert(`View user ${id} details - coming soon!`);
-    }
-    
-    async function makeAdmin(id) {
-        if (!confirm('Are you sure you want to make this user an admin?')) return;
-        
-        try {
-            await axios.patch(`/api/admin/users/${id}`, { role: 'admin' });
-            alert('User promoted to admin successfully');
-            loadUsers();
-        } catch (error) {
-            console.error('Error updating user role:', error);
-            alert('Failed to update user role');
+            toast.error('Failed to load users');
         }
     }
     

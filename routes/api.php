@@ -47,15 +47,27 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     // Shop management (super admin only)
     Route::apiResource('shops', \App\Http\Controllers\Admin\ShopController::class);
+    Route::post('shops/{id}/restore', [\App\Http\Controllers\Admin\ShopController::class, 'restore']);
+    Route::delete('shops/{id}/force', [\App\Http\Controllers\Admin\ShopController::class, 'forceDelete']);
     Route::get('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'current']);
     Route::patch('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'updateCurrent']);
 
     // Admin user management (super admin only)
     Route::apiResource('admin-users', \App\Http\Controllers\Admin\AdminUserController::class);
+    
+    // Regular users management
+    Route::get('users', [\App\Http\Controllers\Admin\AdminUserController::class, 'allUsers']);
+    Route::get('users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'showUser']);
+    Route::patch('users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'updateUser']);
+    Route::delete('users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'destroyUser']);
+    Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\AdminUserController::class, 'restoreUser']);
+    Route::delete('users/{id}/force', [\App\Http\Controllers\Admin\AdminUserController::class, 'forceDeleteUser']);
 
     // Products
     Route::apiResource('products', \App\Http\Controllers\Admin\ProductController::class);
     Route::post('products/{id}/images', [\App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
+    Route::post('products/{id}/restore', [\App\Http\Controllers\Admin\ProductController::class, 'restore']);
+    Route::delete('products/{id}/force', [\App\Http\Controllers\Admin\ProductController::class, 'forceDelete']);
 
     // Orders
     Route::get('orders', [\App\Http\Controllers\Admin\OrderController::class, 'index']);
@@ -63,6 +75,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('orders/{id}', [\App\Http\Controllers\Admin\OrderController::class, 'show']);
     Route::patch('orders/{id}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus']);
     Route::patch('orders/{id}/payment-status', [\App\Http\Controllers\Admin\OrderController::class, 'updatePaymentStatus']);
+    Route::delete('orders/{id}', [\App\Http\Controllers\Admin\OrderController::class, 'destroy']);
+    Route::post('orders/{id}/restore', [\App\Http\Controllers\Admin\OrderController::class, 'restore']);
+    Route::delete('orders/{id}/force', [\App\Http\Controllers\Admin\OrderController::class, 'forceDelete']);
 
     // Delivery Slots
     Route::apiResource('delivery-slots', \App\Http\Controllers\Admin\DeliverySlotController::class);
@@ -70,4 +85,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
 
     // Categories
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::post('categories/{id}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
+    Route::delete('categories/{id}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
 });

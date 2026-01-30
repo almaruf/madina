@@ -9,10 +9,17 @@ use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $shopId = \App\Services\ShopContext::getShopId();
-        $categories = Category::where('shop_id', $shopId)->with('children')->get();
+        $query = Category::where('shop_id', $shopId)->with('children')->withCount('products');
+
+        // Handle archived filter
+        if ($request->has('archived') && $request->archived == '1') {
+            $query->onlyTrashed();
+        }
+
+        $categories = $query->get();
 
         return response()->json($categories);
     }

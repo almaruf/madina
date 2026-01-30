@@ -15,6 +15,11 @@ class OrderController extends Controller
         $query = Order::where('shop_id', $shopId)
             ->with(['user', 'items.product', 'deliverySlot', 'address']);
 
+        // Handle archived filter
+        if ($request->has('archived') && $request->archived == '1') {
+            $query->onlyTrashed();
+        }
+
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -34,7 +39,7 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $order = Order::with(['user', 'items.product', 'deliverySlot', 'address'])->findOrFail($id);
+        $order = Order::withTrashed()->with(['user', 'items.product', 'deliverySlot', 'address'])->findOrFail($id);
 
         return response()->json($order);
     }
@@ -104,5 +109,29 @@ class OrderController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    public function destroy($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->delete();
+
+        return response()->json(['message' => 'Order archived successfully']);
+    }
+
+    public function restore($id)
+    {
+        $order = Order::onlyTrashed()->findOrFail($id);
+        $order->restore();
+
+        return response()->json(['message' => 'Order restored successfully']);
+    }
+
+    public function forceDelete($id)
+    {
+        $order = Order::withTrashed()->findOrFail($id);
+        $order->forceDelete();
+
+        return response()->json(['message' => 'Order permanently deleted']);
     }
 }
