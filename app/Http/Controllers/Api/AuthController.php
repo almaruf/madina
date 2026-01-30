@@ -110,4 +110,105 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    /**
+     * Send OTP for admin login
+     */
+    public function adminLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Normalize phone number (remove +44 prefix if present)
+        $phone = $request->phone;
+        if (str_starts_with($phone, '+44')) {
+            $phone = substr($phone, 3); // Remove +44
+        } elseif (str_starts_with($phone, '0044')) {
+            $phone = substr($phone, 4); // Remove 0044
+        }
+
+        // Check if user exists and is an admin
+        $user = User::where('phone', $phone)->orWhere('phone', $request->phone)->first();
+
+        if (!$user || !$user->isAdmin()) {
+            return response()->json([
+                'message' => 'Invalid credentials. Only admins can login here.'
+            ], 403);
+        }
+
+        try {
+            // Use normalized phone for OTP service
+            $this->otpService->sendOtp($user->phone);
+
+            return response()->json([
+                'message' => 'OTP sent successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to send OTP',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify OTP for admin login
+     */
+    public function adminVerifyOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Normalize phone number (remove +44 prefix if present)
+        $phone = $request->phone;
+        if (str_starts_with($phone, '+44')) {
+            $phone = substr($phone, 3); // Remove +44
+        } elseif (str_starts_with($phone, '0044')) {
+            $phone = substr($phone, 4); // Remove 0044
+        }
+
+        // Verify OTP using the original phone from request (OtpService handles both formats)
+        if (!$this->otpService->verifyOtp($request->phone, $request->otp)) {
+            return response()->json([
+                'message' => 'Invalid or expired OTP'
+            ], 401);
+        }
+
+        // Find admin user using normalized phone
+        $user = User::where('phone', $phone)->orWhere('phone', $request->phone)->first();
+
+        if (!$user || !$user->isAdmin()) {
+            return response()->json([
+                'message' => 'Invalid credentials. Only admins can login here.'
+            ], 403);
+        }
+
+        // Update verification status
+        if (!$user->phone_verified) {
+            $user->update([
+                'phone_verified' => true,
+                'phone_verified_at' => now(),
+            ]);
+        }
+
+        // Create token
+        $token = $user->createToken('admin-auth-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Admin login successful',
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
 }

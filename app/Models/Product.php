@@ -40,6 +40,7 @@ class Product extends Model
         'meta_description',
         'meta_keywords',
         'order',
+        'times_purchased',
     ];
 
     protected $casts = [
@@ -113,6 +114,11 @@ class Product extends Model
     public function scopeMeat($query)
     {
         return $query->where('type', 'meat');
+    }
+
+    public function scopePopular($query, $limit = 15)
+    {
+        return $query->orderBy('times_purchased', 'desc')->limit($limit);
     }
 
     public function isLowStock(): bool

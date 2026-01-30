@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 // Public routes
 Route::post('/auth/send-otp', [AuthController::class, 'sendOtp']);
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/admin/login', [AuthController::class, 'adminLogin']);
+Route::post('/admin/verify-otp', [AuthController::class, 'adminVerifyOtp']);
 
 // Product routes (public)
 Route::get('/products', [ProductController::class, 'index']);

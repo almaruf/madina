@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Add shop_id to users
+        // Add shop_id to users (nullable for admin/super_admin)
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('shop_id')->default(1)->after('id')->constrained()->onDelete('cascade');
+            $table->foreignId('shop_id')->nullable()->after('id')->constrained()->onDelete('cascade');
         });
 
         // Add shop_id to products
