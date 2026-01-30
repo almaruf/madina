@@ -152,16 +152,21 @@
             try {
                 const response = await axios.post('/api/cart/validate', {
                     items: this.items
+                }, {
+                    timeout: 10000 // 10 second timeout
                 });
 
                 // Store validated items with details for later use
                 localStorage.setItem('cart_validated', JSON.stringify(response.data.items));
                 
+                console.log('Cart validation success:', response.data.items);
                 this.renderItems(response.data.items);
                 this.updateSummary(response.data.items);
                 document.getElementById('checkout-btn').disabled = false;
             } catch (error) {
                 console.error('Cart validation error:', error);
+                console.error('Error response:', error.response?.data);
+                console.error('Error status:', error.response?.status);
                 
                 if (error.response?.status === 422 && error.response?.data?.items) {
                     // Some items unavailable
@@ -222,14 +227,20 @@
 
         renderItems(items) {
             const container = document.getElementById('cart-items-container');
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p class="text-gray-600">Your cart is empty</p>';
+                return;
+            }
 
-            const itemsHtml = items.map(item => {
+            let itemsHtml = '';
+            items.forEach((item, idx) => {
                 const quantity = item.quantity || 1;
-                const price = item.price || 0;
-                const total = item.total || (price * quantity);
+                const price = parseFloat(item.price) || 0;
+                const total = parseFloat(item.total) || (price * quantity);
+                const itemKey = `${item.product_id}_${item.variation_id}`;
                 
-                return `
-                <div class="flex gap-4 pb-4 mb-4 border-b border-gray-200">
+                itemsHtml += `
+                <div class="flex gap-4 pb-4 mb-4 border-b border-gray-200" data-item-key="${itemKey}">
                     <!-- Product Image -->
                     <div class="w-20 h-20 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden">
                         ${item.image_url ? `<img src="${item.image_url}" alt="${item.product_name}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-2xl"></i></div>'}
@@ -246,23 +257,61 @@
 
                     <!-- Quantity Controls -->
                     <div class="flex items-center gap-2">
-                        <button onclick="cart.updateQuantity(${item.product_id}, ${item.variation_id}, ${quantity - 1})" class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">−</button>
-                        <input type="number" min="1" value="${quantity}" onchange="cart.updateQuantity(${item.product_id}, ${item.variation_id}, this.value)" class="w-12 text-center border border-gray-300 rounded px-2 py-1">
-                        <button onclick="cart.updateQuantity(${item.product_id}, ${item.variation_id}, ${quantity + 1})" class="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">+</button>
+                        <button class="btn-decrease bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">−</button>
+                        <input type="number" class="qty-input w-12 text-center border border-gray-300 rounded px-2 py-1" min="1" value="${quantity}" data-product-id="${item.product_id}" data-variation-id="${item.variation_id}">
+                        <button class="btn-increase bg-gray-200 px-2 py-1 rounded hover:bg-gray-300 transition">+</button>
                     </div>
 
                     <!-- Item Total -->
                     <div class="text-right">
                         <p class="font-bold text-lg">£${total.toFixed(2)}</p>
-                        <button onclick="cart.removeItem(${item.product_id}, ${item.variation_id})" class="text-red-600 hover:text-red-700 text-sm mt-2 font-medium">
+                        <button class="btn-remove text-red-600 hover:text-red-700 text-sm mt-2 font-medium" data-product-id="${item.product_id}" data-variation-id="${item.variation_id}">
                             <i class="fas fa-trash"></i> Remove
                         </button>
                     </div>
                 </div>
             `;
-            }).join('');
+            });
 
-            container.innerHTML = itemsHtml || '<p class="text-gray-600">Your cart is empty</p>';
+            container.innerHTML = itemsHtml;
+
+            // Attach event listeners
+            container.querySelectorAll('.btn-decrease').forEach((btn, idx) => {
+                btn.addEventListener('click', (e) => {
+                    const input = e.target.closest('div').querySelector('.qty-input');
+                    const productId = parseInt(input.dataset.productId);
+                    const variationId = parseInt(input.dataset.variationId);
+                    const newQty = Math.max(1, parseInt(input.value) - 1);
+                    this.updateQuantity(productId, variationId, newQty);
+                });
+            });
+
+            container.querySelectorAll('.btn-increase').forEach((btn, idx) => {
+                btn.addEventListener('click', (e) => {
+                    const input = e.target.closest('div').querySelector('.qty-input');
+                    const productId = parseInt(input.dataset.productId);
+                    const variationId = parseInt(input.dataset.variationId);
+                    const newQty = parseInt(input.value) + 1;
+                    this.updateQuantity(productId, variationId, newQty);
+                });
+            });
+
+            container.querySelectorAll('.qty-input').forEach((input) => {
+                input.addEventListener('change', (e) => {
+                    const productId = parseInt(input.dataset.productId);
+                    const variationId = parseInt(input.dataset.variationId);
+                    const newQty = Math.max(1, parseInt(input.value));
+                    this.updateQuantity(productId, variationId, newQty);
+                });
+            });
+
+            container.querySelectorAll('.btn-remove').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const productId = parseInt(btn.dataset.productId);
+                    const variationId = parseInt(btn.dataset.variationId);
+                    this.removeItem(productId, variationId);
+                });
+            });
         }
 
         updateSummary(items) {
