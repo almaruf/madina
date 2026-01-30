@@ -173,15 +173,27 @@
         async checkAuthAndInit() {
             // Set authorization token from localStorage
             const token = localStorage.getItem('token');
-            if (token) {
-                axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+            if (!token) {
+                // No token at all - show login prompt
+                console.log('No token found, showing login prompt');
+                document.getElementById('auth-check').classList.remove('hidden');
+                document.getElementById('checkout-content').classList.add('hidden');
+                return;
             }
+            
+            // Set token in axios
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 
-            // Check authentication first
+            // Check authentication
             try {
                 const response = await axios.get('/api/auth/user');
                 this.user = response.data;
+                console.log('User authenticated:', this.user);
             } catch (error) {
+                console.error('Authentication failed:', error.response?.status, error.response?.data);
+                // Token is invalid or expired - clear it and show login
+                localStorage.removeItem('token');
+                delete axios.defaults.headers.common['Authorization'];
                 this.user = null;
                 document.getElementById('auth-check').classList.remove('hidden');
                 document.getElementById('checkout-content').classList.add('hidden');
