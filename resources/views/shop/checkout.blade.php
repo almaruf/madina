@@ -3,7 +3,7 @@
 @section('title', 'Checkout')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Auth Check -->
     <div id="auth-check" class="hidden">
         <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-8 rounded-lg text-center">
@@ -26,19 +26,20 @@
             <h1 class="text-3xl font-bold mt-4">Checkout</h1>
         </div>
 
-    <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded mb-6 flex items-center gap-2">
-        <i class="fas fa-exclamation-circle"></i>
-        <span></span>
-    </div>
-    <div id="success-message" class="hidden bg-green-50 border border-green-200 text-green-700 p-4 rounded mb-6 flex items-center gap-2">
-        <i class="fas fa-check-circle"></i>
-        <span></span>
-    </div>
-
-    <form id="checkout-form" class="space-y-8">
-        <!-- User Addresses -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
+    <form id="checkout-form">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded flex items-center gap-2 mb-4">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span></span>
+                </div>
+                <div id="success-message" class="hidden bg-green-50 border border-green-200 text-green-700 p-4 rounded flex items-center gap-2 mb-4">
+                    <i class="fas fa-check-circle"></i>
+                    <span></span>
+                </div>
+                <!-- User Addresses -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
             
             <div id="user-addresses" class="space-y-3">
                 <p class="text-gray-600">Loading your addresses...</p>
@@ -66,6 +67,7 @@
                         <div>
                             <label class="block text-sm font-medium mb-1">City *</label>
                             <input type="text" id="new_city" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Postcode *</label>
                             <input type="text" id="new_postcode" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
@@ -85,20 +87,20 @@
             <button type="button" onclick="checkout.toggleNewAddressForm()" class="mt-4 text-green-600 hover:text-green-700 font-semibold">
                 + Add New Address
             </button>
-        </div>
+            </div>
 
-        <!-- Delivery Slot -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold mb-4">Delivery Slot *</h2>
+                <!-- Delivery Slot -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Delivery Slot *</h2>
             
             <div id="delivery-slots" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <p class="text-gray-600">Loading delivery slots...</p>
             </div>
-        </div>
+            </div>
 
-        <!-- Payment Method -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold mb-4">Payment Method *</h2>
+                <!-- Payment Method -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Payment Method *</h2>
             
             <div class="space-y-3">
                 <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-green-50">
@@ -110,43 +112,51 @@
                     <span class="ml-3">Card Payment</span>
                 </label>
             </div>
-        </div>
+                </div>
 
-        <!-- Order Summary -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-            
-            <div id="order-items" class="space-y-2 mb-4 pb-4 border-b border-green-200">
-                <!-- Items will be rendered here -->
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg flex items-center justify-center gap-2" id="submit-btn">
+                    <i class="fas fa-check"></i>
+                    Place Order
+                </button>
+
+                <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Cart
+                </a>
             </div>
 
-            <div class="space-y-2 text-lg">
-                <div class="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span id="summary-subtotal">£0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Delivery Fee:</span>
-                    <span id="summary-delivery-fee">£5.00</span>
-                </div>
-                <div class="flex justify-between font-bold text-xl">
-                    <span>Total:</span>
-                    <span id="summary-total">£0.00</span>
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                    <!-- Order Summary -->
+                    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+                    
+                    <div id="order-items" class="space-y-3 mb-6 border-b border-gray-200 pb-4">
+                        <!-- Items will be rendered here -->
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span id="summary-subtotal">£0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Delivery Fee:</span>
+                            <span id="summary-delivery-fee">£5.00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between text-xl font-bold mb-6">
+                        <span>Total:</span>
+                        <span id="summary-total">£0.00</span>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg flex items-center justify-center gap-2" id="submit-btn">
-            <i class="fas fa-check"></i>
-            Place Order
-        </button>
-
-        <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
-            <i class="fas fa-arrow-left"></i>
-            Back to Cart
-        </a>
     </form>
+    </div>
 </div>
 
 <script>
