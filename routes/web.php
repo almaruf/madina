@@ -62,6 +62,10 @@ Route::prefix('admin')->group(function () {
         return view('admin.users.show', ['id' => $id]);
     })->name('admin.users.show');
     
+    Route::get('/users/{id}/edit', function ($id) {
+        return view('admin.users.edit', ['id' => $id]);
+    })->name('admin.users.edit');
+    
     Route::get('/shops', function () {
         return view('admin.shops');
     })->name('admin.shops');

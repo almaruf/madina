@@ -120,12 +120,9 @@
         
         if (!isArchived) {
             actionsHtml.push(`
-                <button onclick="editUser()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <a href="/admin/users/${userId}/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-block">
                     Edit User
-                </button>
-                <button onclick="changeUserRole()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                    Change Role
-                </button>
+                </a>
                 <button onclick="archiveUser()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
                     Archive User
                 </button>
@@ -160,28 +157,7 @@
         `;
     }
 
-    function editUser() {
-        toast.info('Edit functionality coming soon!');
-    }
 
-    function changeUserRole() {
-        const newRole = currentUser.role === 'admin' ? 'customer' : 'admin';
-        const confirmMsg = `Are you sure you want to change this user's role to ${newRole}?`;
-        
-        if (!confirm(confirmMsg)) {
-            return;
-        }
-
-        axios.patch(`/api/admin/users/${userId}`, { role: newRole })
-            .then(response => {
-                toast.success('User role updated successfully!');
-                setTimeout(() => window.location.reload(), 1000);
-            })
-            .catch(error => {
-                console.error('Error updating role:', error);
-                toast.error(error.response?.data?.message || 'Failed to update role');
-            });
-    }
 
     async function archiveUser() {
         if (!confirm('Are you sure you want to archive this user?')) {

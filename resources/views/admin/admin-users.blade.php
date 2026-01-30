@@ -22,7 +22,6 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shop</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -87,7 +86,7 @@
             const tbody = document.querySelector('#admin-users-table tbody');
             
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No admin users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No admin users found</td></tr>';
                 return;
             }
             
@@ -100,21 +99,17 @@
                 };
                 
                 return `
-                    <tr>
+                    <tr onclick="window.location.href='/admin/users/${user.id}'" class="hover:bg-gray-50 cursor-pointer transition">
                         <td class="px-6 py-4 text-sm font-medium text-gray-900">${user.phone}</td>
                         <td class="px-6 py-4 text-sm text-gray-900">${user.name || 'N/A'}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">${user.email || 'N/A'}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 text-xs rounded ${roleColors[user.role] || 'bg-gray-100 text-gray-800'}">
-                                ${user.role.replace('_', ' ')}
+                                ${user.role.replace(/_/g, ' ')}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-900">${user.shop?.name || 'All Shops'}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">${new Date(user.created_at).toLocaleDateString()}</td>
-                        <td class="px-6 py-4 text-sm">
-                            <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                            ${user.role !== 'super_admin' ? `<button onclick="demoteUser(${user.id})" class="text-orange-600 hover:text-orange-900">Demote</button>` : ''}
-                        </td>
                     </tr>
                 `;
             }).join('');
@@ -154,23 +149,6 @@
             toast.error(error.response?.data?.message || 'Failed to create admin user');
         }
     });
-    
-    function editUser(id) {
-        toast.info(`Edit user ${id} - coming soon!`);
-    }
-    
-    async function demoteUser(id) {
-        if (!confirm('Are you sure you want to demote this user to customer?')) return;
-        
-        try {
-            await axios.patch(`/api/admin/users/${id}`, { role: 'customer' });
-            toast.success('User demoted successfully');
-            loadAdminUsers();
-        } catch (error) {
-            console.error('Error demoting user:', error);
-            toast.error('Failed to demote user');
-        }
-    }
     
     loadAdminUsers();
 </script>

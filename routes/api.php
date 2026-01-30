@@ -62,6 +62,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'destroyUser']);
     Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\AdminUserController::class, 'restoreUser']);
     Route::delete('users/{id}/force', [\App\Http\Controllers\Admin\AdminUserController::class, 'forceDeleteUser']);
+    
+    // User addresses management (admin only)
+    Route::get('users/{id}/addresses', [\App\Http\Controllers\Admin\AdminUserController::class, 'getUserAddresses']);
+    Route::post('users/{id}/addresses', [\App\Http\Controllers\Admin\AdminUserController::class, 'createUserAddress']);
+    Route::put('users/{userId}/addresses/{addressId}', [\App\Http\Controllers\Admin\AdminUserController::class, 'updateUserAddress']);
+    Route::delete('users/{userId}/addresses/{addressId}', [\App\Http\Controllers\Admin\AdminUserController::class, 'deleteUserAddress']);
 
     // Products
     Route::apiResource('products', \App\Http\Controllers\Admin\ProductController::class);

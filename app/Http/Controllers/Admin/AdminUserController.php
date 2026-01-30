@@ -27,10 +27,15 @@ class AdminUserController extends Controller
             $shopId = ShopContext::getShopId();
         }
 
-        $query = User::where('role', 'admin');
+        // Include all admin roles: super_admin, shop_admin, shop_manager, admin
+        $query = User::whereIn('role', ['super_admin', 'shop_admin', 'shop_manager', 'admin'])
+                     ->with('shop');
 
         if ($shopId) {
-            $query->where('shop_id', $shopId);
+            $query->where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'super_admin'); // Always include super_admin
+            });
         }
 
         return response()->json($query->paginate(20));
@@ -150,8 +155,16 @@ class AdminUserController extends Controller
      */
     public function showUser($id)
     {
+        $authUser = auth()->user();
+        
+        // Super admin can view any user
+        if ($authUser->role === 'super_admin') {
+            return response()->json(User::withTrashed()->with('shop')->findOrFail($id));
+        }
+        
+        // Regular admins can only view users in their shop
         $shopId = ShopContext::getShopId();
-        $user = User::withTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        $user = User::withTrashed()->with('shop')->where('shop_id', $shopId)->findOrFail($id);
         
         return response()->json($user);
     }
@@ -161,8 +174,22 @@ class AdminUserController extends Controller
      */
     public function updateUser(Request $request, $id)
     {
-        $shopId = ShopContext::getShopId();
-        $user = User::where('shop_id', $shopId)->findOrFail($id);
+        $authUser = auth()->user();
+        
+        // Find the user to update
+        if ($authUser->role === 'super_admin') {
+            $user = User::findOrFail($id);
+        } else {
+            $shopId = ShopContext::getShopId();
+            $user = User::where('shop_id', $shopId)->findOrFail($id);
+        }
+        
+        // Super admin can only be edited by themselves
+        if ($user->role === 'super_admin' && $authUser->id !== $user->id) {
+            return response()->json([
+                'message' => 'Super admin users can only be edited by themselves.'
+            ], 403);
+        }
 
         $validator = Validator::make($request->all(), [
             'role' => 'sometimes|in:customer,admin,shop_manager,shop_admin',
@@ -217,5 +244,139 @@ class AdminUserController extends Controller
         $user->forceDelete();
 
         return response()->json(['message' => 'User permanently deleted']);
+    }
+
+    /**
+     * Get all addresses for a specific user (admin only)
+     */
+    public function getUserAddresses($userId)
+    {
+        $authUser = auth()->user();
+        
+        // Super admin can view any user's addresses
+        if ($authUser->role === 'super_admin') {
+            $addresses = \App\Models\Address::where('user_id', $userId)->get();
+        } else {
+            // Regular admins can only view addresses for users in their shop
+            $shopId = ShopContext::getShopId();
+            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+            $addresses = \App\Models\Address::where('user_id', $userId)->get();
+        }
+        
+        return response()->json($addresses);
+    }
+
+    /**
+     * Create an address for a specific user (admin only)
+     */
+    public function createUserAddress(Request $request, $userId)
+    {
+        $authUser = auth()->user();
+        
+        // Verify admin has permission to manage this user
+        if ($authUser->role === 'super_admin') {
+            $user = User::findOrFail($userId);
+        } else {
+            $shopId = ShopContext::getShopId();
+            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:255',
+            'postcode' => 'required|string|max:20',
+            'country' => 'required|string|max:255',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // If this is default, unset other defaults for this user
+        if ($request->is_default) {
+            \App\Models\Address::where('user_id', $userId)
+                ->update(['is_default' => false]);
+        }
+
+        $address = \App\Models\Address::create(array_merge(
+            $request->all(),
+            [
+                'shop_id' => $user->shop_id,
+                'user_id' => $userId
+            ]
+        ));
+
+        return response()->json($address, 201);
+    }
+
+    /**
+     * Update a user's address (admin only)
+     */
+    public function updateUserAddress(Request $request, $userId, $addressId)
+    {
+        $authUser = auth()->user();
+        
+        // Verify admin has permission to manage this user
+        if ($authUser->role === 'super_admin') {
+            $user = User::findOrFail($userId);
+        } else {
+            $shopId = ShopContext::getShopId();
+            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+        }
+
+        $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:255',
+            'postcode' => 'required|string|max:20',
+            'country' => 'required|string|max:255',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // If this is default, unset other defaults for this user
+        if ($request->is_default) {
+            \App\Models\Address::where('user_id', $userId)
+                ->where('id', '!=', $addressId)
+                ->update(['is_default' => false]);
+        }
+
+        $address->update($request->all());
+
+        return response()->json($address);
+    }
+
+    /**
+     * Delete a user's address (admin only)
+     */
+    public function deleteUserAddress($userId, $addressId)
+    {
+        $authUser = auth()->user();
+        
+        // Verify admin has permission to manage this user
+        if ($authUser->role === 'super_admin') {
+            $user = User::findOrFail($userId);
+        } else {
+            $shopId = ShopContext::getShopId();
+            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+        }
+
+        $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);
+        $address->delete();
+
+        return response()->json(['message' => 'Address deleted successfully']);
     }
 }
