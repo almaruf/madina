@@ -5,9 +5,9 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-3xl font-bold">Categories</h2>
-    <button onclick="showCreateModal()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
-        + Add Category
-    </button>
+    <a href="/admin/categories/create" class="nav-link flex items-center gap-2 px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white font-semibold transition">
+        <i class="fas fa-plus"></i> Add Category
+    </a>
 </div>
 
 <!-- Tabs -->

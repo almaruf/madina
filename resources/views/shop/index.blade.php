@@ -44,7 +44,7 @@
                         <div class="p-8 text-white max-w-2xl">
                             @if($banner->title)
                             <h2 class="text-4xl font-bold mb-4">{{ $banner->title }}</h2>
-                            @endif
+                            @endif                                    
                             @if($banner->description)
                             <p class="text-lg mb-6">{{ $banner->description }}</p>
                             @endif
@@ -110,6 +110,13 @@
                 </a>
                 @endforeach
             </div>
+            @if($otherCategories->count() > 0)
+            <div class="mt-6 flex flex-wrap gap-3">
+                @foreach($otherCategories as $cat)
+                    <a href="/shop/products?category={{ $cat->slug }}" class="inline-block bg-white border border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition">{{ $cat->name }}</a>
+                @endforeach
+            </div>
+            @endif
         </section>
         @endif
 
@@ -166,6 +173,15 @@
                             <p class="text-base font-bold text-green-600">
                                 £{{ number_format($product->variations->first()->price, 2) }}
                             </p>
+                            <div class="mt-2">
+                                <button class="add-to-cart-btn bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-4 py-2 rounded w-full"
+                                    data-product-id="{{ $product->id }}"
+                                    data-product-name="{{ $product->name }}"
+                                    data-has-variations="{{ $product->variations->count() > 1 ? '1' : '0' }}"
+                                    data-variations='@json($product->variations->map(fn($v) => ["id"=>$v->id,"name"=>$v->name,"price"=>$v->price]))'>
+                                    Add to Cart
+                                </button>
+                            </div>
                             @endif
                         </div>
                     </a>
@@ -207,6 +223,72 @@
     </footer>
 
     <script>
+                // Add to Cart logic for Most Popular section
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            const productId = parseInt(this.dataset.productId);
+                            const hasVariations = this.dataset.hasVariations === '1';
+                            const variations = JSON.parse(this.dataset.variations);
+                            if (hasVariations) {
+                                // Show modal for variation selection
+                                openVariationModal(productId, variations);
+                            } else {
+                                // Add first variation to cart
+                                const variationId = variations[0].id;
+                                addToCart(productId, variationId, 1);
+                            }
+                        });
+                    });
+                });
+
+                function openVariationModal(productId, variations) {
+                    const modal = document.getElementById('variation-modal');
+                    const optionsDiv = document.getElementById('variation-modal-options');
+                    optionsDiv.innerHTML = '';
+                    variations.forEach(v => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-left px-4 py-3 border rounded mb-2 flex justify-between items-center bg-white hover:bg-green-50';
+                        btn.textContent = v.name + ' - £' + parseFloat(v.price).toFixed(2);
+                        btn.onclick = function() {
+                            document.getElementById('variation-add-btn').dataset.productId = productId;
+                            document.getElementById('variation-add-btn').dataset.variationId = v.id;
+                            document.getElementById('variation-qty').value = 1;
+                        };
+                        optionsDiv.appendChild(btn);
+                    });
+                    // Default to first variation
+                    if (variations.length > 0) {
+                        document.getElementById('variation-add-btn').dataset.productId = productId;
+                        document.getElementById('variation-add-btn').dataset.variationId = variations[0].id;
+                        document.getElementById('variation-qty').value = 1;
+                    }
+                    modal.classList.remove('hidden');
+                }
+
+                function closeVariationModal() {
+                    document.getElementById('variation-modal').classList.add('hidden');
+                }
+
+                function confirmVariationAdd() {
+                    const productId = parseInt(document.getElementById('variation-add-btn').dataset.productId);
+                    const variationId = parseInt(document.getElementById('variation-add-btn').dataset.variationId);
+                    const qty = parseInt(document.getElementById('variation-qty').value) || 1;
+                    addToCart(productId, variationId, qty);
+                    closeVariationModal();
+                }
+
+                function addToCart(productId, variationId, quantity) {
+                    const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+                    const existing = cart.find(item => item.product_id === productId && item.variation_id === variationId);
+                    if (existing) {
+                        existing.quantity += quantity;
+                    } else {
+                        cart.push({ product_id: productId, variation_id: variationId, quantity });
+                    }
+                    localStorage.setItem('shopping_cart', JSON.stringify(cart));
+                    updateCartCount();
+                }
         // --- Cart Count ---
         function updateCartCount() {
             const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');

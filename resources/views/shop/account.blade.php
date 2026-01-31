@@ -18,11 +18,6 @@
 
     <div id="account-content" class="hidden">
         <!-- Page Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold">My Account</h1>
-            <p class="text-gray-600 mt-1">Manage your contact details, addresses, and orders.</p>
-        </div>
-
         <div id="account-message" class="hidden p-4 rounded mb-6 flex items-center gap-2">
             <i class="fas"></i>
             <span></span>
@@ -90,6 +85,14 @@
                                 <input type="text" id="address-label" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Home, Work">
                             </div>
                             <div>
+                                <label class="block text-sm font-medium mb-1">Postcode *</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="address-postcode" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g. SW1A 1AA">
+                                    <button type="button" id="postcode-lookup-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded">Find Address</button>
+                                </div>
+                                <select id="address-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 mt-2 hidden"></select>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium mb-1">Address Line 1 *</label>
                                 <input type="text" id="address-line-1" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                             </div>
@@ -97,7 +100,7 @@
                                 <label class="block text-sm font-medium mb-1">Address Line 2</label>
                                 <input type="text" id="address-line-2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium mb-1">City *</label>
                                     <input type="text" id="address-city" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
@@ -106,14 +109,6 @@
                                     <label class="block text-sm font-medium mb-1">County</label>
                                     <input type="text" id="address-county" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Postcode *</label>
-                                    <input type="text" id="address-postcode" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Phone</label>
-                                <input type="text" id="address-phone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-1">Delivery Instructions</label>
@@ -141,6 +136,22 @@
             </div>
 
             <div class="lg:col-span-1 space-y-8">
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">My Account</h2>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p class="text-gray-600 mt-1">Manage your contact details, addresses, and orders.</p>
+                        <div class="flex justify-between">
+                            <span>Member since</span>
+                            <span id="member-since">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Orders</span>
+                            <span id="order-count">0</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
                     <div class="space-y-3">
@@ -153,25 +164,29 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold mb-4">Account Info</h2>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <div class="flex justify-between">
-                            <span>Member since</span>
-                            <span id="member-since">-</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Orders</span>
-                            <span id="order-count">0</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // Postcode.io integration helpers
+    async function fetchAddressesByPostcode(postcode) {
+        // Replace with your getaddress.io API key
+        const apiKey = 'YOUR_GETADDRESS_API_KEY';
+        const cleaned = postcode.replace(/\s+/g, '');
+        const url = `https://api.getaddress.io/find/${encodeURIComponent(cleaned)}?api-key=${apiKey}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            const data = await response.json();
+            if (!data.addresses) return null;
+            return data.addresses;
+        } catch (e) {
+            return null;
+        }
+    }
+
     class AccountPage {
         constructor() {
             this.user = null;
@@ -297,6 +312,38 @@
         }
 
         bindAddressForm() {
+                        // Postcode lookup logic
+                        const postcodeInput = document.getElementById('address-postcode');
+                        const lookupBtn = document.getElementById('postcode-lookup-btn');
+                        const addressSelect = document.getElementById('address-select');
+                        lookupBtn.addEventListener('click', async () => {
+                            const postcode = postcodeInput.value.trim();
+                            if (!postcode) return;
+                            lookupBtn.disabled = true;
+                            lookupBtn.textContent = 'Searching...';
+                            addressSelect.innerHTML = '';
+                            addressSelect.classList.add('hidden');
+                            const addresses = await fetchAddressesByPostcode(postcode);
+                            lookupBtn.disabled = false;
+                            lookupBtn.textContent = 'Find Address';
+                            if (!addresses || !addresses.length) {
+                                addressSelect.innerHTML = '<option>No addresses found</option>';
+                                addressSelect.classList.remove('hidden');
+                                return;
+                            }
+                            addressSelect.innerHTML = '<option value="">Select your address</option>' + addresses.map(addr => `<option value="${addr}">${addr}</option>`).join('');
+                            addressSelect.classList.remove('hidden');
+                        });
+                        addressSelect.addEventListener('change', () => {
+                            const val = addressSelect.value;
+                            if (!val) return;
+                            // UK addresses: [line1, line2, line3, city, county, postcode]
+                            const parts = val.split(',').map(x => x.trim());
+                            document.getElementById('address-line-1').value = parts[0] || '';
+                            document.getElementById('address-line-2').value = parts[1] || '';
+                            document.getElementById('address-city').value = parts[3] || '';
+                            document.getElementById('address-county').value = parts[4] || '';
+                        });
             document.getElementById('toggle-address-form').addEventListener('click', () => {
                 this.activateTab('addresses');
                 document.getElementById('address-form-wrapper').classList.toggle('hidden');
@@ -317,7 +364,6 @@
                     city: document.getElementById('address-city').value.trim(),
                     county: document.getElementById('address-county').value.trim() || null,
                     postcode: document.getElementById('address-postcode').value.trim(),
-                    phone: document.getElementById('address-phone').value.trim() || null,
                     delivery_instructions: document.getElementById('address-instructions').value.trim() || null,
                     is_default: document.getElementById('address-default').checked
                 };
@@ -359,7 +405,6 @@
             document.getElementById('address-city').value = address.city || '';
             document.getElementById('address-county').value = address.county || '';
             document.getElementById('address-postcode').value = address.postcode || '';
-            document.getElementById('address-phone').value = address.phone || '';
             document.getElementById('address-instructions').value = address.delivery_instructions || '';
             document.getElementById('address-default').checked = !!address.is_default;
             document.getElementById('address-form-title').textContent = 'Edit Address';
@@ -400,7 +445,6 @@
                     city: address.city,
                     county: address.county || null,
                     postcode: address.postcode,
-                    phone: address.phone || null,
                     delivery_instructions: address.delivery_instructions || null,
                     is_default: true
                 });
@@ -433,7 +477,6 @@
                                 <div class="text-sm text-gray-600 mt-1">${address.address_line_1}</div>
                                 ${address.address_line_2 ? `<div class="text-sm text-gray-600">${address.address_line_2}</div>` : ''}
                                 <div class="text-sm text-gray-600">${address.city}${address.county ? ', ' + address.county : ''} ${address.postcode}</div>
-                                ${address.phone ? `<div class="text-sm text-gray-500">Phone: ${address.phone}</div>` : ''}
                                 ${address.delivery_instructions ? `<div class="text-xs text-gray-500 mt-1">${address.delivery_instructions}</div>` : ''}
                             </div>
                             <div class="flex items-center gap-3">

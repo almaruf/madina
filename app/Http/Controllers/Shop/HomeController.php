@@ -18,6 +18,7 @@ class HomeController extends Controller
             ->active()
             ->get();
 
+
         $featuredCategories = Category::where('shop_id', $shopId)
             ->featured()
             ->active()
@@ -25,6 +26,12 @@ class HomeController extends Controller
             ->with('children')
             ->limit(3)
             ->get();
+
+        $otherCategories = Category::where('shop_id', $shopId)
+            ->active()
+            ->root()
+            ->whereNotIn('id', $featuredCategories->pluck('id')->all())
+            ->orderBy('order')->get();
 
         $featuredProducts = Product::where('shop_id', $shopId)
             ->featured()
@@ -41,6 +48,7 @@ class HomeController extends Controller
         return view('shop.index', compact(
             'banners',
             'featuredCategories',
+            'otherCategories',
             'featuredProducts',
             'popularProducts'
         ));
