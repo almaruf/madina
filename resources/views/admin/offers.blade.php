@@ -15,10 +15,7 @@
     <!-- Filter Tabs -->
     <div class="mb-6 border-b border-gray-200">
         <nav class="-mb-px flex space-x-8">
-            <button onclick="filterOffers('all')" class="filter-tab active border-b-2 border-green-600 py-4 px-1 text-sm font-medium text-green-600">
-                All Offers
-            </button>
-            <button onclick="filterOffers('active')" class="filter-tab border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            <button onclick="filterOffers('active')" class="filter-tab active border-b-2 border-green-600 py-4 px-1 text-sm font-medium text-green-600">
                 Active
             </button>
             <button onclick="filterOffers('inactive')" class="filter-tab border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
@@ -95,7 +92,7 @@
 </div>
 
 <script>
-let currentFilter = 'all';
+let currentFilter = 'active';
 let allOffers = [];
 
 async function loadOffers() {

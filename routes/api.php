@@ -20,6 +20,7 @@ Route::get('/categories', [ProductController::class, 'categories']);
 
 // Offers (public)
 Route::get('/offers/active', [ProductController::class, 'activeOffers']);
+Route::get('/offers/{id}', [ProductController::class, 'showOffer']);
 
 // Delivery slots (public)
 Route::get('/delivery-slots', [DeliverySlotController::class, 'index']);

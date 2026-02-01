@@ -105,83 +105,98 @@
                 <i class="fas fa-tags text-red-600"></i>
                 Special Offers
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div id="offers-grid" class="grid gap-6">
                 @foreach($activeOffers as $offer)
-                    @foreach($offer->products->take(4) as $product)
-                    <div class="bg-white rounded-lg shadow hover:shadow-xl transition relative overflow-hidden">
-                        <!-- Offer Badge -->
-                        @if($offer->badge_text)
-                        <div class="absolute top-2 right-2 z-10 px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg" 
-                             style="background-color: {{ $offer->badge_color ?? '#DC2626' }};">
-                            {{ $offer->badge_text }}
+                <a href="/offers/{{ $offer->id }}" class="bg-white rounded-lg shadow hover:shadow-xl transition overflow-hidden relative group">
+                    <!-- Offer Badge -->
+                    @if($offer->badge_text)
+                    <div class="absolute top-3 right-3 z-10 px-3 py-1 rounded-full text-white text-sm font-bold shadow-lg" 
+                         style="background-color: {{ $offer->badge_color ?? '#DC2626' }};">
+                        {{ $offer->badge_text }}
+                    </div>
+                    @endif
+
+                    <!-- Offer Cover Image (first product image) -->
+                    <div class="aspect-video bg-gray-200 overflow-hidden relative">
+                        @php
+                            $firstProduct = $offer->products->first();
+                            $coverImage = $firstProduct?->primaryImage?->url;
+                        @endphp
+                        @if($coverImage)
+                        <img src="{{ $coverImage }}" alt="{{ $offer->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        @else
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-100 to-red-50">
+                            <i class="fas fa-tag text-red-400 text-4xl"></i>
                         </div>
                         @endif
                         
-                        <a href="/products/{{ $product->slug }}" class="block">
-                            <div class="aspect-square bg-gray-200 rounded-t-lg overflow-hidden">
-                                @if($product->primaryImage)
-                                <img src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover hover:scale-110 transition duration-300">
-                                @else
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <i class="fas fa-image text-gray-400 text-4xl"></i>
-                                </div>
-                                @endif
-                            </div>
-                            <div class="p-4">
-                                <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ $product->name }}</h3>
-                                
-                                @if($product->default_variation)
-                                <div class="mb-3">
-                                    @php
-                                        $originalPrice = $product->default_variation->price;
-                                        $discountedPrice = $offer->getDiscountedPrice($originalPrice, 1);
-                                    @endphp
-                                    
-                                    @if($discountedPrice < $originalPrice)
-                                    <div class="flex items-center gap-2">
-                                        <p class="text-xl font-bold text-red-600">
-                                            £{{ number_format($discountedPrice, 2) }}
-                                        </p>
-                                        <p class="text-sm text-gray-500 line-through">
-                                            £{{ number_format($originalPrice, 2) }}
-                                        </p>
-                                    </div>
-                                    <p class="text-xs text-green-600 font-semibold mt-1">
-                                        Save £{{ number_format($originalPrice - $discountedPrice, 2) }}
-                                    </p>
-                                    @else
-                                    <p class="text-xl font-bold text-green-600">
-                                        £{{ number_format($originalPrice, 2) }}
-                                    </p>
-                                    @endif
-                                </div>
-                                @endif
-                                
-                                <!-- Offer Description -->
-                                @if($offer->description)
-                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $offer->description }}</p>
-                                @endif
-                            </div>
-                        </a>
+                        <!-- Overlay -->
+                        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition duration-300"></div>
+                    </div>
+
+                    <!-- Offer Details -->
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $offer->name }}</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $offer->description ?: 'Special offer on selected products' }}</p>
                         
-                        <div class="px-4 pb-4">
-                            <button onclick="addToCartFromCard({{ $product->id }}, this)" 
-                                    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2">
-                                <i class="fas fa-shopping-cart"></i>
-                                Add to Cart
-                            </button>
+                        <div class="mb-4 pb-4 border-b border-gray-200">
+                            <p class="text-sm text-gray-600 mb-1">Discount</p>
+                            @if($offer->type === 'percentage_discount')
+                            <p class="text-2xl font-bold text-red-600">{{ $offer->discount_value }}% OFF</p>
+                            @elseif($offer->type === 'fixed_discount')
+                            <p class="text-2xl font-bold text-red-600">£{{ number_format($offer->discount_value, 2) }} OFF</p>
+                            @elseif($offer->type === 'bxgy_free')
+                            <p class="text-2xl font-bold text-red-600">Buy {{ $offer->buy_quantity }} Get {{ $offer->get_quantity }} Free</p>
+                            @elseif($offer->type === 'multibuy')
+                            <p class="text-2xl font-bold text-red-600">{{ $offer->buy_quantity }} for £{{ number_format($offer->bundle_price, 2) }}</p>
+                            @else
+                            <p class="text-2xl font-bold text-red-600">Special Deal</p>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-600">Products</p>
+                                <p class="text-lg font-semibold text-gray-900">{{ $offer->products->count() }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Valid Until</p>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    @if($offer->ends_at)
+                                        {{ $offer->ends_at->format('M d') }}
+                                    @else
+                                        Ongoing
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-center text-green-600 font-semibold group-hover:text-green-700">View Offer →</p>
                         </div>
                     </div>
-                    @endforeach
+                </a>
                 @endforeach
             </div>
-            
-            <!-- View All Offers Button -->
-            <div class="text-center mt-8">
-                <a href="/shop/products?offers=1" class="inline-block bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold px-8 py-3 rounded-lg transition shadow-md hover:shadow-lg">
-                    View All Offers
-                </a>
-            </div>
+
+            <script>
+                // Make offer grid responsive to number of offers
+                const offersGrid = document.getElementById('offers-grid');
+                const offerCount = offersGrid.children.length;
+                let gridClass = 'grid-cols-1';
+                
+                if (offerCount === 1) {
+                    gridClass = 'md:grid-cols-1';
+                } else if (offerCount === 2) {
+                    gridClass = 'md:grid-cols-2';
+                } else if (offerCount <= 4) {
+                    gridClass = 'md:grid-cols-2 lg:grid-cols-4';
+                } else {
+                    gridClass = 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+                }
+                
+                offersGrid.className = 'grid gap-6 ' + gridClass;
+            </script>
         </section>
         @endif
 
