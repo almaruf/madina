@@ -161,6 +161,10 @@
                         <a href="/cart" class="block w-full text-center border border-green-600 text-green-600 hover:bg-green-50 py-2 rounded-lg font-semibold">
                             View Cart
                         </a>
+                        <button id="logout-btn-account" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
                     </div>
                 </div>
 
@@ -530,5 +534,39 @@
     }
 
     const accountPage = new AccountPage();
+
+    // Logout button handlers
+    const logoutBtnAccount = document.getElementById('logout-btn-account');
+    
+    function checkAuthStatusAccount() {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            if (logoutBtnAccount) logoutBtnAccount.classList.remove('hidden');
+        } else {
+            if (logoutBtnAccount) logoutBtnAccount.classList.add('hidden');
+        }
+    }
+
+    async function handleLogout(e) {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('auth_token');
+            await axios.post('/api/auth/logout', {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('shopping_cart');
+        window.location.href = '/';
+    }
+
+    if (logoutBtnAccount) {
+        logoutBtnAccount.addEventListener('click', handleLogout);
+    }
+
+    checkAuthStatusAccount();
+    window.addEventListener('storage', checkAuthStatusAccount);
 </script>
 @endsection

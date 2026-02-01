@@ -34,6 +34,9 @@
                             0
                         </span>
                     </a>
+                    <button id="logout-btn" class="hidden text-gray-700 hover:text-red-600 font-medium transition" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -83,9 +86,45 @@
             }
         }
         
+        // Check auth status
+        function checkAuthStatus() {
+            const token = localStorage.getItem('auth_token');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            if (token && logoutBtn) {
+                logoutBtn.classList.remove('hidden');
+            } else if (logoutBtn) {
+                logoutBtn.classList.add('hidden');
+            }
+        }
+        
+        // Logout function
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const token = localStorage.getItem('auth_token');
+                    await axios.post('/api/auth/logout', {}, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('shopping_cart');
+                checkAuthStatus();
+                window.location.href = '/';
+            });
+        }
+        
         // Update on page load and when storage changes
         updateCartCount();
-        window.addEventListener('storage', updateCartCount);
+        checkAuthStatus();
+        window.addEventListener('storage', () => {
+            updateCartCount();
+            checkAuthStatus();
+        });
     </script>
 </body>
 </html>

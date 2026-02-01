@@ -3,19 +3,16 @@
 @section('title', 'Shop - ' . app(\App\Services\ShopConfigService::class)->name())
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <!-- Page Header -->
+<div class="w-full px-4 py-8">
+    <!-- Categories Filter (as buttons) -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Shop All Products</h1>
-        <p class="text-gray-600">Browse our full range of fresh products</p>
+        <div id="categories-filter" class="flex flex-wrap gap-2">
+            <button class="category-btn category-btn-all bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition" data-id="">All Categories</button>
+        </div>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-6 flex flex-wrap gap-4">
-        <select id="category-filter" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            <option value="">All Categories</option>
-        </select>
-        
+    <!-- Sort and Search -->
+    <div class="mb-6 flex flex-wrap gap-4 max-w-7xl mx-auto">
         <select id="sort-filter" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
             <option value="featured">Featured</option>
             <option value="name_asc">Name (A-Z)</option>
@@ -34,7 +31,7 @@
     </div>
 
     <!-- Products Grid -->
-    <div id="products-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div id="products-grid" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         <!-- Products will be loaded here -->
     </div>
 
@@ -107,13 +104,67 @@
     }
 
     function renderCategories() {
-        const select = document.getElementById('category-filter');
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            select.appendChild(option);
+        const container = document.getElementById('categories-filter');
+        const allCategoriesBtn = container.querySelector('.category-btn-all');
+        
+        // Add click handler for "All Categories" button
+        allCategoriesBtn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('bg-green-600', 'text-white');
+                btn.classList.add('border', 'border-gray-300', 'text-gray-900', 'hover:bg-green-50');
+            });
+            allCategoriesBtn.classList.add('bg-green-600', 'text-white');
+            allCategoriesBtn.classList.remove('border', 'border-gray-300', 'text-gray-900', 'hover:bg-green-50');
+            currentFilters.category = '';
+            renderProducts();
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.delete('category');
+            window.history.pushState({}, '', url);
         });
+        
+        const buttons = [allCategoriesBtn];
+        
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.className = 'category-btn border border-gray-300 text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-green-50 hover:border-green-600 transition';
+            button.textContent = category.name;
+            button.dataset.id = category.id;
+            button.dataset.slug = category.slug;
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('bg-green-600', 'text-white');
+                    btn.classList.add('border', 'border-gray-300', 'text-gray-900', 'hover:bg-green-50');
+                });
+                button.classList.add('bg-green-600', 'text-white');
+                button.classList.remove('border', 'border-gray-300', 'text-gray-900', 'hover:bg-green-50');
+                currentFilters.category = category.id;
+                renderProducts();
+                // Update URL
+                const url = new URL(window.location);
+                url.searchParams.set('category', category.slug);
+                window.history.pushState({}, '', url);
+            });
+            buttons.push(button);
+        });
+        
+        container.innerHTML = '';
+        buttons.forEach(button => container.appendChild(button));
+        
+        // Check URL for category slug and set active
+        const params = new URLSearchParams(window.location.search);
+        const categorySlug = params.get('category');
+        if (categorySlug) {
+            const matchingCategory = categories.find(cat => cat.slug === categorySlug);
+            if (matchingCategory) {
+                currentFilters.category = matchingCategory.id;
+                const categoryBtn = document.querySelector(`[data-slug="${categorySlug}"]`);
+                if (categoryBtn) {
+                    categoryBtn.classList.add('bg-green-600', 'text-white');
+                    categoryBtn.classList.remove('border', 'border-gray-300', 'text-gray-900', 'hover:bg-green-50');
+                }
+            }
+        }
     }
 
     function renderProducts() {
@@ -168,23 +219,20 @@
             const imageUrl = product.primary_image?.url || product.images?.[0]?.url || '/images/placeholder.jpg';
             
             return `
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer" onclick="window.location.href='/products/${product.slug}'">
+                <div class="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer h-full flex flex-col" onclick="window.location.href='/products/${product.slug}'">
                     <div class="aspect-square overflow-hidden rounded-t-lg bg-gray-100">
                         <img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover">
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-900 mb-1 line-clamp-2">${product.name}</h3>
-                        ${product.description ? `<p class="text-sm text-gray-600 mb-2 line-clamp-2">${product.description}</p>` : ''}
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-lg font-bold text-green-600">£${minPrice.toFixed(2)}</span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="event.stopPropagation(); addToCartFromCard(${product.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm">
-                                    Add to Cart
-                                </button>
-                                <button onclick="event.stopPropagation(); viewProduct('${product.slug}')" class="border border-green-600 text-green-600 hover:bg-green-50 px-3 py-2 rounded-lg text-sm">
-                                    View
-                                </button>
-                            </div>
+                    <div class="p-2 flex flex-col flex-grow">
+                        <h3 class="font-semibold text-gray-900 mb-1 line-clamp-1 text-sm">${product.name}</h3>
+                        <span class="text-sm font-bold text-green-600 mb-2">£${minPrice.toFixed(2)}</span>
+                        <div class="flex items-center gap-1 mt-auto">
+                            <button onclick="event.stopPropagation(); addToCartFromCard(${product.id})" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs flex-1">
+                                Add
+                            </button>
+                            <button onclick="event.stopPropagation(); viewProduct('${product.slug}')" class="border border-green-600 text-green-600 hover:bg-green-50 px-2 py-1 rounded text-xs">
+                                View
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -290,11 +338,6 @@
     }
 
     // Event listeners
-    document.getElementById('category-filter').addEventListener('change', (e) => {
-        currentFilters.category = e.target.value;
-        renderProducts();
-    });
-
     document.getElementById('sort-filter').addEventListener('change', (e) => {
         currentFilters.sort = e.target.value;
         renderProducts();
