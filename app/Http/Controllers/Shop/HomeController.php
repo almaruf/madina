@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ShopBanner;
+use App\Models\Offer;
 use App\Services\ShopContext;
 
 class HomeController extends Controller
@@ -45,12 +46,26 @@ class HomeController extends Controller
             ->with(['primaryImage', 'variations', 'categories'])
             ->get();
 
+        // Get active offers with products
+        $activeOffers = Offer::where('shop_id', $shopId)
+            ->active()
+            ->valid()
+            ->with(['products' => function ($query) {
+                $query->active()
+                    ->with(['primaryImage', 'variations'])
+                    ->limit(20);
+            }])
+            ->orderBy('priority', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('shop.index', compact(
             'banners',
             'featuredCategories',
             'otherCategories',
             'featuredProducts',
-            'popularProducts'
+            'popularProducts',
+            'activeOffers'
         ));
     }
 }

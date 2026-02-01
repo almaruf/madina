@@ -91,6 +91,30 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class, 'offer_product')
+            ->withTimestamps();
+    }
+
+    public function activeOffers()
+    {
+        return $this->offers()
+            ->active()
+            ->valid()
+            ->orderBy('priority', 'desc');
+    }
+
+    public function getBestOffer()
+    {
+        return $this->activeOffers()->first();
+    }
+
+    public function hasActiveOffer()
+    {
+        return $this->activeOffers()->exists();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

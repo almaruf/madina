@@ -98,6 +98,93 @@
         </section>
         @endif
 
+        <!-- Offers Section -->
+        @if($activeOffers && $activeOffers->count() > 0)
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                <i class="fas fa-tags text-red-600"></i>
+                Special Offers
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach($activeOffers as $offer)
+                    @foreach($offer->products->take(4) as $product)
+                    <div class="bg-white rounded-lg shadow hover:shadow-xl transition relative overflow-hidden">
+                        <!-- Offer Badge -->
+                        @if($offer->badge_text)
+                        <div class="absolute top-2 right-2 z-10 px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg" 
+                             style="background-color: {{ $offer->badge_color ?? '#DC2626' }};">
+                            {{ $offer->badge_text }}
+                        </div>
+                        @endif
+                        
+                        <a href="/products/{{ $product->slug }}" class="block">
+                            <div class="aspect-square bg-gray-200 rounded-t-lg overflow-hidden">
+                                @if($product->primaryImage)
+                                <img src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover hover:scale-110 transition duration-300">
+                                @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400 text-4xl"></i>
+                                </div>
+                                @endif
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ $product->name }}</h3>
+                                
+                                @if($product->default_variation)
+                                <div class="mb-3">
+                                    @php
+                                        $originalPrice = $product->default_variation->price;
+                                        $discountedPrice = $offer->getDiscountedPrice($originalPrice, 1);
+                                    @endphp
+                                    
+                                    @if($discountedPrice < $originalPrice)
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-xl font-bold text-red-600">
+                                            £{{ number_format($discountedPrice, 2) }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 line-through">
+                                            £{{ number_format($originalPrice, 2) }}
+                                        </p>
+                                    </div>
+                                    <p class="text-xs text-green-600 font-semibold mt-1">
+                                        Save £{{ number_format($originalPrice - $discountedPrice, 2) }}
+                                    </p>
+                                    @else
+                                    <p class="text-xl font-bold text-green-600">
+                                        £{{ number_format($originalPrice, 2) }}
+                                    </p>
+                                    @endif
+                                </div>
+                                @endif
+                                
+                                <!-- Offer Description -->
+                                @if($offer->description)
+                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $offer->description }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        
+                        <div class="px-4 pb-4">
+                            <button onclick="addToCartFromCard({{ $product->id }}, this)" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    @endforeach
+                @endforeach
+            </div>
+            
+            <!-- View All Offers Button -->
+            <div class="text-center mt-8">
+                <a href="/shop/products?offers=1" class="inline-block bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold px-8 py-3 rounded-lg transition shadow-md hover:shadow-lg">
+                    View All Offers
+                </a>
+            </div>
+        </section>
+        @endif
+
         <!-- Featured Categories -->
         @if($featuredCategories->count() > 0)
         <section class="mb-12">

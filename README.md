@@ -322,6 +322,12 @@ chmod -R 775 storage bootstrap/cache
 
 ## Development Notes
 
+### 🔴 Common Issue: 401 Authentication Errors
+
+If you experience 401 errors when making API calls from admin pages, see [AUTH_HEADERS_ISSUE.md](AUTH_HEADERS_ISSUE.md) for the complete solution. 
+
+**TL;DR**: Every admin page must explicitly configure axios with the auth token at the start of its script section.
+
 ### Creating an Admin User
 
 ```php

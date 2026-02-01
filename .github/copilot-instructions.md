@@ -138,6 +138,30 @@ POST /api/admin/shops
 
 ## Architecture Principles
 
+### 0. 🔴 CRITICAL: Admin Page Authentication
+**ALWAYS READ THIS FIRST when creating admin pages that make API calls**
+
+Every admin page that makes API calls MUST include explicit axios authentication configuration. This is a RECURRING issue.
+
+**Required code block at START of every admin page `<script>` section:**
+```javascript
+// CRITICAL: Ensure axios is configured with auth token
+const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+if (!token) {
+    console.error('No auth token found');
+    window.location.href = '/admin/login';
+} else {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axios.defaults.headers.common['Accept'] = 'application/json';
+    axios.defaults.headers.common['Content-Type'] = 'application/json';
+    console.log('Auth token configured for axios:', token.substring(0, 20) + '...');
+}
+```
+
+**See `/AUTH_HEADERS_ISSUE.md` for complete details and troubleshooting.**
+
+If you get 401 errors on admin API calls, you forgot this block. Add it BEFORE any axios calls.
+
 ### 1. Authentication & Authorization
 - **Phone-based authentication only** - no passwords
 - OTP verification via Twilio SMS

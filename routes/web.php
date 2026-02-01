@@ -67,6 +67,18 @@ Route::prefix('admin')->group(function () {
         return view('admin.categories.edit', ['slug' => $slug]);
     })->name('admin.categories.edit');
     
+    Route::get('/offers', function () {
+        return view('admin.offers');
+    })->name('admin.offers');
+    
+    Route::get('/offers/create', function () {
+        return view('admin.offers.create');
+    })->name('admin.offers.create');
+    
+    Route::get('/offers/edit', function () {
+        return view('admin.offers.edit');
+    })->name('admin.offers.edit');
+    
     Route::get('/users', function () {
         return view('admin.users');
     })->name('admin.users');

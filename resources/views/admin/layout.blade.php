@@ -190,6 +190,10 @@
                     <i class="fas fa-list w-5"></i>
                     <span>Categories</span>
                 </a>
+                <a href="/admin/offers" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/offers*') ? 'bg-green-600' : '' }}">
+                    <i class="fas fa-tags w-5"></i>
+                    <span>Offers</span>
+                </a>
                 <a href="/admin/users" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/users*') ? 'bg-green-600' : '' }}">
                     <i class="fas fa-users w-5"></i>
                     <span>Users</span>

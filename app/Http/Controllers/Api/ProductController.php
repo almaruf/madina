@@ -76,4 +76,22 @@ class ProductController extends Controller
 
         return response()->json($categories);
     }
-}
+
+    public function activeOffers()
+    {
+        $shopId = \App\Services\ShopContext::getShopId();
+        $offers = \App\Models\Offer::where('shop_id', $shopId)
+            ->active()
+            ->valid()
+            ->with(['products' => function ($query) {
+                $query->active()
+                    ->with(['primaryImage', 'variations'])
+                    ->limit(20);
+            }])
+            ->orderBy('priority', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json($offers);
+    }

@@ -30,7 +30,7 @@
                             <select id="phone-prefix" class="border border-gray-300 rounded-lg px-4 py-2 bg-white" style="width: 80px; focus-ring-2 focus-ring-green-500 focus-border-transparent">
                                 <option value="+44">+44</option>
                             </select>
-                            <input type="tel" id="phone" placeholder="7911123456" required inputmode="numeric" pattern="[0-9]*" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" maxlength="11">
+                            <input type="tel" id="phone" placeholder="077........." required inputmode="numeric" pattern="[0-9]*" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" maxlength="11">
                         </div>
                     </div>
 

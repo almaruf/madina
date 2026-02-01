@@ -18,6 +18,9 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/categories', [ProductController::class, 'categories']);
 
+// Offers (public)
+Route::get('/offers/active', [ProductController::class, 'activeOffers']);
+
 // Delivery slots (public)
 Route::get('/delivery-slots', [DeliverySlotController::class, 'index']);
 
@@ -106,6 +109,18 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('categories/{slug}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
+    
+    // Offers
+    Route::get('offers', [\App\Http\Controllers\Admin\OfferController::class, 'index']);
+    Route::post('offers', [\App\Http\Controllers\Admin\OfferController::class, 'store']);
+    Route::get('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'show']);
+    Route::put('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'update']);
+    Route::patch('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'update']);
+    Route::delete('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'destroy']);
+    Route::post('offers/{id}/toggle-status', [\App\Http\Controllers\Admin\OfferController::class, 'toggleStatus']);
+    Route::get('offers/{id}/products', [\App\Http\Controllers\Admin\OfferController::class, 'products']);
+    Route::post('offers/{id}/products', [\App\Http\Controllers\Admin\OfferController::class, 'addProduct']);
+    Route::delete('offers/{id}/products/{productId}', [\App\Http\Controllers\Admin\OfferController::class, 'removeProduct']);
     
     // Queue Management (super admin only)
     Route::middleware('super_admin')->group(function () {
