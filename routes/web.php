@@ -71,13 +71,19 @@ Route::prefix('admin')->group(function () {
         return view('admin.offers');
     })->name('admin.offers');
     
+    // Offer type selector
     Route::get('/offers/create', function () {
-        return view('admin.offers.create');
+        return view('admin.offers.create-type-selector');
     })->name('admin.offers.create');
     
-    Route::get('/offers/edit', function () {
-        return view('admin.offers.edit');
-    })->name('admin.offers.edit');
+    // Percentage discount create/edit
+    Route::get('/offers/create/percentage-discount', function () {
+        return view('admin.offers.create-percentage-discount');
+    })->name('admin.offers.create.percentage-discount');
+    
+    Route::get('/offers/edit/percentage-discount', function () {
+        return view('admin.offers.edit-percentage-discount');
+    })->name('admin.offers.edit.percentage-discount');
     
     Route::get('/users', function () {
         return view('admin.users');
