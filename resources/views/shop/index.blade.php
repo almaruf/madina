@@ -405,10 +405,21 @@
 
         // --- Add to Cart Modal Logic (from products.blade.php) ---
         let featuredProducts = @json($featuredProducts);
+        let offerProducts = [];
+        
+        // Flatten all offer products into a single array
+        const activeOffers = @json($activeOffers);
+        activeOffers.forEach(offer => {
+            if (offer.products) {
+                offerProducts = offerProducts.concat(offer.products);
+            }
+        });
+        
         let currentProduct = null;
 
         function addToCartFromCard(productId, btn) {
-            const product = featuredProducts.find(item => item.id === productId);
+            const product = featuredProducts.find(item => item.id === productId) || 
+                           offerProducts.find(item => item.id === productId);
             if (!product) return;
             const variations = product.variations || [];
             if (variations.length === 1) {

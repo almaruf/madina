@@ -27,6 +27,10 @@
                         <span>Subtotal:</span>
                         <span id="subtotal">£0.00</span>
                     </div>
+                    <div class="flex justify-between text-green-600">
+                        <span>Discounts:</span>
+                        <span id="discounts">-£0.00</span>
+                    </div>
                     <div class="flex justify-between">
                         <span>Delivery Fee:</span>
                         <span id="delivery-fee">£0.00</span>
@@ -232,8 +236,13 @@
             items.forEach((item, idx) => {
                 const quantity = item.quantity || 1;
                 const price = parseFloat(item.price) || 0;
-                const total = parseFloat(item.total) || (price * quantity);
+                const discountedUnitPrice = parseFloat(item.discounted_unit_price || price) || price;
+                const discountAmount = parseFloat(item.discount_amount || 0) || 0;
+                const total = parseFloat(item.discounted_total || item.total) || (price * quantity);
+                const originalTotal = (price * quantity);
+                const hasDiscount = discountAmount > 0 && total < originalTotal;
                 const itemKey = `${item.product_id}_${item.variation_id}`;
+                const offerLabel = item.offer?.badge_text || item.offer?.name || null;
                 
                 itemsHtml += `
                 <div class="flex gap-4 pb-4 mb-4 border-b border-gray-200" data-item-key="${itemKey}">
@@ -248,7 +257,16 @@
                             ${item.product_name || 'Unknown Product'}
                         </a>
                         <p class="text-sm text-gray-600">${item.variation_name || ''}</p>
-                        <p class="text-green-600 font-bold mt-1">£${price.toFixed(2)}</p>
+                        ${offerLabel ? `<span class="inline-flex items-center text-xs font-semibold px-2 py-1 rounded-full text-white" style="background-color: ${item.offer?.badge_color || '#DC2626'};">${offerLabel}</span>` : ''}
+                        ${hasDiscount ? `
+                            <div class="mt-1">
+                                <p class="text-green-600 font-bold">£${discountedUnitPrice.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500 line-through">£${price.toFixed(2)}</p>
+                                <p class="text-xs text-green-700 font-semibold">You save £${discountAmount.toFixed(2)}</p>
+                            </div>
+                        ` : `
+                            <p class="text-green-600 font-bold mt-1">£${price.toFixed(2)}</p>
+                        `}
                     </div>
 
                     <!-- Quantity Controls -->
@@ -260,7 +278,12 @@
 
                     <!-- Item Total -->
                     <div class="text-right">
-                        <p class="font-bold text-lg">£${total.toFixed(2)}</p>
+                        ${hasDiscount ? `
+                            <p class="font-bold text-lg">£${total.toFixed(2)}</p>
+                            <p class="text-xs text-gray-500 line-through">£${originalTotal.toFixed(2)}</p>
+                        ` : `
+                            <p class="font-bold text-lg">£${total.toFixed(2)}</p>
+                        `}
                         <button class="btn-remove text-red-600 hover:text-red-700 text-sm mt-2 font-medium" data-product-id="${item.product_id}" data-variation-id="${item.variation_id}">
                             <i class="fas fa-trash"></i> Remove
                         </button>
@@ -312,14 +335,20 @@
 
         updateSummary(items) {
             const subtotal = items.reduce((sum, item) => {
-                const itemTotal = item.total || ((item.price || 0) * (item.quantity || 1));
+                const itemTotal = item.discounted_total || item.total || ((item.price || 0) * (item.quantity || 1));
                 return sum + itemTotal;
+            }, 0);
+
+            const discounts = items.reduce((sum, item) => {
+                const itemDiscount = item.discount_amount || 0;
+                return sum + itemDiscount;
             }, 0);
             
             const deliveryFee = subtotal > 0 ? this.deliveryFee : 0;
             const total = subtotal + deliveryFee;
 
             document.getElementById('subtotal').textContent = '£' + subtotal.toFixed(2);
+            document.getElementById('discounts').textContent = '-£' + discounts.toFixed(2);
             document.getElementById('delivery-fee').textContent = '£' + deliveryFee.toFixed(2);
             document.getElementById('total').textContent = '£' + total.toFixed(2);
         }

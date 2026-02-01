@@ -212,6 +212,25 @@
 </div>
 
 <script>
+    // CRITICAL: Ensure axios is configured with auth token
+    (() => {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (!token) {
+            console.error('No auth token found');
+            window.location.href = '/admin/login';
+        } else {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Accept'] = 'application/json';
+            axios.defaults.headers.common['Content-Type'] = 'application/json';
+            console.log('Auth token configured for axios:', token.substring(0, 20) + '...');
+        }
+    })();
+
+    const getAuthHeaders = () => {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
     let allProducts = [];
     let allCategories = [];
     let selectedProducts = [];
@@ -219,7 +238,7 @@
     async function loadCategories() {
         try {
             const res = await axios.get('/api/admin/categories', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+                headers: getAuthHeaders()
             });
             allCategories = res.data.data || res.data;
             loadCategorySelect();
@@ -261,7 +280,7 @@
     async function openProductModal() {
         try {
             const res = await axios.get('/api/admin/products?per_page=1000', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+                headers: getAuthHeaders()
             });
             allProducts = res.data.data || res.data;
             renderProductsList(allProducts);
@@ -278,16 +297,32 @@
 
     function renderProductsList(products) {
         const list = document.getElementById('products-list');
-        list.innerHTML = products.map(product => `
-            <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
+        list.innerHTML = products.map(product => {
+            const imageUrl = product.primary_image?.url || null;
+            const defaultVariation = product.variations?.find(v => v.is_default) || product.variations?.[0];
+            const priceText = defaultVariation?.price ? `£${parseFloat(defaultVariation.price).toFixed(2)}` : 'No price';
+            const categories = (product.categories || [])
+                .map(c => `<span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">${c.name}</span>`)
+                .join('');
+
+            return `
+            <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
                 <input type="checkbox" value="${product.id}" class="product-checkbox mt-1"
                     ${selectedProducts.includes(product.id) ? 'checked' : ''}>
-                <div class="ml-3 flex-1 min-w-0">
-                    <div class="font-semibold">${product.name}</div>
-                    <div class="text-sm text-gray-600">SKU: ${product.sku || 'N/A'}</div>
+                <div class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>'}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="font-semibold truncate">${product.name}</div>
+                        <div class="text-sm font-semibold text-green-600">${priceText}</div>
+                    </div>
+                    <div class="text-xs text-gray-500">SKU: ${product.sku || 'N/A'}</div>
+                    ${categories ? `<div class="flex flex-wrap gap-1 mt-2">${categories}</div>` : ''}
                 </div>
             </label>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function searchProducts() {
@@ -372,9 +407,8 @@
         };
 
         try {
-            const token = localStorage.getItem('auth_token');
             await axios.post('/api/admin/offers', formData, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: getAuthHeaders()
             });
             toast.success('Offer created successfully');
             setTimeout(() => window.location.href = '/admin/offers', 1500);

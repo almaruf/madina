@@ -31,12 +31,12 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Offer Name *</label>
-                        <input type="text" id="name" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="text" id="name" required placeholder="e.g., Summer Sale 20%" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea id="description" rows="3" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500"></textarea>
+                        <textarea id="description" rows="3" placeholder="Tell customers about this sale" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500"></textarea>
                     </div>
                 </div>
             </div>
@@ -48,19 +48,19 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Discount Percentage (%) *</label>
-                        <input type="number" id="discount_value" min="0" max="100" step="0.01" required class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="number" id="discount_value" min="0" max="100" step="0.01" required placeholder="e.g., 20" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                         <p class="text-sm text-gray-500 mt-1">Enter the percentage to discount (0-100)</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Min Purchase Amount (£)</label>
-                        <input type="number" id="min_purchase_amount" min="0" step="0.01" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="number" id="min_purchase_amount" min="0" step="0.01" placeholder="e.g., 25" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                         <p class="text-sm text-gray-500 mt-1">Leave blank for no minimum</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Badge Text</label>
-                        <input type="text" id="badge_text" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="text" id="badge_text" placeholder="e.g., 20% OFF" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                         <p class="text-sm text-gray-500 mt-1">Text shown on product cards</p>
                     </div>
 
@@ -97,13 +97,13 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Max Uses Per Customer</label>
-                        <input type="number" id="max_uses_per_customer" min="1" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="number" id="max_uses_per_customer" min="1" placeholder="e.g., 3" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                         <p class="text-sm text-gray-500 mt-1">Leave blank for unlimited</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Total Usage Limit</label>
-                        <input type="number" id="total_usage_limit" min="1" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        <input type="number" id="total_usage_limit" min="1" placeholder="e.g., 100" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                         <p class="text-sm text-gray-500 mt-1">Leave blank for unlimited</p>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
                 <div class="space-y-4">
                     <div class="flex gap-4 flex-wrap">
                         <label class="flex items-center">
-                            <input type="radio" name="product-scope" value="all" onchange="handleProductScopeChange()">
+                            <input type="radio" name="product-scope" value="all" checked onchange="handleProductScopeChange()">
                             <span class="ml-2 text-sm font-semibold">All Products</span>
                         </label>
                         <label class="flex items-center">
@@ -224,6 +224,25 @@
 </div>
 
 <script>
+    // CRITICAL: Ensure axios is configured with auth token
+    (() => {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (!token) {
+            console.error('No auth token found');
+            window.location.href = '/admin/login';
+        } else {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Accept'] = 'application/json';
+            axios.defaults.headers.common['Content-Type'] = 'application/json';
+            console.log('Auth token configured for axios:', token.substring(0, 20) + '...');
+        }
+    })();
+
+    const getAuthHeaders = () => {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
     const offerId = new URLSearchParams(window.location.search).get('id');
     let offerData = null;
     let allProducts = [];
@@ -233,12 +252,8 @@
     async function loadOffer() {
         try {
             const [offerRes, categoriesRes] = await Promise.all([
-                axios.get(`/api/admin/offers/${offerId}`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-                }),
-                axios.get('/api/admin/categories', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-                })
+                axios.get(`/api/admin/offers/${offerId}`, { headers: getAuthHeaders() }),
+                axios.get('/api/admin/categories', { headers: getAuthHeaders() })
             ]);
             
             offerData = offerRes.data;
@@ -343,7 +358,7 @@
     async function openProductModal() {
         try {
             const res = await axios.get('/api/admin/products?per_page=1000', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+                headers: getAuthHeaders()
             });
             allProducts = res.data.data || res.data;
             renderProductsList(allProducts);
@@ -360,16 +375,32 @@
 
     function renderProductsList(products) {
         const list = document.getElementById('products-list');
-        list.innerHTML = products.map(product => `
-            <label class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
+        list.innerHTML = products.map(product => {
+            const imageUrl = product.primary_image?.url || null;
+            const defaultVariation = product.variations?.find(v => v.is_default) || product.variations?.[0];
+            const priceText = defaultVariation?.price ? `£${parseFloat(defaultVariation.price).toFixed(2)}` : 'No price';
+            const categories = (product.categories || [])
+                .map(c => `<span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">${c.name}</span>`)
+                .join('');
+
+            return `
+            <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 mb-2">
                 <input type="checkbox" value="${product.id}" class="product-checkbox mt-1"
                     ${selectedProducts.includes(product.id) ? 'checked' : ''}>
-                <div class="ml-3 flex-1 min-w-0">
-                    <div class="font-semibold">${product.name}</div>
-                    <div class="text-sm text-gray-600">SKU: ${product.sku || 'N/A'}</div>
+                <div class="w-14 h-14 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>'}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="font-semibold truncate">${product.name}</div>
+                        <div class="text-sm font-semibold text-green-600">${priceText}</div>
+                    </div>
+                    <div class="text-xs text-gray-500">SKU: ${product.sku || 'N/A'}</div>
+                    ${categories ? `<div class="flex flex-wrap gap-1 mt-2">${categories}</div>` : ''}
                 </div>
             </label>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function searchProducts() {
@@ -396,7 +427,8 @@
 
     function renderSelectedProducts() {
         const container = document.getElementById('selected-products-display');
-        const selected = allProducts.filter(p => selectedProducts.includes(p.id));
+        const sourceProducts = allProducts.length > 0 ? allProducts : (offerData?.products || []);
+        const selected = sourceProducts.filter(p => selectedProducts.includes(p.id));
         
         container.innerHTML = selected.length > 0 
             ? selected.map(p => `
@@ -453,9 +485,8 @@
         };
 
         try {
-            const token = localStorage.getItem('auth_token');
             await axios.put(`/api/admin/offers/${offerId}`, formData, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: getAuthHeaders()
             });
             toast.success('Offer updated successfully');
             setTimeout(() => window.location.href = '/admin/offers', 1500);
@@ -470,9 +501,8 @@
         if (!confirm('Are you sure you want to delete this offer? This action cannot be undone.')) return;
         
         try {
-            const token = localStorage.getItem('auth_token');
             await axios.delete(`/api/admin/offers/${offerId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: getAuthHeaders()
             });
             toast.success('Offer deleted successfully');
             setTimeout(() => window.location.href = '/admin/offers', 1500);
