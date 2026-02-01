@@ -15,7 +15,7 @@
                     <h1 class="text-2xl font-bold text-green-600">{{ app(\App\Services\ShopConfigService::class)->name() }}</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/shop/products" class="text-gray-700 hover:text-green-600 font-medium">Shop</a>
+                    <a href="/products" class="text-gray-700 hover:text-green-600 font-medium">Shop</a>
                     <a href="/admin/login" class="text-gray-700 hover:text-green-600 font-medium">Admin</a>
                     <a href="/shop/login" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium">
                         Login
@@ -35,7 +35,7 @@
             <p class="text-2xl mb-8 text-gray-100">
                 {{ app(\App\Services\ShopConfigService::class)->description() }}
             </p>
-            <a href="/shop/products" class="inline-block bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition shadow-lg">
+            <a href="/products" class="inline-block bg-white text-green-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition shadow-lg">
                 Start Shopping Now
             </a>
         </div>
@@ -47,7 +47,7 @@
         <section class="mb-16">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-900">Shop by Category</h2>
-                <a href="/shop/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
+                <a href="/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
             </div>
             <div id="featured-categories" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="animate-pulse bg-gray-200 h-48 rounded-lg"></div>
@@ -60,7 +60,7 @@
         <section class="mb-16">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-900">Featured Products</h2>
-                <a href="/shop/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
+                <a href="/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
             </div>
             <div id="featured-products" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 <!-- Loading placeholders -->
@@ -77,7 +77,7 @@
         <section class="mb-16">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-900">Popular Products</h2>
-                <a href="/shop/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
+                <a href="/products" class="text-green-600 hover:text-green-700 font-semibold">View All →</a>
             </div>
             <div id="popular-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <!-- Loading placeholders -->
@@ -134,7 +134,7 @@
                 <div>
                     <h3 class="font-bold mb-4">Quick Links</h3>
                     <ul class="text-gray-400 space-y-2">
-                        <li><a href="/shop/products" class="hover:text-white transition">Shop</a></li>
+                        <li><a href="/products" class="hover:text-white transition">Shop</a></li>
                         <li><a href="/shop/login" class="hover:text-white transition">My Account</a></li>
                         <li><a href="/admin/login" class="hover:text-white transition">Admin</a></li>
                     </ul>
@@ -173,7 +173,7 @@
             }
 
             container.innerHTML = categories.map(cat => `
-                <a href="/shop/products?category=${cat.slug}" class="block group">
+                <a href="/products?category=${cat.slug}" class="block group">
                     <div class="relative h-48 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
                         ${cat.image_url ? `<img src="${cat.image_url}" class="w-full h-full object-cover" alt="${cat.name}">` : ''}
                         <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition flex items-center justify-center">
@@ -226,7 +226,7 @@
                 const image = product.primary_image || product.primaryImage || (product.images && product.images[0]) || null;
 
                 return `
-                    <a href="/shop/products/${product.slug}" class="block group">
+                    <a href="/products/${product.slug}" class="block group">
                         <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden h-full">
                             <div class="relative h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
                                 ${image && image.url ? 

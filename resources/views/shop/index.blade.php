@@ -21,7 +21,7 @@
                 
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="/" class="text-gray-700 hover:text-green-600 font-medium">Home</a>
-                    <a href="/shop/products" class="text-gray-700 hover:text-green-600 font-medium">Shop</a>
+                    <a href="/products" class="text-gray-700 hover:text-green-600 font-medium">Shop</a>
                     <a href="/account" class="text-gray-700 hover:text-green-600 font-medium">Account</a>
                 </div>
 
@@ -227,7 +227,7 @@
             @if($otherCategories->count() > 0)
             <div class="mt-6 flex flex-wrap gap-3">
                 @foreach($otherCategories as $cat)
-                    <a href="/shop/products?category={{ $cat->slug }}" class="inline-block bg-white border border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition">{{ $cat->name }}</a>
+                    <a href="/products?category={{ $cat->slug }}" class="inline-block bg-white border border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition">{{ $cat->name }}</a>
                 @endforeach
             </div>
             @endif

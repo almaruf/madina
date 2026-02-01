@@ -5,7 +5,7 @@ use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\ProductController;
 
 Route::get('/', [HomeController::class, 'index'])->name('shop.home');
-Route::get('/shop/products', [ProductController::class, 'index'])->name('shop.products');
+Route::get('/products', [ProductController::class, 'index'])->name('shop.products');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('shop.products.show');
 Route::get('/offers/{id}', function ($id) { return view('shop.offers.show', ['offerId' => $id]); })->name('shop.offers.show');
 Route::get('/cart', function () { return view('shop.cart'); })->name('shop.cart');

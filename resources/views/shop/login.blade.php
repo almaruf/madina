@@ -141,7 +141,7 @@
                     
                     // Get redirect URL from query parameter
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectUrl = urlParams.get('redirect') || '/shop/products';
+                    const redirectUrl = urlParams.get('redirect') || '/products';
                     
                     setTimeout(() => {
                         window.location.href = redirectUrl;
@@ -170,7 +170,7 @@
 
         if (localStorage.getItem('token')) {
             const urlParams = new URLSearchParams(window.location.search);
-            const redirectUrl = urlParams.get('redirect') || '/shop/products';
+            const redirectUrl = urlParams.get('redirect') || '/products';
             window.location.href = redirectUrl;
         }
     </script>

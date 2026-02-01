@@ -155,7 +155,7 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
                     <div class="space-y-3">
-                        <a href="/shop/products" class="block w-full text-center bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold">
+                        <a href="/products" class="block w-full text-center bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold">
                             Continue Shopping
                         </a>
                         <a href="/cart" class="block w-full text-center border border-green-600 text-green-600 hover:bg-green-50 py-2 rounded-lg font-semibold">
