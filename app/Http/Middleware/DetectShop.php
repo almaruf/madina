@@ -10,6 +10,11 @@ class DetectShop
 {
     public function handle(Request $request, Closure $next)
     {
+        // Skip shop detection for admin routes
+        if ($request->is('admin') || $request->is('admin/*')) {
+            return $next($request);
+        }
+
         // Get the host/domain
         $domain = $request->getHost();
 
@@ -26,7 +31,7 @@ class DetectShop
             $shop = \App\Models\Shop::active()->first();
         }
 
-        // If still no shop found, abort
+        // If still no shop found, abort (only for public shop routes)
         if (!$shop) {
             return response()->json(['message' => 'Shop not found'], 404);
         }

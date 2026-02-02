@@ -11,10 +11,6 @@ class ShopConfigService
     public function __construct()
     {
         $this->shop = ShopContext::getShop();
-
-        if (!$this->shop) {
-            throw new \Exception('No shop context set. Make sure DetectShop middleware is applied.');
-        }
     }
 
     public function get($key = null, $default = null)
@@ -32,76 +28,86 @@ class ShopConfigService
 
     public function name()
     {
-        return $this->shop->name ?? 'ABC Grocery Shop';
+        return $this->shop?->name ?? 'ABC Grocery Shop';
     }
 
     public function slug()
     {
-        return $this->shop->slug ?? 'abc-grocery';
+        return $this->shop?->slug ?? 'abc-grocery';
     }
 
     public function description()
     {
-        return $this->shop->description ?? 'Fresh groceries delivered to your door';
+        return $this->shop?->description ?? 'Fresh groceries delivered to your door';
     }
 
     public function tagline()
     {
-        return $this->shop->tagline ?? 'Quality products at affordable prices';
+        return $this->shop?->tagline ?? 'Quality products at affordable prices';
     }
 
     public function phone()
     {
-        return $this->shop->phone;
+        return $this->shop?->phone;
     }
 
     public function email()
     {
-        return $this->shop->email;
+        return $this->shop?->email;
     }
 
     public function address()
     {
-        return $this->shop->address_line_1;
+        return $this->shop?->address_line_1;
     }
 
     public function fullAddress()
     {
-        return $this->shop->fullAddress();
+        return $this->shop?->fullAddress();
     }
 
     public function currency()
     {
-        return $this->shop->currency;
+        return $this->shop?->currency ?? 'GBP';
     }
 
     public function currencySymbol()
     {
-        return $this->shop->currency_symbol;
+        return $this->shop?->currency_symbol ?? '£';
     }
 
     public function primaryColor()
     {
-        return $this->shop->primary_color;
+        return $this->shop?->primary_color ?? '#10B981';
     }
 
     public function isFeatureEnabled($feature)
     {
-        return $this->shop->isFeatureEnabled($feature);
+        return $this->shop?->isFeatureEnabled($feature) ?? false;
     }
 
     public function hasHalalProducts()
     {
-        return $this->shop->has_halal_products;
+        return $this->shop?->has_halal_products ?? false;
     }
 
     public function hasOrganicProducts()
     {
-        return $this->shop->has_organic_products;
+        return $this->shop?->has_organic_products ?? false;
     }
 
     public function deliveryConfig()
     {
+        if (!$this->shop) {
+            return [
+                'radius_km' => 5,
+                'min_order_amount' => 10.00,
+                'delivery_fee' => 2.99,
+                'free_delivery_threshold' => 30.00,
+                'currency' => 'GBP',
+                'currency_symbol' => '£',
+            ];
+        }
         return [
             'radius_km' => $this->shop->delivery_radius_km,
             'min_order_amount' => $this->shop->min_order_amount,
@@ -114,6 +120,10 @@ class ShopConfigService
 
     public function operatingHours($day = null)
     {
+        if (!$this->shop) {
+            return null;
+        }
+        
         if ($day) {
             $field = strtolower($day) . '_hours';
             return $this->shop->{$field};
@@ -130,7 +140,7 @@ class ShopConfigService
         ];
     }
 
-    public function getShop(): Shop
+    public function getShop(): ?Shop
     {
         return $this->shop;
     }
