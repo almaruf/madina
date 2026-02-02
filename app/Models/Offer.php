@@ -56,6 +56,18 @@ class Offer extends Model
             ->withTimestamps();
     }
 
+    public function buyProducts()
+    {
+        return $this->belongsToMany(Product::class, 'offer_buy_product')
+            ->withTimestamps();
+    }
+
+    public function getProducts()
+    {
+        return $this->belongsToMany(Product::class, 'offer_get_product')
+            ->withTimestamps();
+    }
+
     // Scopes
     public function scopeActive($query)
     {

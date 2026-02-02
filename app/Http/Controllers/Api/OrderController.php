@@ -31,6 +31,8 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_variation_id' => 'required|exists:product_variations,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.offer_id' => 'nullable|exists:offers,id',
+            'items.*.offer_type' => 'nullable|string',
             'fulfillment_type' => 'required|in:delivery,collection',
             'delivery_slot_id' => 'required|exists:delivery_slots,id',
             'address_id' => 'required_if:fulfillment_type,delivery|exists:addresses,id',
@@ -52,19 +54,63 @@ class OrderController extends Controller
             foreach ($request->items as $item) {
                 $variation = ProductVariation::with('product')->findOrFail($item['product_variation_id']);
 
-                $itemSubtotal = $variation->price * $item['quantity'];
-                $subtotal += $itemSubtotal;
+                $quantity = $item['quantity'];
+                $unitPrice = $variation->price;
+                $itemSubtotal = $unitPrice * $quantity;
+                $discountAmount = 0;
+                $itemTotal = $itemSubtotal;
+                
+                // Get offer information if available
+                $offerId = $item['offer_id'] ?? null;
+                $offerType = $item['offer_type'] ?? null;
+                $offerName = null;
+                
+                // Calculate discount if offer exists
+                if ($offerId && $offerType) {
+                    $offer = \App\Models\Offer::find($offerId);
+                    if ($offer) {
+                        $offerName = $offer->name;
+                        
+                        // Calculate BXGY discounts
+                        if ($offerType === 'bxgy_free') {
+                            $buyQty = $offer->buy_quantity;
+                            $getQty = $offer->get_quantity;
+                            $sets = floor($quantity / ($buyQty + $getQty));
+                            $freeItems = $sets * $getQty;
+                            $discountAmount = $freeItems * $unitPrice;
+                        } elseif ($offerType === 'bxgy_discount') {
+                            $buyQty = $offer->buy_quantity;
+                            $getQty = $offer->get_quantity;
+                            $discountPct = $offer->get_discount_percentage;
+                            $sets = floor($quantity / ($buyQty + $getQty));
+                            $discountedItems = $sets * $getQty;
+                            $discountAmount = $discountedItems * $unitPrice * ($discountPct / 100);
+                        } elseif ($offerType === 'percentage_discount') {
+                            $discountAmount = $itemSubtotal * ($offer->discount_value / 100);
+                        } elseif ($offerType === 'fixed_discount') {
+                            $discountAmount = min($offer->discount_value * $quantity, $itemSubtotal);
+                        }
+                        
+                        $itemTotal = max(0, $itemSubtotal - $discountAmount);
+                    }
+                }
+
+                $subtotal += $itemTotal;
 
                 $orderItems[] = [
                     'product_id' => $variation->product_id,
                     'product_variation_id' => $variation->id,
+                    'offer_id' => $offerId,
+                    'offer_type' => $offerType,
+                    'offer_name' => $offerName,
                     'product_name' => $variation->product->name,
                     'variation_name' => $variation->name,
                     'sku' => $variation->sku,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $variation->price,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
                     'subtotal' => $itemSubtotal,
-                    'total' => $itemSubtotal,
+                    'discount_amount' => $discountAmount,
+                    'total' => $itemTotal,
                 ];
             }
 
@@ -126,9 +172,33 @@ class OrderController extends Controller
 
     public function show(Request $request, $id)
     {
-        $order = Order::with(['items.product', 'deliverySlot', 'address'])
-            ->where('user_id', $request->user()->id)
+        $order = Order::with([
+            'items.product.primaryImage',
+            'deliverySlot',
+            'address',
+            'user'
+        ])->where('user_id', $request->user()->id)
             ->findOrFail($id);
+
+        // Enhance items with offer information if available
+        $order->items->each(function($item) {
+            if ($item->offer_id) {
+                $offer = \App\Models\Offer::find($item->offer_id);
+                if ($offer) {
+                    $item->offer = [
+                        'id' => $offer->id,
+                        'name' => $offer->name,
+                        'type' => $offer->type,
+                        'badge_text' => $offer->badge_text,
+                        'badge_color' => $offer->badge_color,
+                        'buy_quantity' => $offer->buy_quantity,
+                        'get_quantity' => $offer->get_quantity,
+                        'discount_value' => $offer->discount_value,
+                        'get_discount_percentage' => $offer->get_discount_percentage,
+                    ];
+                }
+            }
+        });
 
         return response()->json($order);
     }

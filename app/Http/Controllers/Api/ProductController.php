@@ -100,11 +100,21 @@ class ProductController extends Controller
         $shopId = \App\Services\ShopContext::getShopId();
         $offer = \App\Models\Offer::where('shop_id', $shopId)
             ->where('id', $id)
-            ->with(['products' => function ($query) {
-                $query->active()
-                    ->with(['primaryImage', 'variations'])
-                    ->orderBy('pivot_created_at', 'desc');
-            }])
+            ->with([
+                'products' => function ($query) {
+                    $query->active()
+                        ->with(['primaryImage', 'variations'])
+                        ->orderBy('pivot_created_at', 'desc');
+                },
+                'buyProducts' => function ($query) {
+                    $query->active()
+                        ->with(['primaryImage', 'variations']);
+                },
+                'getProducts' => function ($query) {
+                    $query->active()
+                        ->with(['primaryImage', 'variations']);
+                }
+            ])
             ->firstOrFail();
 
         return response()->json($offer);

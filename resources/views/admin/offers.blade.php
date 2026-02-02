@@ -199,9 +199,21 @@ function filterOffers(status) {
 }
 
 function editOffer(id) {
-    // For now, all offers route to percentage-discount editor
-    // In future, route based on offer.type
-    window.location.href = `/admin/offers/edit/percentage-discount?id=${id}`;
+    const offer = allOffers.find(o => o.id === id);
+    if (!offer) {
+        window.location.href = `/admin/offers/edit/percentage-discount?id=${id}`;
+        return;
+    }
+    
+    // Route to appropriate editor based on offer type
+    if (offer.type === 'bxgy_free' || offer.type === 'bxgy_discount') {
+        window.location.href = `/admin/offers/edit/bxgy?id=${id}`;
+    } else if (offer.type === 'percentage_discount') {
+        window.location.href = `/admin/offers/edit/percentage-discount?id=${id}`;
+    } else {
+        // Default to percentage-discount for other types
+        window.location.href = `/admin/offers/edit/percentage-discount?id=${id}`;
+    }
 }
 
 async function toggleOfferStatus(id) {

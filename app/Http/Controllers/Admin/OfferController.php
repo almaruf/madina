@@ -85,15 +85,83 @@ class OfferController extends Controller
         ], 201);
     }
 
+    public function storeBxgy(Request $request)
+    {
+        $shopId = ShopContext::getShopId();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'required|in:bxgy_free,bxgy_discount',
+            'buy_quantity' => 'required|integer|min:1',
+            'get_quantity' => 'required|integer|min:1',
+            'get_discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'min_purchase_amount' => 'nullable|numeric|min:0',
+            'max_uses_per_customer' => 'nullable|integer|min:1',
+            'total_usage_limit' => 'nullable|integer|min:1',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date|after:starts_at',
+            'badge_text' => 'nullable|string|max:50',
+            'badge_color' => 'nullable|string|max:7',
+            'is_active' => 'boolean',
+            'priority' => 'nullable|integer',
+            'buy_product_ids' => 'required|array|min:1',
+            'buy_product_ids.*' => 'exists:products,id',
+            'get_product_ids' => 'required|array|min:1',
+            'get_product_ids.*' => 'exists:products,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $validator->validated();
+        $data['shop_id'] = $shopId;
+        $data['slug'] = Str::slug($data['name']) . '-' . time();
+
+        $buyProductIds = $data['buy_product_ids'];
+        $getProductIds = $data['get_product_ids'];
+        unset($data['buy_product_ids'], $data['get_product_ids']);
+
+        $offer = Offer::create($data);
+
+        // Attach buy and get products
+        if (!empty($buyProductIds)) {
+            $offer->buyProducts()->attach($buyProductIds);
+        }
+        if (!empty($getProductIds)) {
+            $offer->getProducts()->attach($getProductIds);
+        }
+
+        return response()->json([
+            'message' => 'BXGY offer created successfully',
+            'offer' => $offer->load(['buyProducts', 'getProducts'])
+        ], 201);
+    }
+
     public function show($id)
     {
         $shopId = ShopContext::getShopId();
         
         $offer = Offer::where('shop_id', $shopId)
-            ->with(['products' => function ($query) {
-                $query->with(['primaryImage', 'variations']);
-            }])
+            ->with([
+                'products' => function ($query) {
+                    $query->with(['primaryImage', 'variations']);
+                },
+                'buyProducts' => function ($query) {
+                    $query->with(['primaryImage', 'variations']);
+                },
+                'getProducts' => function ($query) {
+                    $query->with(['primaryImage', 'variations']);
+                }
+            ])
             ->findOrFail($id);
+
+        // Add buy_products and get_products to response for BXGY offers
+        if (in_array($offer->type, ['bxgy_free', 'bxgy_discount'])) {
+            $offer->buy_products = $offer->buyProducts;
+            $offer->get_products = $offer->getProducts;
+        }
 
         return response()->json($offer);
     }
@@ -124,6 +192,10 @@ class OfferController extends Controller
             'priority' => 'nullable|integer',
             'product_ids' => 'nullable|array',
             'product_ids.*' => 'exists:products,id',
+            'buy_product_ids' => 'nullable|array',
+            'buy_product_ids.*' => 'exists:products,id',
+            'get_product_ids' => 'nullable|array',
+            'get_product_ids.*' => 'exists:products,id',
         ]);
 
         if ($validator->fails()) {
@@ -137,17 +209,30 @@ class OfferController extends Controller
         }
 
         $productIds = $data['product_ids'] ?? null;
-        unset($data['product_ids']);
+        $buyProductIds = $data['buy_product_ids'] ?? null;
+        $getProductIds = $data['get_product_ids'] ?? null;
+        unset($data['product_ids'], $data['buy_product_ids'], $data['get_product_ids']);
 
         $offer->update($data);
 
-        if ($productIds !== null) {
-            $offer->products()->sync($productIds);
+        // Handle BXGY offers
+        if (in_array($offer->type, ['bxgy_free', 'bxgy_discount'])) {
+            if ($buyProductIds !== null) {
+                $offer->buyProducts()->sync($buyProductIds);
+            }
+            if ($getProductIds !== null) {
+                $offer->getProducts()->sync($getProductIds);
+            }
+        } else {
+            // Handle regular offers
+            if ($productIds !== null) {
+                $offer->products()->sync($productIds);
+            }
         }
 
         return response()->json([
             'message' => 'Offer updated successfully',
-            'offer' => $offer->load('products')
+            'offer' => $offer->load(['products', 'buyProducts', 'getProducts'])
         ]);
     }
 

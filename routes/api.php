@@ -114,6 +114,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     // Offers
     Route::get('offers', [\App\Http\Controllers\Admin\OfferController::class, 'index']);
     Route::post('offers', [\App\Http\Controllers\Admin\OfferController::class, 'store']);
+    Route::post('offers/bxgy', [\App\Http\Controllers\Admin\OfferController::class, 'storeBxgy']);
     Route::get('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'show']);
     Route::put('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'update']);
     Route::patch('offers/{id}', [\App\Http\Controllers\Admin\OfferController::class, 'update']);

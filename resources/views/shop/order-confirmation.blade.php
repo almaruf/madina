@@ -145,19 +145,64 @@
         }
 
         // Order items
-        const itemsHtml = order.items.map(item => `
-            <div class="flex gap-4">
+        const itemsHtml = order.items.map(item => {
+            const offer = item.offer;
+            const hasOffer = offer !== null && offer !== undefined;
+            const isBXGY = hasOffer && (offer.type === 'bxgy_free' || offer.type === 'bxgy_discount');
+            const isDiscount = hasOffer && (offer.type === 'percentage_discount' || offer.type === 'fixed_discount');
+            
+            // Calculate displayed prices
+            const unitPrice = parseFloat(item.unit_price);
+            const quantity = parseInt(item.quantity);
+            const itemTotal = parseFloat(item.total || item.subtotal || (unitPrice * quantity));
+            const originalTotal = unitPrice * quantity;
+            const hasSavings = itemTotal < originalTotal;
+            const savings = originalTotal - itemTotal;
+            
+            // Build offer badge
+            let offerBadge = '';
+            if (hasOffer && offer.badge_text) {
+                offerBadge = `<span class="inline-block text-xs font-semibold px-2 py-1 rounded text-white mt-1" style="background-color: ${offer.badge_color || '#DC2626'};">${offer.badge_text}</span>`;
+            }
+            
+            // Build BXGY details
+            let bxgyDetails = '';
+            if (isBXGY) {
+                if (offer.type === 'bxgy_free') {
+                    bxgyDetails = `<p class="text-xs text-green-700 font-semibold mt-1"><i class="fas fa-gift"></i> Buy ${offer.buy_quantity} Get ${offer.get_quantity} FREE</p>`;
+                } else if (offer.type === 'bxgy_discount') {
+                    bxgyDetails = `<p class="text-xs text-orange-700 font-semibold mt-1"><i class="fas fa-tag"></i> Buy ${offer.buy_quantity} Get ${offer.get_quantity} @ ${offer.get_discount_percentage}% OFF</p>`;
+                }
+            } else if (isDiscount) {
+                // Regular discount offers
+                if (offer.type === 'percentage_discount') {
+                    bxgyDetails = `<p class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-percent"></i> ${offer.discount_value}% OFF</p>`;
+                } else if (offer.type === 'fixed_discount') {
+                    bxgyDetails = `<p class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-pound-sign"></i> £${offer.discount_value} OFF</p>`;
+                }
+            }
+            
+            return `
+            <div class="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
                 <div class="flex-1">
                     <h4 class="font-semibold text-gray-900">${item.product_name}</h4>
                     <p class="text-sm text-gray-600">${item.variation_name}</p>
-                    <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+                    ${offerBadge}
+                    ${bxgyDetails}
+                    <p class="text-sm text-gray-600 mt-1">Quantity: ${quantity}</p>
+                    ${hasSavings ? `<p class="text-xs text-green-700 font-semibold mt-1">Saved: £${savings.toFixed(2)}</p>` : ''}
                 </div>
                 <div class="text-right">
-                    <p class="font-semibold text-gray-900">£${parseFloat(item.unit_price * item.quantity).toFixed(2)}</p>
-                    <p class="text-sm text-gray-600">£${parseFloat(item.unit_price).toFixed(2)} each</p>
+                    <p class="font-semibold text-gray-900">£${itemTotal.toFixed(2)}</p>
+                    ${hasSavings ? `
+                        <p class="text-sm text-gray-400 line-through">£${originalTotal.toFixed(2)}</p>
+                    ` : `
+                        <p class="text-sm text-gray-600">£${unitPrice.toFixed(2)} each</p>
+                    `}
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         document.getElementById('order-items').innerHTML = itemsHtml;
 
         // Order summary

@@ -34,17 +34,17 @@
             </div>
         </div>
 
-        <!-- BOGO (Coming Soon) -->
-        <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200 opacity-50">
+        <!-- Buy X Get Y -->
+        <a href="/admin/offers/create/bxgy" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition p-8 border-2 border-transparent hover:border-green-500 cursor-pointer">
             <div class="text-4xl mb-4">
-                <i class="fas fa-gift text-gray-400"></i>
+                <i class="fas fa-gift text-green-600"></i>
             </div>
-            <h3 class="text-xl font-bold mb-2 text-gray-900">Buy X Get Y Free</h3>
-            <p class="text-gray-600 text-sm">Encourage bulk purchases with free items</p>
-            <div class="mt-4 text-gray-400 font-semibold inline-block px-3 py-1 bg-gray-100 rounded">
-                Coming Soon
+            <h3 class="text-xl font-bold mb-2 text-gray-900">Buy X Get Y</h3>
+            <p class="text-gray-600 text-sm">Free items or discounts with bulk purchases</p>
+            <div class="mt-4 text-green-600 font-semibold flex items-center gap-2">
+                Get Started <i class="fas fa-arrow-right"></i>
             </div>
-        </div>
+        </a>
 
         <!-- Multi-Buy (Coming Soon) -->
         <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200 opacity-50">

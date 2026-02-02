@@ -86,6 +86,15 @@ Route::prefix('admin')->group(function () {
         return view('admin.offers.edit-percentage-discount');
     })->name('admin.offers.edit.percentage-discount');
     
+    // Buy X Get Y create/edit
+    Route::get('/offers/create/bxgy', function () {
+        return view('admin.offers.create-bxgy');
+    })->name('admin.offers.create.bxgy');
+    
+    Route::get('/offers/edit/bxgy', function () {
+        return view('admin.offers.edit-bxgy');
+    })->name('admin.offers.edit.bxgy');
+    
     Route::get('/users', function () {
         return view('admin.users');
     })->name('admin.users');

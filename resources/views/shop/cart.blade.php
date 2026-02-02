@@ -243,6 +243,25 @@
                 const hasDiscount = discountAmount > 0 && total < originalTotal;
                 const itemKey = `${item.product_id}_${item.variation_id}`;
                 const offerLabel = item.offer?.badge_text || item.offer?.name || null;
+                const offerType = item.offer?.type || null;
+                const isBXGY = offerType === 'bxgy_free' || offerType === 'bxgy_discount';
+                const isDiscount = offerType === 'percentage_discount' || offerType === 'fixed_discount';
+                
+                // BXGY and discount offer display
+                let bxgyDetails = '';
+                if (isBXGY && item.offer) {
+                    if (offerType === 'bxgy_free') {
+                        bxgyDetails = `<p class="text-xs text-green-700 font-semibold mt-1"><i class="fas fa-gift"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} FREE</p>`;
+                    } else if (offerType === 'bxgy_discount') {
+                        bxgyDetails = `<p class="text-xs text-orange-700 font-semibold mt-1"><i class="fas fa-tag"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} @ ${item.offer.get_discount_percentage}% OFF</p>`;
+                    }
+                } else if (isDiscount && item.offer) {
+                    if (offerType === 'percentage_discount') {
+                        bxgyDetails = `<p class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-percent"></i> ${item.offer.discount_value}% OFF</p>`;
+                    } else if (offerType === 'fixed_discount') {
+                        bxgyDetails = `<p class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-pound-sign"></i> £${item.offer.discount_value} OFF</p>`;
+                    }
+                }
                 
                 itemsHtml += `
                 <div class="flex gap-4 pb-4 mb-4 border-b border-gray-200" data-item-key="${itemKey}">
@@ -257,7 +276,8 @@
                             ${item.product_name || 'Unknown Product'}
                         </a>
                         <p class="text-sm text-gray-600">${item.variation_name || ''}</p>
-                        ${offerLabel ? `<span class="inline-flex items-center text-xs font-semibold px-2 py-1 rounded-full text-white" style="background-color: ${item.offer?.badge_color || '#DC2626'};">${offerLabel}</span>` : ''}
+                        ${offerLabel ? `<span class="inline-flex items-center text-xs font-semibold px-2 py-1 rounded-full text-white mt-1" style="background-color: ${item.offer?.badge_color || '#DC2626'};">${offerLabel}</span>` : ''}
+                        ${bxgyDetails}
                         ${hasDiscount ? `
                             <div class="mt-1">
                                 <p class="text-green-600 font-bold">£${discountedUnitPrice.toFixed(2)}</p>

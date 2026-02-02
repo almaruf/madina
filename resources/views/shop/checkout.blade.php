@@ -346,12 +346,57 @@
                 const items = response.data.items;
                 const subtotal = response.data.subtotal;
 
-                const itemsHtml = items.map(item => `
-                    <div class="flex justify-between">
-                        <span>${item.product_name} (${item.variation_name}) x ${item.quantity}</span>
-                        <span>£${item.total.toFixed(2)}</span>
-                    </div>
-                `).join('');
+                const itemsHtml = items.map(item => {
+                    const price = parseFloat(item.unit_price || 0);
+                    const quantity = parseInt(item.quantity || 1);
+                    const discountAmount = parseFloat(item.discount_amount || 0) || 0;
+                    const total = parseFloat(item.discounted_total || item.total) || (price * quantity);
+                    const originalTotal = (price * quantity);
+                    const hasDiscount = discountAmount > 0 && total < originalTotal;
+                    
+                    const offerLabel = item.offer?.badge_text || item.offer?.name || null;
+                    const offerType = item.offer?.type || null;
+                    const isBXGY = offerType === 'bxgy_free' || offerType === 'bxgy_discount';
+                    const isDiscount = offerType === 'percentage_discount' || offerType === 'fixed_discount';
+                    
+                    // BXGY and discount offer display
+                    let bxgyDetails = '';
+                    if (isBXGY && item.offer) {
+                        if (offerType === 'bxgy_free') {
+                            bxgyDetails = `<div class="text-xs text-green-700 font-semibold mt-1"><i class="fas fa-gift"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} FREE</div>`;
+                        } else if (offerType === 'bxgy_discount') {
+                            bxgyDetails = `<div class="text-xs text-orange-700 font-semibold mt-1"><i class="fas fa-tag"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} @ ${item.offer.get_discount_percentage}% OFF</div>`;
+                        }
+                    } else if (isDiscount && item.offer) {
+                        if (offerType === 'percentage_discount') {
+                            bxgyDetails = `<div class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-percent"></i> ${item.offer.discount_value}% OFF</div>`;
+                        } else if (offerType === 'fixed_discount') {
+                            bxgyDetails = `<div class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-pound-sign"></i> £${item.offer.discount_value} OFF</div>`;
+                        }
+                    }
+                    
+                    return `
+                        <div class="pb-3 mb-3 border-b border-gray-100 last:border-0 last:pb-0 last:mb-0">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="font-medium text-sm">${item.product_name}</div>
+                                    <div class="text-xs text-gray-600">${item.variation_name} × ${quantity}</div>
+                                    ${offerLabel ? `<span class="inline-flex items-center text-xs font-semibold px-2 py-1 rounded-full text-white mt-1" style="background-color: ${item.offer?.badge_color || '#DC2626'};">${offerLabel}</span>` : ''}
+                                    ${bxgyDetails}
+                                </div>
+                                <div class="text-right">
+                                    ${hasDiscount ? `
+                                        <div class="font-bold text-sm">£${total.toFixed(2)}</div>
+                                        <div class="text-xs text-gray-500 line-through">£${originalTotal.toFixed(2)}</div>
+                                        <div class="text-xs text-green-600 font-semibold">Save £${discountAmount.toFixed(2)}</div>
+                                    ` : `
+                                        <div class="font-bold text-sm">£${total.toFixed(2)}</div>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
                 document.getElementById('order-items').innerHTML = itemsHtml;
 
@@ -393,7 +438,9 @@
                     const formData = {
                         items: this.cart.map(item => ({
                             product_variation_id: item.variation_id,
-                            quantity: item.quantity
+                            quantity: item.quantity,
+                            offer_id: item.offer_id || null,
+                            offer_type: item.offer_type || null
                         })),
                         address_id: parseInt(addressId),
                         delivery_slot_id: parseInt(deliverySlotId),
