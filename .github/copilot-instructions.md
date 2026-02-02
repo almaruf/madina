@@ -28,13 +28,48 @@ The master table that stores all configuration for each shop:
 4. All database queries automatically scoped to `shop_id`
 5. All record creation auto-assigns `shop_id` from ShopContext
 
+### User Roles and shop_id Assignment
+
+**CRITICAL:** Not all users are tied to a specific shop via `shop_id`. The architecture is:
+
+| Role | shop_id | Description |
+|------|---------|-------------|
+| **super_admin** | `NULL` | Platform-wide access, manages all shops and users |
+| **admin** | `NULL` | Can switch between and manage multiple shops |
+| **owner** | `SET` | Owns a specific shop, tied to that shop |
+| **staff** | `SET` | Works at a specific shop, tied to that shop |
+| **customer** | `NULL` | Can order from any shop, linked to shops via orders |
+
+**Key Rules:**
+- **Customers are NOT tied to shops** - they have `shop_id = NULL` and are linked to shops through their orders
+- **Admins can switch shops** - they have `shop_id = NULL` to allow multi-shop management
+- **Owner and Staff are shop-specific** - they have `shop_id` set to their shop
+- **Orders link customers to shops** - orders table has both `user_id` (customer) AND `shop_id` (shop)
+
+**Query Pattern for Shop-Specific Users:**
+```php
+// Find users associated with a shop (in AdminUserController)
+$shopId = ShopContext::getShopId();
+$users = User::where('role', '!=', 'super_admin')
+    ->where(function($q) use ($shopId) {
+        // Owner/Staff with this shop_id
+        $q->where('shop_id', $shopId)
+        // OR admins (can manage any shop)
+          ->orWhere('role', 'admin')
+        // OR customers who have placed orders at this shop
+          ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+              $orderQuery->where('shop_id', $shopId);
+          });
+    })->get();
+```
+
 ### Tenant Tables
-The following tables have `shop_id` foreign keys for complete data isolation:
-- `users` - customers and admins
+The following tables have `shop_id` foreign keys for data isolation:
+- `users` - **nullable** shop_id (NULL for super_admin, admin, customer; SET for owner, staff)
 - `products` - shop's product catalog
 - `product_variations` - product pricing and stock
 - `categories` - product categories
-- `orders` - customer orders
+- `orders` - customer orders (has BOTH user_id and shop_id)
 - `order_items` - order details
 - `addresses` - customer delivery addresses
 - `delivery_slots` - available delivery time slots
@@ -115,9 +150,12 @@ POST /api/admin/shops
 
 ### Important Multi-Tenancy Rules
 - **Never hardcode shop data** - always use `ShopConfigService`
-- **All queries must filter by shop_id** - use `where('shop_id', $shopId)` in custom queries
-- **All records must include shop_id** - auto-assigned from ShopContext when creating records
+- **Not all records need shop_id** - customers, admins, and super_admins have `shop_id = NULL`
+- **Query by shop_id OR relationships** - for customers, find them via orders relationship
+- **Customers link to shops via orders** - orders table has both `user_id` and `shop_id`
+- **Admins can manage multiple shops** - they have `shop_id = NULL` to allow switching
 - **Shop detection happens automatically** - DetectShop middleware runs on every request
+- **When creating owner/staff** - set `shop_id`; when creating admin/customer - leave `shop_id` as NULL
 - **Feature flags** in Shop model control feature availability (check `is_feature_enabled()` method)
 - **Domain-based routing** is preferred in production (setup DNS records to point to your app)
 - **Query parameter fallback** (?shop=slug) works in development/testing
@@ -139,35 +177,61 @@ POST /api/admin/shops
 ## Architecture Principles
 
 ### 0. 🔴 CRITICAL: Admin Page Authentication
-**ALWAYS READ THIS FIRST when creating admin pages that make API calls**
+**Authentication is NOW CENTRALIZED in the layout file**
 
-Every admin page that makes API calls MUST include explicit axios authentication configuration. This is a RECURRING issue.
+**DO NOT add axios authentication setup in individual admin pages!**
 
-**Required code block at START of every admin page `<script>` section:**
+The [admin/layout.blade.php](resources/views/admin/layout.blade.php) file handles ALL axios configuration globally:
+- Automatically loads token from localStorage/sessionStorage
+- Configures axios defaults with Authorization header
+- Sets up request/response interceptors
+- Handles 401/403 errors automatically
+- Redirects to login if token is missing or invalid
+
+**Individual admin pages should:**
+- Simply extend the layout: `@extends('admin.layout')`
+- Make axios calls directly without any auth setup
+- Rely on the layout's centralized configuration
+
+**Example of a clean admin page script:**
 ```javascript
-// CRITICAL: Ensure axios is configured with auth token
-const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-if (!token) {
-    console.error('No auth token found');
-    window.location.href = '/admin/login';
-} else {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    axios.defaults.headers.common['Accept'] = 'application/json';
-    axios.defaults.headers.common['Content-Type'] = 'application/json';
-    console.log('Auth token configured for axios:', token.substring(0, 20) + '...');
-}
+<script>
+    // NO auth setup needed - layout handles it!
+    
+    async function loadData() {
+        try {
+            // Just make the API call - auth header is automatic
+            const response = await axios.get('/api/admin/users');
+            // ... handle response
+        } catch (error) {
+            console.error('Error:', error);
+            // 401 errors are handled automatically by layout
+        }
+    }
+    
+    loadData();
+</script>
 ```
 
-**See `/AUTH_HEADERS_ISSUE.md` for complete details and troubleshooting.**
+**What the layout does automatically:**
+1. Checks for auth token on page load
+2. Redirects to `/admin/login` if no token
+3. Configures axios with `Authorization: Bearer {token}`
+4. Adds request interceptor to ensure token on every request
+5. Adds response interceptor to catch 401/403 and redirect
+6. Verifies token with `/api/auth/user` call
+7. Logs all auth-related actions to console
 
-If you get 401 errors on admin API calls, you forgot this block. Add it BEFORE any axios calls.
+**See `/AUTH_HEADERS_ISSUE.md` for troubleshooting 401 errors.**
 
 ### 1. Authentication & Authorization
 - **Phone-based authentication only** - no passwords
 - OTP verification via Twilio SMS
-- Two user roles: `customer` and `admin`
+- User roles: `super_admin`, `admin`, `owner`, `staff`, `customer`
 - Use Sanctum tokens for API authentication
-- Middleware: `admin` for admin routes, `customer` for customer-specific routes
+- Middleware: `super_admin` for shop management, `admin` for admin routes
+- **Customers register without shop_id** - they can order from any shop
+- **Orders link customers to shops** - each order has both user_id and shop_id
 
 ### 2. API Design
 - RESTful API structure
@@ -300,7 +364,8 @@ public function scopeActive($query)
 2. System generates 6-digit OTP, stores in database with expiry
 3. OTP sent via Twilio (or logged if no credentials)
 4. User submits phone + OTP → `POST /api/auth/verify-otp`
-5. System verifies OTP, creates/updates user, returns Sanctum token
+5. System verifies OTP, creates/updates user (customer with `shop_id` = NULL), returns Sanctum token
+6. Customers can log in from any shop - no shop-specific restriction
 
 ### Order Creation Flow
 1. Validate request (items, quantities, delivery slot, address)
@@ -371,7 +436,8 @@ FREE_DELIVERY_THRESHOLD
 MIN_ORDER_AMOUNT
 ```
 
-##**Never hardcode shop names or details** - always use `ShopConfigService`
+## Security Guidelines
+- **Never hardcode shop names or details** - always use `ShopConfigService`
 - Never expose Twilio/AWS credentials in responses
 - Always validate user ownership before modifying resources
 - Use soft deletes for important data (users, products, orders)
@@ -381,8 +447,7 @@ MIN_ORDER_AMOUNT
 - Admin endpoints must be protected with `admin` middleware
 - Stock management is critical - always use transactions
 - **Feature flags** in shop.json control which features are visible/enabled
-- When creating new features, check if they should be feature-flaggedare
-- Stock management is critical - always use transactions
+- When creating new features, check if they should be feature-flagged
 
 ## Future Enhancements Consideration
 - Payment gateway integration (Stripe, PayPal)
@@ -393,22 +458,22 @@ MIN_ORDER_AMOUNT
 - Push notifications
 - Analytics dashboard
 - Inventory alerts
-- BaShop Configuration**: `config/shop.json` (edit this to rebrand the shop)
+## Project Structure
+- **Shop Configuration**: `config/shop.json` (edit this to rebrand the shop)
 - **Migrations**: `database/migrations/`
 - **Models**: `app/Models/`
 - **Controllers**: `app/Http/Controllers/{Api,Admin}/`
 - **Middleware**: `app/Http/Middleware/`
-- **Services**: `app/Services/` (includes `ShopConfigService`)
-- **Controllers**: `app/Http/Controllers/{Api,Admin}/`
-- **Middleware**: `app/Http/Middleware/`
-- **Services**: `app/Services/`
+- **Services**: `app/Services/` (includes `ShopConfigService`, `ShopContext`)
 - **Routes**: `routes/{api,web,console}.php`
 - **Config**: `config/`
 - **Views**: `resources/views/`
 - **Frontend Assets**: `resources/{css,js}/`
 
 ---
-**Never hardcode shop-specific values** - use ShopConfigService
+
+## Development Guidelines
+1. **Never hardcode shop-specific values** - use ShopConfigService
 2. Follow the established patterns and conventions
 3. Add appropriate validation and error handling
 4. Use database transactions for critical operations
@@ -416,8 +481,5 @@ MIN_ORDER_AMOUNT
 6. Test authentication and authorization thoroughly
 7. **Check feature flags** before showing/enabling optional features
 8. When adding shop-specific data, consider if it belongs in shop.json
-9. Add appropriate validation and error handling
-3. Use database transactions for critical operations
-4. Keep controllers thin, use services for business logic
-5. Test authentication and authorization thoroughly
+9. When querying users by shop, remember customers are linked via orders, not shop_id
 6. Update this file when adding new patterns or architectural decisions

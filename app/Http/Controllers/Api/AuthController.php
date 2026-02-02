@@ -67,40 +67,31 @@ class AuthController extends Controller
             ], 403);
         }
 
-        $shopId = app(\App\Services\ShopContext::class)->getShopId();
-
-        // First check if user exists with this phone number (regardless of shop)
+        // First check if user exists with this phone number
         $existingUser = User::where('phone', $request->phone)->first();
 
         if ($existingUser) {
-            // User exists - check if they can access this shop
-            if ($existingUser->role === 'super_admin' || $existingUser->shop_id === $shopId) {
-                // Allow super_admin or users from this shop
-                if (!$existingUser->phone_verified) {
-                    $existingUser->update([
-                        'phone_verified' => true,
-                        'phone_verified_at' => now(),
-                    ]);
-                }
-                
-                $token = $existingUser->createToken('auth-token')->plainTextToken;
-
-                return response()->json([
-                    'message' => 'Login successful',
-                    'user' => $existingUser,
-                    'token' => $token,
+            // User exists - allow login (customers have no shop_id, admins do)
+            // Super admins and admins can access any shop
+            // Customers can place orders at any shop
+            if (!$existingUser->phone_verified) {
+                $existingUser->update([
+                    'phone_verified' => true,
+                    'phone_verified_at' => now(),
                 ]);
-            } else {
-                // User exists but belongs to a different shop
-                return response()->json([
-                    'message' => 'This phone number is already registered with another shop.'
-                ], 403);
             }
+            
+            $token = $existingUser->createToken('auth-token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => $existingUser,
+                'token' => $token,
+            ]);
         }
 
-        // Create new customer user for this shop
+        // Create new customer user (no shop_id - customers are linked to shops via orders)
         $user = User::create([
-            'shop_id' => $shopId,
             'phone' => $request->phone,
             'phone_verified' => true,
             'phone_verified_at' => now(),

@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         $superAdmin = User::create([
             'phone' => '+4407849261469',
             'email' => 'maruf.sylhet@gmail.com',
-            'name' => 'Al Maruf',
+            'name' => 'Al Maruf (Super Admin)',
             'role' => 'super_admin',
             'phone_verified' => true,
             'phone_verified_at' => now(),
@@ -52,9 +52,33 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Create admin user for the shop (can manage products, orders, etc for this shop)
-        User::create([
+        // Create owner user (tied to the shop)
+        $owner = User::create([
+            'phone' => '+4407849261471',
+            'email' => 'owner@example.com',
+            'name' => 'Shop Owner',
+            'role' => 'owner',
+            'phone_verified' => true,
+            'phone_verified_at' => now(),
+            'is_active' => true,
             'shop_id' => $shop->id,
+        ]);
+
+        // Create staff user (tied to the shop)
+        $staff = User::create([
+            'phone' => '+4407849261472',
+            'email' => 'staff@example.com',
+            'name' => 'Shop Staff',
+            'role' => 'staff',
+            'phone_verified' => true,
+            'phone_verified_at' => now(),
+            'is_active' => true,
+            'shop_id' => $shop->id,
+        ]);
+
+        // Create admin user (can switch between shops, not tied to specific shop)
+        $admin = User::create([
+            'shop_id' => null,
             'phone' => '+441234567890',
             'name' => 'Admin User',
             'email' => 'admin@example.com',
@@ -64,9 +88,9 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Create test customer
-        User::create([
-            'shop_id' => $shop->id,
+        // Create test customer (NOT tied to any shop - linked via orders)
+        $customer = User::create([
+            'shop_id' => null, // Customers have no shop_id - they're linked to shops via orders
             'phone' => '+441234567891',
             'name' => 'Test Customer',
             'email' => 'customer@test.com',
@@ -351,9 +375,6 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]);
         }
-
-        // Get customer for orders
-        $customer = User::where('role', 'customer')->where('shop_id', $shop->id)->first();
 
         // Create customer address
         $address = Address::create([

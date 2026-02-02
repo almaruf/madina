@@ -6,7 +6,6 @@
     <title>@yield('title', 'Admin Dashboard') - {{ app(\App\Services\ShopConfigService::class)->name() }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -86,71 +85,36 @@
     </style>
 </head>
 <body class="bg-gray-100">
+    <!-- Axios is now configured via Vite in resources/js/bootstrap.js -->
     <script>
-        // Authentication and Axios setup - runs after axios is loaded
-        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-        
-        if (!token) {
-            window.location.href = '/admin/login';
+        // Verify axios is loaded and configured
+        if (typeof axios === 'undefined') {
+            console.error('CRITICAL: Axios not loaded! Check Vite build.');
         } else {
-            // Store in localStorage for persistence
-            localStorage.setItem('auth_token', token);
+            console.log('[Layout] Axios loaded via Vite, configured:', !!window.axiosConfigured);
             
-            // Configure axios globally
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            axios.defaults.headers.common['Accept'] = 'application/json';
-            axios.defaults.headers.common['Content-Type'] = 'application/json';
-            
-            // Request interceptor to ensure token is always sent
-            axios.interceptors.request.use(
-                config => {
-                    const currentToken = localStorage.getItem('auth_token');
-                    if (currentToken) {
-                        config.headers.Authorization = `Bearer ${currentToken}`;
-                    }
-                    return config;
-                },
-                error => Promise.reject(error)
-            );
-            
-            // Set up error interceptor
-            axios.interceptors.response.use(
-                response => response,
-                error => {
-                    // Handle 401 Unauthorized errors
-                    if (error.response?.status === 401) {
-                        console.warn('Token expired or invalid, redirecting to login...');
-                        localStorage.removeItem('auth_token');
-                        sessionStorage.removeItem('auth_token');
-                        // Use replace to prevent back button from returning to protected page
-                        window.location.replace('/admin/login');
-                        return Promise.reject(error);
-                    }
-                    
-                    // Handle 403 Forbidden errors
-                    if (error.response?.status === 403) {
-                        console.error('Access forbidden:', error);
-                        toast.error('You do not have permission to perform this action');
-                        return Promise.reject(error);
-                    }
-                    
-                    return Promise.reject(error);
-                }
-            );
-            
-            // Verify token is valid on page load
-            axios.get('/api/auth/user')
-                .then(() => {
-                    console.log('Authentication verified');
-                })
-                .catch(error => {
-                    if (error.response?.status === 401) {
-                        console.warn('Invalid token detected on page load');
-                        localStorage.removeItem('auth_token');
-                        sessionStorage.removeItem('auth_token');
-                        window.location.replace('/admin/login');
-                    }
-                });
+            // Verify token on page load
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            if (!token && !window.location.pathname.includes('/login')) {
+                console.error('[Layout] No auth token found, redirecting to login');
+                window.location.href = '/admin/login';
+            } else if (token) {
+                // Verify token is valid
+                axios.get('/api/auth/user')
+                    .then(response => {
+                        console.log('[Layout] Authentication verified for user:', response.data.email || response.data.phone);
+                    })
+                    .catch(error => {
+                        if (error.response?.status === 401) {
+                            console.warn('[Layout] Invalid token detected on page load');
+                            localStorage.removeItem('auth_token');
+                            sessionStorage.removeItem('auth_token');
+                            if (!window.location.pathname.includes('/login')) {
+                                window.location.replace('/admin/login');
+                            }
+                        }
+                    });
+            }
         }
     </script>
     

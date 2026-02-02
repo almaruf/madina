@@ -184,6 +184,10 @@
         
         // Load orders
         try {
+            console.log('About to fetch orders for user:', userId);
+            console.log('Axios interceptors registered:', window.axiosInterceptorsRegistered);
+            console.log('Current auth header:', axios.defaults.headers.common['Authorization']);
+            
             const ordersResponse = await axios.get(`/api/admin/orders?user_id=${userId}`);
             const orders = ordersResponse.data.data || ordersResponse.data;
             
@@ -295,6 +299,13 @@
     }
 
     // Load user on page load
-    loadUser();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait a tiny bit to ensure axios interceptors are fully registered
+        setTimeout(() => {
+            console.log('Page loaded, axios configured:', !!window.axiosConfigured);
+            console.log('Axios interceptors registered:', !!window.axiosInterceptorsRegistered);
+            loadUser();
+        }, 100);
+    });
 </script>
 @endsection

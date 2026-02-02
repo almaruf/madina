@@ -42,8 +42,11 @@ class DashboardController extends Controller
 
         // Additional stats
         $totalProducts = Product::where('shop_id', $shopId)->count();
-        $totalCustomers = User::where('shop_id', $shopId)
-            ->where('role', 'customer')
+        // Count customers who have placed orders at this shop
+        $totalCustomers = User::where('role', 'customer')
+            ->whereHas('orders', function($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })
             ->count();
 
         return response()->json([

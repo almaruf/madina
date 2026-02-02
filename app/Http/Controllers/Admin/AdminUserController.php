@@ -62,16 +62,24 @@ class AdminUserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $admin = User::create([
+        // Determine if this is owner/staff (needs shop_id) or admin (no shop_id)
+        $role = $request->input('role', 'admin');
+        $userData = [
             'phone' => $request->phone,
             'email' => $request->email,
             'name' => $request->name,
-            'shop_id' => $request->shop_id,
-            'role' => 'admin',
+            'role' => $role,
             'phone_verified' => true,
             'phone_verified_at' => now(),
             'is_active' => true,
-        ]);
+        ];
+        
+        // Only owner and staff are tied to specific shops
+        if (in_array($role, ['owner', 'staff'])) {
+            $userData['shop_id'] = $request->shop_id;
+        }
+        
+        $admin = User::create($userData);
 
         return response()->json([
             'message' => 'Admin user created successfully',
@@ -130,7 +138,25 @@ class AdminUserController extends Controller
     public function allUsers(Request $request)
     {
         $shopId = ShopContext::getShopId();
-        $query = User::where('shop_id', $shopId)->withCount('orders');
+        
+        // Get users associated with this shop:
+        // - Owner/Staff with this shop_id
+        // - Customers who have placed orders at this shop
+        // - Admins (they can manage any shop, shown for convenience)
+        // - Exclude super_admins (they have their own management interface)
+        $query = User::where('role', '!=', 'super_admin')
+            ->where(function($q) use ($shopId) {
+                // Owner/Staff with this shop_id
+                $q->where('shop_id', $shopId)
+                // OR admins (can manage any shop)
+                  ->orWhere('role', 'admin')
+                // OR customers who have placed orders at this shop
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->withCount(['orders' => function($orderQuery) use ($shopId) {
+                $orderQuery->where('shop_id', $shopId);
+            }]);
 
         // Handle archived filter
         if ($request->has('archived') && $request->archived == '1') {
@@ -167,9 +193,17 @@ class AdminUserController extends Controller
             return response()->json(User::withTrashed()->with('shop')->findOrFail($id));
         }
         
-        // Regular admins can only view users in their shop
+        // Regular admins can only view users in their shop, customers who ordered, or other admins
         $shopId = ShopContext::getShopId();
-        $user = User::withTrashed()->with('shop')->where('shop_id', $shopId)->findOrFail($id);
+        $user = User::withTrashed()->with('shop')
+            ->where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })
+            ->findOrFail($id);
         
         return response()->json($user);
     }
@@ -186,7 +220,13 @@ class AdminUserController extends Controller
             $user = User::findOrFail($id);
         } else {
             $shopId = ShopContext::getShopId();
-            $user = User::where('shop_id', $shopId)->findOrFail($id);
+            $user = User::where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->findOrFail($id);
         }
         
         // Super admin can only be edited by themselves
@@ -221,7 +261,13 @@ class AdminUserController extends Controller
     public function destroyUser($id)
     {
         $shopId = ShopContext::getShopId();
-        $user = User::where('shop_id', $shopId)->findOrFail($id);
+        $user = User::where(function($q) use ($shopId) {
+            $q->where('shop_id', $shopId)
+              ->orWhere('role', 'admin')
+              ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                  $orderQuery->where('shop_id', $shopId);
+              });
+        })->findOrFail($id);
         $user->delete();
 
         return response()->json(['message' => 'User archived successfully']);
@@ -233,7 +279,13 @@ class AdminUserController extends Controller
     public function restoreUser($id)
     {
         $shopId = ShopContext::getShopId();
-        $user = User::onlyTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        $user = User::onlyTrashed()->where(function($q) use ($shopId) {
+            $q->where('shop_id', $shopId)
+              ->orWhere('role', 'admin')
+              ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                  $orderQuery->where('shop_id', $shopId);
+              });
+        })->findOrFail($id);
         $user->restore();
 
         return response()->json(['message' => 'User restored successfully']);
@@ -245,7 +297,13 @@ class AdminUserController extends Controller
     public function forceDeleteUser($id)
     {
         $shopId = ShopContext::getShopId();
-        $user = User::withTrashed()->where('shop_id', $shopId)->findOrFail($id);
+        $user = User::withTrashed()->where(function($q) use ($shopId) {
+            $q->where('shop_id', $shopId)
+              ->orWhere('role', 'admin')
+              ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                  $orderQuery->where('shop_id', $shopId);
+              });
+        })->findOrFail($id);
         $user->forceDelete();
 
         return response()->json(['message' => 'User permanently deleted']);
@@ -262,9 +320,15 @@ class AdminUserController extends Controller
         if ($authUser->role === 'super_admin') {
             $addresses = \App\Models\Address::where('user_id', $userId)->get();
         } else {
-            // Regular admins can only view addresses for users in their shop
+            // Regular admins can only view addresses for users in their shop or customers who ordered from their shop
             $shopId = ShopContext::getShopId();
-            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+            $user = User::where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->findOrFail($userId);
             $addresses = \App\Models\Address::where('user_id', $userId)->get();
         }
         
@@ -283,7 +347,13 @@ class AdminUserController extends Controller
             $user = User::findOrFail($userId);
         } else {
             $shopId = ShopContext::getShopId();
-            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+            $user = User::where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->findOrFail($userId);
         }
 
         $validator = Validator::make($request->all(), [
@@ -305,10 +375,11 @@ class AdminUserController extends Controller
                 ->update(['is_default' => false]);
         }
 
+        $shopId = ShopContext::getShopId();
         $address = \App\Models\Address::create(array_merge(
             $request->all(),
             [
-                'shop_id' => $user->shop_id,
+                'shop_id' => $shopId,
                 'user_id' => $userId
             ]
         ));
@@ -328,7 +399,13 @@ class AdminUserController extends Controller
             $user = User::findOrFail($userId);
         } else {
             $shopId = ShopContext::getShopId();
-            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+            $user = User::where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->findOrFail($userId);
         }
 
         $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);
@@ -370,7 +447,13 @@ class AdminUserController extends Controller
             $user = User::findOrFail($userId);
         } else {
             $shopId = ShopContext::getShopId();
-            $user = User::where('shop_id', $shopId)->findOrFail($userId);
+            $user = User::where(function($q) use ($shopId) {
+                $q->where('shop_id', $shopId)
+                  ->orWhere('role', 'admin')
+                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
+                      $orderQuery->where('shop_id', $shopId);
+                  });
+            })->findOrFail($userId);
         }
 
         $address = \App\Models\Address::where('user_id', $userId)->findOrFail($addressId);

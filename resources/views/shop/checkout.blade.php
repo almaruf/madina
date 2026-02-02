@@ -3,7 +3,7 @@
 @section('title', 'Checkout')
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="max-w-4xl mx-auto px-4 py-8">
     <!-- Auth Check -->
     <div id="auth-check" class="hidden">
         <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-8 rounded-lg text-center">
@@ -18,25 +18,27 @@
 
     <div id="checkout-content">
         <!-- Page Header -->
-
-        <div>
+        <div class="mb-8">
+            <a href="/cart" class="text-green-600 hover:text-green-700 mb-4 inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                Back to Cart
+            </a>
             <h1 class="text-3xl font-bold mt-4">Checkout</h1>
         </div>
 
-    <form id="checkout-form">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded flex items-center gap-2 mb-4">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span></span>
-                </div>
-                <div id="success-message" class="hidden bg-green-50 border border-green-200 text-green-700 p-4 rounded flex items-center gap-2 mb-4">
-                    <i class="fas fa-check-circle"></i>
-                    <span></span>
-                </div>
-                <!-- User Addresses -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
+    <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded mb-6 flex items-center gap-2">
+        <i class="fas fa-exclamation-circle"></i>
+        <span></span>
+    </div>
+    <div id="success-message" class="hidden bg-green-50 border border-green-200 text-green-700 p-4 rounded mb-6 flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span></span>
+    </div>
+
+    <form id="checkout-form" class="space-y-8">
+        <!-- User Addresses -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
             
             <div id="user-addresses" class="space-y-3">
                 <p class="text-gray-600">Loading your addresses...</p>
@@ -45,15 +47,9 @@
             <div id="new-address-form" class="hidden mt-4 pt-4 border-t">
                 <h3 class="font-semibold mb-3">Add New Address</h3>
                 <div class="space-y-4">
-
-                    <!-- Postcode Search -->
                     <div>
-                        <label class="block text-sm font-medium mb-1">Search by Postcode *</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="postcode-search" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Enter postcode (e.g. SW1A 1AA)">
-                            <button type="button" onclick="searchPostcode()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Search</button>
-                        </div>
-                        <div id="postcode-results" class="mt-2"></div>
+                        <label class="block text-sm font-medium mb-1">Phone Number *</label>
+                        <input type="tel" id="new_phone" placeholder="+44..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>
 
                     <div>
@@ -70,7 +66,6 @@
                         <div>
                             <label class="block text-sm font-medium mb-1">City *</label>
                             <input type="text" id="new_city" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Postcode *</label>
                             <input type="text" id="new_postcode" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
@@ -87,23 +82,23 @@
                 </div>
             </div>
 
-            <a href="/account?tab=addresses&open=1" class="mt-4 inline-block text-green-600 hover:text-green-700 font-semibold">
+            <button type="button" onclick="checkout.toggleNewAddressForm()" class="mt-4 text-green-600 hover:text-green-700 font-semibold">
                 + Add New Address
-            </a>
-            </div>
+            </button>
+        </div>
 
-                <!-- Delivery Slot -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold mb-4">Delivery Slot *</h2>
+        <!-- Delivery Slot -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">Delivery Slot *</h2>
             
             <div id="delivery-slots" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <p class="text-gray-600">Loading delivery slots...</p>
             </div>
-            </div>
+        </div>
 
-                <!-- Payment Method -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold mb-4">Payment Method *</h2>
+        <!-- Payment Method -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">Payment Method *</h2>
             
             <div class="space-y-3">
                 <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-green-50">
@@ -115,56 +110,43 @@
                     <span class="ml-3">Card Payment</span>
                 </label>
             </div>
-                </div>
+        </div>
 
-                <!-- Submit Button -->
-                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg flex items-center justify-center gap-2" id="submit-btn">
-                    <i class="fas fa-check"></i>
-                    Place Order
-                </button>
-
-                <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Cart
-                </a>
+        <!-- Order Summary -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+            
+            <div id="order-items" class="space-y-2 mb-4 pb-4 border-b border-green-200">
+                <!-- Items will be rendered here -->
             </div>
 
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-24 mt-8">
-                    <!-- Order Summary -->
-                    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
-                    
-                    <div id="order-items" class="space-y-3 mb-6 border-b border-gray-200 pb-4">
-                        <!-- Items will be rendered here -->
-                    </div>
-
-                    <div class="space-y-3 mb-6">
-                        <div class="flex justify-between">
-                            <span>Subtotal:</span>
-                            <span id="summary-subtotal">£0.00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Delivery Fee:</span>
-                            <span id="summary-delivery-fee">£5.00</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between text-xl font-bold mb-6">
-                        <span>Total:</span>
-                        <span id="summary-total">£0.00</span>
-                    </div>
-
-                    <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Cart
-                    </a>
-
+            <div class="space-y-2 text-lg">
+                <div class="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span id="summary-subtotal">£0.00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Delivery Fee:</span>
+                    <span id="summary-delivery-fee">£5.00</span>
+                </div>
+                <div class="flex justify-between font-bold text-xl">
+                    <span>Total:</span>
+                    <span id="summary-total">£0.00</span>
                 </div>
             </div>
         </div>
 
+        <!-- Submit Button -->
+        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg flex items-center justify-center gap-2" id="submit-btn">
+            <i class="fas fa-check"></i>
+            Place Order
+        </button>
+
+        <a href="/cart" class="block text-center text-green-600 hover:text-green-700 font-medium">
+            <i class="fas fa-arrow-left"></i>
+            Back to Cart
+        </a>
     </form>
-    </div>
 </div>
 
 <script>
@@ -253,6 +235,7 @@
                                 <div class="font-semibold">${addr.address_line_1}</div>
                                 ${addr.address_line_2 ? `<div class="text-sm text-gray-600">${addr.address_line_2}</div>` : ''}
                                 <div class="text-sm text-gray-600">${addr.city}, ${addr.postcode}</div>
+                                ${addr.phone ? `<div class="text-sm text-gray-500">Phone: ${addr.phone}</div>` : ''}
                                 ${addr.is_default ? '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded mt-1 inline-block">Default</span>' : ''}
                             </div>
                         </label>
@@ -260,7 +243,8 @@
                     document.getElementById('user-addresses').innerHTML = html;
                     this.selectedAddressId = addresses.find(a => a.is_default)?.id || addresses[0].id;
                 } else {
-                    document.getElementById('user-addresses').innerHTML = '<p class="text-gray-600">No saved addresses. <a href="/account?tab=addresses&open=1" class="text-green-600 hover:text-green-700 font-semibold">Add an address in your account</a>.</p>';
+                    document.getElementById('user-addresses').innerHTML = '<p class="text-gray-600">No saved addresses. Please add a new one below.</p>';
+                    document.getElementById('new-address-form').classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Error loading addresses:', error);
@@ -269,7 +253,8 @@
         }
 
         toggleNewAddressForm() {
-            window.location.href = '/account?tab=addresses&open=1';
+            const form = document.getElementById('new-address-form');
+            form.classList.toggle('hidden');
         }
 
         async saveNewAddress() {
@@ -278,10 +263,11 @@
                 address_line_2: document.getElementById('new_address_line_2').value,
                 city: document.getElementById('new_city').value,
                 postcode: document.getElementById('new_postcode').value,
+                phone: document.getElementById('new_phone').value,
             };
 
             if (!addressData.address_line_1 || !addressData.city || !addressData.postcode) {
-                this.showError('Please fill in all required fields');
+                alert('Please fill in all required fields');
                 return;
             }
 
@@ -298,9 +284,9 @@
                 document.getElementById('new_address_line_2').value = '';
                 document.getElementById('new_city').value = '';
                 document.getElementById('new_postcode').value = '';
-                document.getElementById('new_country').value = 'United Kingdom';
+                document.getElementById('new_phone').value = '';
             } catch (error) {
-                this.showError('Failed to save address: ' + (error.response?.data?.message || error.message));
+                alert('Failed to save address: ' + (error.response?.data?.message || error.message));
             }
         }
 
@@ -346,57 +332,12 @@
                 const items = response.data.items;
                 const subtotal = response.data.subtotal;
 
-                const itemsHtml = items.map(item => {
-                    const price = parseFloat(item.unit_price || 0);
-                    const quantity = parseInt(item.quantity || 1);
-                    const discountAmount = parseFloat(item.discount_amount || 0) || 0;
-                    const total = parseFloat(item.discounted_total || item.total) || (price * quantity);
-                    const originalTotal = (price * quantity);
-                    const hasDiscount = discountAmount > 0 && total < originalTotal;
-                    
-                    const offerLabel = item.offer?.badge_text || item.offer?.name || null;
-                    const offerType = item.offer?.type || null;
-                    const isBXGY = offerType === 'bxgy_free' || offerType === 'bxgy_discount';
-                    const isDiscount = offerType === 'percentage_discount' || offerType === 'fixed_discount';
-                    
-                    // BXGY and discount offer display
-                    let bxgyDetails = '';
-                    if (isBXGY && item.offer) {
-                        if (offerType === 'bxgy_free') {
-                            bxgyDetails = `<div class="text-xs text-green-700 font-semibold mt-1"><i class="fas fa-gift"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} FREE</div>`;
-                        } else if (offerType === 'bxgy_discount') {
-                            bxgyDetails = `<div class="text-xs text-orange-700 font-semibold mt-1"><i class="fas fa-tag"></i> Buy ${item.offer.buy_quantity} Get ${item.offer.get_quantity} @ ${item.offer.get_discount_percentage}% OFF</div>`;
-                        }
-                    } else if (isDiscount && item.offer) {
-                        if (offerType === 'percentage_discount') {
-                            bxgyDetails = `<div class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-percent"></i> ${item.offer.discount_value}% OFF</div>`;
-                        } else if (offerType === 'fixed_discount') {
-                            bxgyDetails = `<div class="text-xs text-blue-700 font-semibold mt-1"><i class="fas fa-pound-sign"></i> £${item.offer.discount_value} OFF</div>`;
-                        }
-                    }
-                    
-                    return `
-                        <div class="pb-3 mb-3 border-b border-gray-100 last:border-0 last:pb-0 last:mb-0">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="font-medium text-sm">${item.product_name}</div>
-                                    <div class="text-xs text-gray-600">${item.variation_name} × ${quantity}</div>
-                                    ${offerLabel ? `<span class="inline-flex items-center text-xs font-semibold px-2 py-1 rounded-full text-white mt-1" style="background-color: ${item.offer?.badge_color || '#DC2626'};">${offerLabel}</span>` : ''}
-                                    ${bxgyDetails}
-                                </div>
-                                <div class="text-right">
-                                    ${hasDiscount ? `
-                                        <div class="font-bold text-sm">£${total.toFixed(2)}</div>
-                                        <div class="text-xs text-gray-500 line-through">£${originalTotal.toFixed(2)}</div>
-                                        <div class="text-xs text-green-600 font-semibold">Save £${discountAmount.toFixed(2)}</div>
-                                    ` : `
-                                        <div class="font-bold text-sm">£${total.toFixed(2)}</div>
-                                    `}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                const itemsHtml = items.map(item => `
+                    <div class="flex justify-between">
+                        <span>${item.product_name} (${item.variation_name}) x ${item.quantity}</span>
+                        <span>£${item.total.toFixed(2)}</span>
+                    </div>
+                `).join('');
 
                 document.getElementById('order-items').innerHTML = itemsHtml;
 
@@ -438,9 +379,7 @@
                     const formData = {
                         items: this.cart.map(item => ({
                             product_variation_id: item.variation_id,
-                            quantity: item.quantity,
-                            offer_id: item.offer_id || null,
-                            offer_type: item.offer_type || null
+                            quantity: item.quantity
                         })),
                         address_id: parseInt(addressId),
                         delivery_slot_id: parseInt(deliverySlotId),
@@ -461,23 +400,7 @@
                 } catch (error) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Place Order';
-                    console.error('Order error:', error.response?.data);
-                    
-                    // Extract error message - check multiple possible locations
-                    let message = 'Failed to place order';
-                    if (error.response?.data) {
-                        const data = error.response.data;
-                        if (data.error) {
-                            message = data.message + ': ' + data.error;
-                        } else if (data.message) {
-                            message = data.message;
-                        } else if (data.errors) {
-                            // Validation errors
-                            const firstError = Object.values(data.errors)[0];
-                            message = Array.isArray(firstError) ? firstError[0] : firstError;
-                        }
-                    }
-                    
+                    const message = error.response?.data?.message || error.response?.data?.errors?.[0] || 'Failed to place order';
                     this.showError(message);
                 }
             });
