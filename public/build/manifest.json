@@ -1,11 +1,179 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-BNBJHXiz.css",
+    "file": "assets/app-DvJOIWrB.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
+  "resources/js/admin/admin-users.js": {
+    "file": "assets/admin-users-CEi1XyHe.js",
+    "name": "admin-users",
+    "src": "resources/js/admin/admin-users.js",
+    "isEntry": true
+  },
+  "resources/js/admin/categories.js": {
+    "file": "assets/categories-6V6-D1me.js",
+    "name": "categories",
+    "src": "resources/js/admin/categories.js",
+    "isEntry": true
+  },
+  "resources/js/admin/categories/edit.js": {
+    "file": "assets/edit-DL8nm9-i.js",
+    "name": "edit",
+    "src": "resources/js/admin/categories/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/categories/show.js": {
+    "file": "assets/show-CTXw1ajX.js",
+    "name": "show",
+    "src": "resources/js/admin/categories/show.js",
+    "isEntry": true
+  },
+  "resources/js/admin/dashboard.js": {
+    "file": "assets/dashboard-DpChtOJq.js",
+    "name": "dashboard",
+    "src": "resources/js/admin/dashboard.js",
+    "isEntry": true
+  },
+  "resources/js/admin/delivery-slots.js": {
+    "file": "assets/delivery-slots-Bkj8Eevc.js",
+    "name": "delivery-slots",
+    "src": "resources/js/admin/delivery-slots.js",
+    "isEntry": true
+  },
+  "resources/js/admin/layout.js": {
+    "file": "assets/layout-dSAyZoHH.js",
+    "name": "layout",
+    "src": "resources/js/admin/layout.js",
+    "isEntry": true
+  },
+  "resources/js/admin/login.js": {
+    "file": "assets/login-Y4vZe64X.js",
+    "name": "login",
+    "src": "resources/js/admin/login.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers.js": {
+    "file": "assets/offers-DRxwrZly.js",
+    "name": "offers",
+    "src": "resources/js/admin/offers.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/create-bxgy.js": {
+    "file": "assets/create-bxgy-B9ye5GZp.js",
+    "name": "create-bxgy",
+    "src": "resources/js/admin/offers/create-bxgy.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/create-percentage-discount.js": {
+    "file": "assets/create-percentage-discount-DbyvUcfb.js",
+    "name": "create-percentage-discount",
+    "src": "resources/js/admin/offers/create-percentage-discount.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/create.js": {
+    "file": "assets/create-DRdy30s8.js",
+    "name": "create",
+    "src": "resources/js/admin/offers/create.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/edit-bxgy.js": {
+    "file": "assets/edit-bxgy-PpNWEJQF.js",
+    "name": "edit-bxgy",
+    "src": "resources/js/admin/offers/edit-bxgy.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/edit-percentage-discount.js": {
+    "file": "assets/edit-percentage-discount-BVzdMPRI.js",
+    "name": "edit-percentage-discount",
+    "src": "resources/js/admin/offers/edit-percentage-discount.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/edit.js": {
+    "file": "assets/edit-pY1O40vk.js",
+    "name": "edit",
+    "src": "resources/js/admin/offers/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/orders.js": {
+    "file": "assets/orders-C7x4WZuj.js",
+    "name": "orders",
+    "src": "resources/js/admin/orders.js",
+    "isEntry": true
+  },
+  "resources/js/admin/orders/show.js": {
+    "file": "assets/show-1mIdKd2I.js",
+    "name": "show",
+    "src": "resources/js/admin/orders/show.js",
+    "isEntry": true
+  },
+  "resources/js/admin/products.js": {
+    "file": "assets/products-B0z8WxME.js",
+    "name": "products",
+    "src": "resources/js/admin/products.js",
+    "isEntry": true
+  },
+  "resources/js/admin/products/edit.js": {
+    "file": "assets/edit-DDq3-C7_.js",
+    "name": "edit",
+    "src": "resources/js/admin/products/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/products/show.js": {
+    "file": "assets/show-BP6jzju5.js",
+    "name": "show",
+    "src": "resources/js/admin/products/show.js",
+    "isEntry": true
+  },
+  "resources/js/admin/queue/index.js": {
+    "file": "assets/index-B3awwVHS.js",
+    "name": "index",
+    "src": "resources/js/admin/queue/index.js",
+    "isEntry": true
+  },
+  "resources/js/admin/shops.js": {
+    "file": "assets/shops-CXwYo0Ub.js",
+    "name": "shops",
+    "src": "resources/js/admin/shops.js",
+    "isEntry": true
+  },
+  "resources/js/admin/shops/create.js": {
+    "file": "assets/create-BXLBjt8L.js",
+    "name": "create",
+    "src": "resources/js/admin/shops/create.js",
+    "isEntry": true
+  },
+  "resources/js/admin/shops/edit.js": {
+    "file": "assets/edit-eVg6tFOK.js",
+    "name": "edit",
+    "src": "resources/js/admin/shops/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/shops/show.js": {
+    "file": "assets/show-QhOKBym-.js",
+    "name": "show",
+    "src": "resources/js/admin/shops/show.js",
+    "isEntry": true
+  },
+  "resources/js/admin/users.js": {
+    "file": "assets/users-BOmhrNZi.js",
+    "name": "users",
+    "src": "resources/js/admin/users.js",
+    "isEntry": true
+  },
+  "resources/js/admin/users/edit.js": {
+    "file": "assets/edit-ChtpgDL8.js",
+    "name": "edit",
+    "src": "resources/js/admin/users/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/users/show.js": {
+    "file": "assets/show-WBGQOzWc.js",
+    "name": "show",
+    "src": "resources/js/admin/users/show.js",
+    "isEntry": true
+  },
   "resources/js/app.js": {
-    "file": "assets/app-DIuewKhF.js",
+    "file": "assets/app-DC5WTDa8.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

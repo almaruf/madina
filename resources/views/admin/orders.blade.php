@@ -5,164 +5,54 @@
 @section('content')
 <h2 class="text-3xl font-bold mb-6">Orders</h2>
 
-<!-- Tabs -->
-<div class="mb-4 border-b border-gray-200">
-    <nav class="-mb-px flex space-x-8">
-        <button onclick="switchTab('active')" id="tab-active" class="tab-button border-b-2 border-green-600 py-2 px-1 text-sm font-medium text-green-600">
-            Active
-        </button>
-        <button onclick="switchTab('archived')" id="tab-archived" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-            Archived
-        </button>
-    </nav>
+<!-- Tabs and Status Filter -->
+<div class="mb-4 flex justify-between items-center">
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+            <button id="tab-active" class="tab-button border-b-2 border-green-600 py-2 px-1 text-sm font-medium text-green-600">
+                Active
+            </button>
+            <button id="tab-archived" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Archived
+            </button>
+        </nav>
+    </div>
+    
+    <div>
+        <select id="status-filter" class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="ready">Ready</option>
+            <option value="out_for_delivery">Out for Delivery</option>
+            <option value="delivered">Delivered</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+    </div>
 </div>
 
 <div class="bg-white rounded-lg shadow">
-    <table class="min-w-full divide-y divide-gray-200" id="orders-table">
+    <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200" id="orders-table">
             <!-- Orders will be loaded here -->
         </tbody>
     </table>
 </div>
+@endsection
 
-<script>
-    let currentTab = 'active';
-    
-    function switchTab(tab) {
-        currentTab = tab;
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('border-green-600', 'text-green-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
-        });
-        document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
-        document.getElementById(`tab-${tab}`).classList.add('border-green-600', 'text-green-600');
-        loadOrders();
-    }
-    
-    async function loadOrders() {
-        try {
-            // Ensure token is set
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                console.error('No auth token found');
-                window.location.href = '/admin/login';
-                return;
-            }
-            
-            const url = currentTab === 'archived' ? '/api/admin/orders?archived=1' : '/api/admin/orders';
-            console.log('Loading orders from:', url);
-            
-            const response = await axios.get(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            const orders = response.data.data || response.data;
-            const tbody = document.querySelector('#orders-table tbody');
-            
-            if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No orders found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = orders.map(order => {
-                const totalAmount = parseFloat(order.total || 0).toFixed(2);
-                const userName = order.user?.name || order.user?.phone || 'N/A';
-                const createdDate = new Date(order.created_at).toLocaleDateString();
-                
-                return `
-                    <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">#${order.id}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900">${userName}</td>
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-900">£${totalAmount}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs rounded ${getStatusColor(order.status)}">
-                                ${order.status.replace('_', ' ')}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs rounded ${getPaymentColor(order.payment_status)}">
-                                ${order.payment_status}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-500">${createdDate}</td>
-                        <td class="px-6 py-4 text-sm">
-                            <a href="/admin/orders/${order.id}" class="text-blue-600 hover:text-blue-900">View Details</a>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        } catch (error) {
-            console.error('Error loading orders:', error);
-            console.error('Error details:', error.response?.data);
-            console.error('Error status:', error.response?.status);
-            
-            if (error.response?.status === 401) {
-                console.error('Authentication failed - redirecting to login');
-                localStorage.removeItem('auth_token');
-                window.location.href = '/admin/login';
-            } else {
-                const message = error.response?.data?.message || 'Failed to load orders';
-                toast.error(message);
-            }
-        }
-    }
-    
-    function getStatusColor(status) {
-        const colors = {
-            'pending': 'bg-yellow-100 text-yellow-800',
-            'confirmed': 'bg-blue-100 text-blue-800',
-            'processing': 'bg-indigo-100 text-indigo-800',
-            'ready': 'bg-purple-100 text-purple-800',
-            'out_for_delivery': 'bg-orange-100 text-orange-800',
-            'delivered': 'bg-green-100 text-green-800',
-            'completed': 'bg-green-100 text-green-800',
-            'cancelled': 'bg-red-100 text-red-800',
-            'refunded': 'bg-gray-100 text-gray-800'
-        };
-        return colors[status] || 'bg-gray-100 text-gray-800';
-    }
-    
-    function getPaymentColor(status) {
-        const colors = {
-            'pending': 'bg-yellow-100 text-yellow-800',
-            'paid': 'bg-green-100 text-green-800',
-            'failed': 'bg-red-100 text-red-800',
-            'refunded': 'bg-gray-100 text-gray-800'
-        };
-        return colors[status] || 'bg-gray-100 text-gray-800';
-    }
-    
-
-    
-    // Wait for authentication to be verified before loading orders
-    const waitForAuth = setInterval(() => {
-        const token = localStorage.getItem('auth_token');
-        if (token && axios.defaults.headers.common['Authorization']) {
-            clearInterval(waitForAuth);
-            loadOrders();
-        }
-    }, 100);
-    
-    // Fallback: load after 1 second regardless
-    setTimeout(() => {
-        clearInterval(waitForAuth);
-        if (!document.querySelector('#orders-table tbody tr')) {
-            loadOrders();
-        }
-    }, 1000);
-</script>
+@section('scripts')
+    @vite('resources/js/admin/orders.js')
 @endsection

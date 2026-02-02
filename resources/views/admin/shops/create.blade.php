@@ -280,65 +280,8 @@
     </form>
 </div>
 
-<script>
-    document.getElementById('name').addEventListener('input', (e) => {
-        const slug = e.target.value.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
-    });
+@endsection
 
-    async function saveShop(e) {
-        e.preventDefault();
-        
-        const data = {
-            name: document.getElementById('name').value,
-            slug: document.getElementById('slug').value,
-            description: document.getElementById('description').value,
-            tagline: document.getElementById('tagline').value,
-            domain: document.getElementById('domain').value,
-            address_line_1: document.getElementById('address_line_1').value,
-            address_line_2: document.getElementById('address_line_2').value,
-            city: document.getElementById('city').value,
-            postcode: document.getElementById('postcode').value,
-            country: document.getElementById('country').value,
-            phone: document.getElementById('phone-prefix').value + document.getElementById('phone').value,
-            email: document.getElementById('email').value,
-            support_email: document.getElementById('support_email').value,
-            whatsapp_number: document.getElementById('whatsapp_number').value,
-            business_type: document.getElementById('business_type').value,
-            specialization: document.getElementById('specialization').value,
-            currency: document.getElementById('currency').value,
-            currency_symbol: document.getElementById('currency_symbol').value,
-            min_order_amount: document.getElementById('min_order_amount').value,
-            delivery_fee: document.getElementById('delivery_fee').value,
-            free_delivery_threshold: document.getElementById('free_delivery_threshold').value,
-            delivery_radius_km: document.getElementById('delivery_radius_km').value,
-            has_halal_products: document.getElementById('has_halal_products').checked,
-            has_organic_products: document.getElementById('has_organic_products').checked,
-            has_international_products: document.getElementById('has_international_products').checked,
-            delivery_enabled: document.getElementById('delivery_enabled').checked,
-            collection_enabled: document.getElementById('collection_enabled').checked,
-            online_payment: document.getElementById('online_payment').checked,
-            loyalty_program: document.getElementById('loyalty_program').checked,
-            reviews_enabled: document.getElementById('reviews_enabled').checked,
-            primary_color: document.getElementById('primary_color').value,
-            secondary_color: document.getElementById('secondary_color').value,
-            logo_url: document.getElementById('logo_url').value,
-            cover_image_url: document.getElementById('cover_image_url').value,
-            favicon_url: document.getElementById('favicon_url').value,
-            facebook_url: document.getElementById('facebook_url').value,
-            instagram_url: document.getElementById('instagram_url').value,
-            twitter_url: document.getElementById('twitter_url').value,
-            is_active: document.getElementById('is_active').checked,
-        };
-
-        try {
-            await axios.post('/api/admin/shops', data);
-            window.location = '/admin/shops';
-        } catch (error) {
-            toast.error('Failed to create shop: ' + (error.response?.data?.message || error.message));
-        }
-    }
-</script>
+@section('scripts')
+    @vite('resources/js/admin/shops/create.js')
 @endsection

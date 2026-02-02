@@ -85,38 +85,7 @@
     </style>
 </head>
 <body class="bg-gray-100">
-    <!-- Axios is now configured via Vite in resources/js/bootstrap.js -->
-    <script>
-        // Verify axios is loaded and configured
-        if (typeof axios === 'undefined') {
-            console.error('CRITICAL: Axios not loaded! Check Vite build.');
-        } else {
-            console.log('[Layout] Axios loaded via Vite, configured:', !!window.axiosConfigured);
-            
-            // Verify token on page load
-            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-            if (!token && !window.location.pathname.includes('/login')) {
-                console.error('[Layout] No auth token found, redirecting to login');
-                window.location.href = '/admin/login';
-            } else if (token) {
-                // Verify token is valid
-                axios.get('/api/auth/user')
-                    .then(response => {
-                        console.log('[Layout] Authentication verified for user:', response.data.email || response.data.phone);
-                    })
-                    .catch(error => {
-                        if (error.response?.status === 401) {
-                            console.warn('[Layout] Invalid token detected on page load');
-                            localStorage.removeItem('auth_token');
-                            sessionStorage.removeItem('auth_token');
-                            if (!window.location.pathname.includes('/login')) {
-                                window.location.replace('/admin/login');
-                            }
-                        }
-                    });
-            }
-        }
-    </script>
+    <!-- Axios configured via Vite in resources/js/bootstrap.js -->
     
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
@@ -214,75 +183,7 @@
         </div>
     </div>
 
-    <script>
-        // Toast Notification System
-        const toast = {
-            success: (message) => showToast(message, 'success'),
-            error: (message) => showToast(message, 'error'),
-            warning: (message) => showToast(message, 'warning'),
-            info: (message) => showToast(message, 'info')
-        };
-        
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toastEl = document.createElement('div');
-            toastEl.className = `toast ${type}`;
-            
-            const icons = {
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            
-            toastEl.innerHTML = `
-                <i class="fas ${icons[type]} toast-icon"></i>
-                <span class="flex-1">${message}</span>
-                <button class="toast-close" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            container.appendChild(toastEl);
-            
-            // Auto remove after 4 seconds
-            setTimeout(() => {
-                removeToast(toastEl);
-            }, 4000);
-        }
-        
-        function removeToast(toastEl) {
-            toastEl.classList.add('removing');
-            setTimeout(() => {
-                toastEl.remove();
-            }, 300);
-        }
-
-        // Mobile menu and navigation handlers
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 768) {
-                    document.getElementById('sidebar').classList.remove('active');
-                }
-            });
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            try {
-                await axios.post('/api/admin/logout');
-                localStorage.removeItem('auth_token');
-                window.location.href = '/admin/login';
-            } catch (error) {
-                localStorage.removeItem('auth_token');
-                window.location.href = '/admin/login';
-            }
-        });
-    </script>
-
+    @vite('resources/js/admin/layout.js')
     @yield('scripts')
 </body>
 </html>

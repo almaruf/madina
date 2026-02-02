@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-3xl font-bold">Products</h2>
-    <button onclick="showCreateModal()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+    <button id="create-product-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
         + Add Product
     </button>
 </div>
@@ -13,10 +13,10 @@
 <!-- Tabs -->
 <div class="mb-4 border-b border-gray-200">
     <nav class="-mb-px flex space-x-8">
-        <button onclick="switchTab('active')" id="tab-active" class="tab-button border-b-2 border-green-600 py-2 px-1 text-sm font-medium text-green-600">
+        <button id="tab-active" class="tab-button border-b-2 border-green-600 py-2 px-1 text-sm font-medium text-green-600">
             Active
         </button>
-        <button onclick="switchTab('archived')" id="tab-archived" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+        <button id="tab-archived" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
             Archived
         </button>
     </nav>
@@ -41,108 +41,8 @@
     </table>
 </div>
 
-<script>
-    let currentTab = 'active';
-    
-    function switchTab(tab) {
-        currentTab = tab;
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('border-green-600', 'text-green-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
-        });
-        document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-gray-500');
-        document.getElementById(`tab-${tab}`).classList.add('border-green-600', 'text-green-600');
-        loadProducts();
-    }
-    
-    async function loadProducts() {
-        try {
-            // Ensure token is set
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                console.error('No auth token found');
-                window.location.href = '/admin/login';
-                return;
-            }
-            
-            const url = currentTab === 'archived' ? '/api/admin/products?archived=1' : '/api/admin/products';
-            console.log('Loading products from:', url);
-            
-            const response = await axios.get(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            const products = response.data.data || response.data;
-            const tbody = document.querySelector('#products-table tbody');
-            
-            if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No products found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = products.map(product => {
-                const price = product.variations?.[0]?.price ? parseFloat(product.variations[0].price).toFixed(2) : '0.00';
-                const stock = product.variations?.[0]?.stock || 0;
-                const categories = product.categories?.map(c => c.name).join(', ') || 'N/A';
-                
-                return `
-                    <tr>
-                        <td class="px-6 py-4">
-                            <img src="${product.primary_image?.url || '/placeholder.png'}" alt="${product.name}" class="w-16 h-16 object-cover rounded">
-                        </td>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${product.name}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">${categories}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900">£${price}</td>
-                        <td class="px-6 py-4 text-sm text-gray-900">${stock}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                ${product.is_active ? 'Active' : 'Inactive'}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            <a href="/admin/products/${product.slug}" class="text-blue-600 hover:text-blue-900">View Details</a>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        } catch (error) {
-            console.error('Error loading products:', error);
-            console.error('Error details:', error.response?.data);
-            console.error('Error status:', error.response?.status);
-            
-            if (error.response?.status === 401) {
-                console.error('Authentication failed - redirecting to login');
-                localStorage.removeItem('auth_token');
-                window.location.href = '/admin/login';
-            } else {
-                const message = error.response?.data?.message || 'Failed to load products';
-                toast.error(message);
-            }
-        }
-    }
-    
-    function showCreateModal() {
-        toast.info('Product creation form coming soon!');
-    }
-    
-    // Wait for authentication to be verified before loading products
-    const waitForAuth = setInterval(() => {
-        const token = localStorage.getItem('auth_token');
-        if (token && axios.defaults.headers.common['Authorization']) {
-            clearInterval(waitForAuth);
-            loadProducts();
-        }
-    }, 100);
-    
-    // Fallback: load after 1 second regardless
-    setTimeout(() => {
-        clearInterval(waitForAuth);
-        if (!document.querySelector('#products-table tbody tr')) {
-            loadProducts();
-        }
-    }, 1000);
-</script>
+@endsection
+
+@section('scripts')
+    @vite('resources/js/admin/products.js')
 @endsection

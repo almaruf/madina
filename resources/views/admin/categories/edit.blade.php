@@ -97,80 +97,8 @@
     </form>
 </div>
 
-<script>
-    const categorySlug = '{{ request()->route("slug") }}';
-    let categoryData = null;
-    let allCategories = [];
+@endsection
 
-    async function loadCategory() {
-        try {
-            const [categoryRes, categoriesRes] = await Promise.all([
-                axios.get(`/api/admin/categories/${categorySlug}`),
-                axios.get('/api/admin/categories')
-            ]);
-            
-            categoryData = categoryRes.data;
-            allCategories = (categoriesRes.data.data || categoriesRes.data).filter(c => c.slug !== categorySlug);
-            
-            populateForm();
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('category-form').classList.remove('hidden');
-        } catch (error) {
-            console.error('Error loading category:', error);
-            toast.error('Failed to load category details');
-            setTimeout(() => window.location.href = '/admin/categories', 2000);
-        }
-    }
-
-    function populateForm() {
-        document.getElementById('name').value = categoryData.name || '';
-        document.getElementById('slug').value = categoryData.slug || '';
-        document.getElementById('description').value = categoryData.description || '';
-        document.getElementById('image').value = categoryData.image || '';
-        document.getElementById('order').value = categoryData.order || 0;
-        document.getElementById('is_active').checked = categoryData.is_active || false;
-        document.getElementById('is_featured').checked = categoryData.is_featured || false;
-        
-        // Load parent categories
-        const parentSelect = document.getElementById('parent_id');
-        parentSelect.innerHTML = '<option value="">None (Top Level)</option>' + 
-            allCategories.map(cat => `
-                <option value="${cat.id}" ${cat.id === categoryData.parent_id ? 'selected' : ''}>
-                    ${cat.name}
-                </option>
-            `).join('');
-    }
-
-    async function handleSubmit(e) {
-        e.preventDefault();
-        
-        const formData = {
-            name: document.getElementById('name').value,
-            slug: document.getElementById('slug').value || null,
-            parent_id: document.getElementById('parent_id').value || null,
-            description: document.getElementById('description').value || null,
-            image: document.getElementById('image').value || null,
-            order: parseInt(document.getElementById('order').value) || 0,
-            is_active: document.getElementById('is_active').checked,
-            is_featured: document.getElementById('is_featured').checked
-        };
-        
-        try {
-            const token = localStorage.getItem('auth_token');
-            await axios.patch(`/api/admin/categories/${categorySlug}`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            toast.success('Category updated successfully');
-            setTimeout(() => window.location.href = `/admin/categories/${categorySlug}`, 1500);
-        } catch (error) {
-            console.error('Error updating category:', error);
-            const message = error.response?.data?.message || 'Failed to update category';
-            toast.error(message);
-        }
-    }
-
-    loadCategory();
-</script>
+@section('scripts')
+    @vite(['resources/js/admin/categories/edit.js'])
 @endsection

@@ -13,10 +13,10 @@
 <!-- Tabs -->
 <div class="mb-6 border-b border-gray-200">
     <nav class="-mb-px flex space-x-8">
-        <button onclick="switchTab('active')" id="active-tab" class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
+        <button id="active-tab" class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
             Active
         </button>
-        <button onclick="switchTab('archived')" id="archived-tab" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+        <button id="archived-tab" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
             Archived
         </button>
     </nav>
@@ -40,115 +40,9 @@
     </table>
 </div>
 
-<script>
-    let currentTab = 'active';
+@endsection
 
-    function switchTab(tab) {
-        currentTab = tab;
-        
-        // Update tab styling
-        const activeTab = document.getElementById('active-tab');
-        const archivedTab = document.getElementById('archived-tab');
-        
-        if (tab === 'active') {
-            activeTab.classList.add('border-blue-500', 'text-blue-600');
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
-            archivedTab.classList.remove('border-blue-500', 'text-blue-600');
-            archivedTab.classList.add('border-transparent', 'text-gray-500');
-        } else {
-            archivedTab.classList.add('border-blue-500', 'text-blue-600');
-            archivedTab.classList.remove('border-transparent', 'text-gray-500');
-            activeTab.classList.remove('border-blue-500', 'text-blue-600');
-            activeTab.classList.add('border-transparent', 'text-gray-500');
-        }
-        
-        loadCategories();
-    }
-
-    async function loadCategories() {
-        try {
-            // Ensure token is set
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                console.error('No auth token found');
-                window.location.href = '/admin/login';
-                return;
-            }
-            
-            const url = currentTab === 'archived' ? '/api/admin/categories?archived=1' : '/api/admin/categories';
-            console.log('Loading categories from:', url);
-            
-            const response = await axios.get(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            const categories = response.data.data || response.data;
-            const tbody = document.querySelector('#categories-table tbody');
-            
-            if (categories.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No categories found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = categories.map(category => `
-                <tr>
-                    <td class="px-6 py-4">
-                        ${category.image ? `<img src="${category.image}" alt="${category.name}" class="w-16 h-16 object-cover rounded">` : '<div class="w-16 h-16 bg-gray-200 rounded"></div>'}
-                    </td>
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${category.name}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">${category.slug}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${category.products_count || 0}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 text-xs rounded ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${category.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-right">
-                        <a href="/admin/categories/${category.slug}" class="text-blue-600 hover:text-blue-900 font-medium">
-                            View Details
-                        </a>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            console.error('Error loading categories:', error);
-            console.error('Error details:', error.response?.data);
-            console.error('Error status:', error.response?.status);
-            
-            if (error.response?.status === 401) {
-                console.error('Authentication failed - redirecting to login');
-                localStorage.removeItem('auth_token');
-                window.location.href = '/admin/login';
-            } else {
-                const message = error.response?.data?.message || 'Failed to load categories';
-                toast.error(message);
-            }
-        }
-    }
-    
-    function showCreateModal() {
-        toast.info('Category creation form coming soon!');
-    }
-    
-    // Wait for authentication to be verified before loading categories
-    const waitForAuth = setInterval(() => {
-        const token = localStorage.getItem('auth_token');
-        if (token && axios.defaults.headers.common['Authorization']) {
-            clearInterval(waitForAuth);
-            loadCategories();
-        }
-    }, 100);
-    
-    // Fallback: load after 1 second regardless
-    setTimeout(() => {
-        clearInterval(waitForAuth);
-        if (!document.querySelector('#categories-table tbody tr')) {
-            loadCategories();
-        }
-    }, 1000);
-</script>
+@section('scripts')
+    @vite('resources/js/admin/categories.js')
 @endsection
 

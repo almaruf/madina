@@ -394,3 +394,11 @@
     loadUser();
 </script>
 @endsection
+
+@section('scripts')
+    <script>
+        // Pass userId to JS module
+        window.userId = {{ $userId }};
+    </script>
+    @vite(['resources/js/admin/users/edit.js'])
+@endsection
