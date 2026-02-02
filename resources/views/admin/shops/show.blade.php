@@ -32,11 +32,62 @@
             <!-- Shop Header -->
             <div id="shop-header" class="p-6 border-b"></div>
 
-            <!-- Shop Info Grid -->
-            <div id="shop-info" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <!-- Tabs Navigation -->
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px">
+                    <button data-tab="basic" class="tab-button active px-6 py-3 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
+                        Basic Information
+                    </button>
+                    <button data-tab="delivery" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Delivery & Pricing
+                    </button>
+                    <button data-tab="legal" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Legal & VAT
+                    </button>
+                    <button data-tab="bank" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Bank Details
+                    </button>
+                    <button data-tab="branding" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Branding & Social
+                    </button>
+                    <button data-tab="hours" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Operating Hours
+                    </button>
+                </nav>
+            </div>
 
-            <!-- Configuration Section -->
-            <div id="shop-config" class="p-6 border-t"></div>
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- Basic Information Tab -->
+                <div id="tab-basic" class="tab-content">
+                    <div id="shop-basic-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Delivery & Pricing Tab -->
+                <div id="tab-delivery" class="tab-content hidden">
+                    <div id="shop-delivery-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Legal & VAT Tab -->
+                <div id="tab-legal" class="tab-content hidden">
+                    <div id="shop-legal-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Bank Details Tab -->
+                <div id="tab-bank" class="tab-content hidden">
+                    <div id="shop-bank-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Branding & Social Tab -->
+                <div id="tab-branding" class="tab-content hidden">
+                    <div id="shop-branding-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- Operating Hours Tab -->
+                <div id="tab-hours" class="tab-content hidden">
+                    <div id="shop-hours-info" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+            </div>
 
             <!-- Actions -->
             <div id="shop-actions" class="p-6 bg-gray-50 border-t flex gap-4"></div>

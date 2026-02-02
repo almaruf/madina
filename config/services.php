@@ -26,4 +26,8 @@ return [
         'max_attempts' => 3,
     ],
 
+    'vat' => [
+        'default_rate' => env('VAT_RATE', 20.00),
+    ],
+
 ];

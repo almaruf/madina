@@ -69,11 +69,23 @@ class ShopController extends Controller
         $shop = Shop::where('slug', $slug)->firstOrFail();
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:shops,slug,' . $shop->id,
+            'name' => 'sometimes|required|string|max:255',
+            'legal_company_name' => 'nullable|string|max:255',
+            'company_registration_number' => 'nullable|string|max:100',
+            'slug' => 'sometimes|required|string|max:255|unique:shops,slug,' . $shop->id,
             'domain' => 'nullable|string|unique:shops,domain,' . $shop->id,
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email',
+            'phone' => 'sometimes|required|string|max:20',
+            'email' => 'sometimes|required|email',
+            'vat_registered' => 'boolean',
+            'vat_number' => 'nullable|string|max:50',
+            'vat_rate' => 'nullable|numeric|min:0|max:100',
+            'prices_include_vat' => 'boolean',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_account_name' => 'nullable|string|max:255',
+            'bank_account_number' => 'nullable|string|max:50',
+            'bank_sort_code' => 'nullable|string|max:20',
+            'bank_iban' => 'nullable|string|max:50',
+            'bank_swift_code' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {

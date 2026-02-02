@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-DvJOIWrB.css",
+    "file": "assets/app-s3KpD6ur.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -137,19 +137,19 @@
     "isEntry": true
   },
   "resources/js/admin/shops/create.js": {
-    "file": "assets/create-BXLBjt8L.js",
+    "file": "assets/create-DfDJoZen.js",
     "name": "create",
     "src": "resources/js/admin/shops/create.js",
     "isEntry": true
   },
   "resources/js/admin/shops/edit.js": {
-    "file": "assets/edit-Drvtl332.js",
+    "file": "assets/edit-BNz-U143.js",
     "name": "edit",
     "src": "resources/js/admin/shops/edit.js",
     "isEntry": true
   },
   "resources/js/admin/shops/show.js": {
-    "file": "assets/show-DpZW9wRK.js",
+    "file": "assets/show-CpukIyD_.js",
     "name": "show",
     "src": "resources/js/admin/shops/show.js",
     "isEntry": true
