@@ -49,7 +49,7 @@ class CategoryController extends Controller
     {
         $category = Category::withTrashed()
             ->where('slug', $slug)
-            ->with(['children', 'parent'])
+            ->with(['children', 'parent', 'products.variations', 'products.primaryImage'])
             ->withCount('products')
             ->firstOrFail();
 
