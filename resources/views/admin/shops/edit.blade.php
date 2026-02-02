@@ -40,295 +40,327 @@
             </nav>
         </div>
 
-        <form id="shop-form" class="p-6">
+        <div class="p-6">
             <!-- Basic Information Tab -->
             <div id="tab-basic" class="tab-content">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Shop Name *</label>
-                        <input type="text" id="name" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <form id="form-basic" data-form-type="basic">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Shop Name *</label>
+                            <input type="text" name="name" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Slug *</label>
+                            <input type="text" name="slug" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                            <p class="text-xs text-gray-500 mt-1">URL-friendly identifier</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                            <textarea name="description" rows="3" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tagline</label>
+                            <input type="text" name="tagline" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Domain</label>
+                            <input type="text" name="domain" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Business Type</label>
+                            <input type="text" name="business_type" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Specialization</label>
+                            <select name="specialization" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                                <option value="general">General</option>
+                                <option value="halal">Halal</option>
+                                <option value="organic">Organic</option>
+                                <option value="asian">Asian</option>
+                                <option value="african">African</option>
+                                <option value="caribbean">Caribbean</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
+                            <input type="tel" name="phone" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                            <input type="email" name="email" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Support Email</label>
+                            <input type="email" name="support_email" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
+                            <input type="tel" name="whatsapp_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Line 1 *</label>
+                            <input type="text" name="address_line_1" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Address Line 2</label>
+                            <input type="text" name="address_line_2" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">City *</label>
+                            <input type="text" name="city" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Postcode *</label>
+                            <input type="text" name="postcode" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+                            <input type="text" name="country" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="is_active" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Shop Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Slug *</label>
-                        <input type="text" id="slug" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                        <p class="text-xs text-gray-500 mt-1">URL-friendly identifier</p>
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Basic Info
+                        </button>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea id="description" rows="3" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tagline</label>
-                        <input type="text" id="tagline" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Domain</label>
-                        <input type="text" id="domain" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Business Type</label>
-                        <input type="text" id="business_type" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Specialization</label>
-                        <select id="specialization" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                            <option value="general">General</option>
-                            <option value="halal">Halal</option>
-                            <option value="organic">Organic</option>
-                            <option value="asian">Asian</option>
-                            <option value="african">African</option>
-                            <option value="caribbean">Caribbean</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
-                        <input type="tel" id="phone" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                        <input type="email" id="email" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Support Email</label>
-                        <input type="email" id="support_email" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
-                        <input type="tel" id="whatsapp_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Address Line 1 *</label>
-                        <input type="text" id="address_line_1" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Address Line 2</label>
-                        <input type="text" id="address_line_2" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">City *</label>
-                        <input type="text" id="city" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Postcode *</label>
-                        <input type="text" id="postcode" required class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                        <input type="text" id="country" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="is_active" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Shop Active</span>
-                        </label>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Delivery & Pricing Tab -->
             <div id="tab-delivery" class="tab-content hidden">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
-                        <input type="text" id="currency" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <form id="form-delivery" data-form-type="delivery">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+                            <input type="text" name="currency" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Currency Symbol</label>
+                            <input type="text" name="currency_symbol" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Fee</label>
+                            <input type="number" name="delivery_fee" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Min Order Amount</label>
+                            <input type="number" name="min_order_amount" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Free Delivery Threshold</label>
+                            <input type="number" name="free_delivery_threshold" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Radius (km)</label>
+                            <input type="number" name="delivery_radius_km" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="delivery_enabled" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Delivery Enabled</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="collection_enabled" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Collection Enabled</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="online_payment" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Online Payment Enabled</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="has_halal_products" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Has Halal Products</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="has_organic_products" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Has Organic Products</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Currency Symbol</label>
-                        <input type="text" id="currency_symbol" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Delivery & Pricing
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Fee</label>
-                        <input type="number" id="delivery_fee" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Min Order Amount</label>
-                        <input type="number" id="min_order_amount" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Free Delivery Threshold</label>
-                        <input type="number" id="free_delivery_threshold" step="0.01" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Radius (km)</label>
-                        <input type="number" id="delivery_radius_km" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="delivery_enabled" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Delivery Enabled</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="collection_enabled" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Collection Enabled</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="online_payment" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Online Payment Enabled</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="has_halal_products" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Has Halal Products</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="has_organic_products" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Has Organic Products</span>
-                        </label>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Legal & VAT Tab -->
             <div id="tab-legal" class="tab-content hidden">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Legal Company Name</label>
-                        <input type="text" id="legal_company_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <form id="form-legal" data-form-type="legal">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Legal Company Name</label>
+                            <input type="text" name="legal_company_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Company Registration Number</label>
+                            <input type="text" name="company_registration_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="vat_registered" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">VAT Registered</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">VAT Number</label>
+                            <input type="text" name="vat_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">VAT Rate (%)</label>
+                            <input type="number" name="vat_rate" step="0.01" readonly class="w-full border rounded px-4 py-2 bg-gray-100 cursor-not-allowed">
+                            <p class="text-xs text-gray-500 mt-1">Configured in environment settings</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="prices_include_vat" class="rounded">
+                                <span class="text-sm font-semibold text-gray-700">Prices Include VAT</span>
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1 ml-6">When checked, displayed prices are VAT-inclusive. When unchecked, VAT will be added at checkout.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Company Registration Number</label>
-                        <input type="text" id="company_registration_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Legal & VAT
+                        </button>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="vat_registered" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">VAT Registered</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">VAT Number</label>
-                        <input type="text" id="vat_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">VAT Rate (%)</label>
-                        <input type="number" id="vat_rate" step="0.01" readonly class="w-full border rounded px-4 py-2 bg-gray-100 cursor-not-allowed">
-                        <p class="text-xs text-gray-500 mt-1">Configured in environment settings</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" id="prices_include_vat" class="rounded">
-                            <span class="text-sm font-semibold text-gray-700">Prices Include VAT</span>
-                        </label>
-                        <p class="text-xs text-gray-500 mt-1 ml-6">When checked, displayed prices are VAT-inclusive. When unchecked, VAT will be added at checkout.</p>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Bank Details Tab -->
             <div id="tab-bank" class="tab-content hidden">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
-                        <input type="text" id="bank_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <form id="form-bank" data-form-type="bank">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
+                            <input type="text" name="bank_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Account Name</label>
+                            <input type="text" name="bank_account_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
+                            <input type="text" name="bank_account_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sort Code</label>
+                            <input type="text" name="bank_sort_code" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">IBAN</label>
+                            <input type="text" name="bank_iban" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">SWIFT/BIC Code</label>
+                            <input type="text" name="bank_swift_code" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Name</label>
-                        <input type="text" id="bank_account_name" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Bank Details
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
-                        <input type="text" id="bank_account_number" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sort Code</label>
-                        <input type="text" id="bank_sort_code" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">IBAN</label>
-                        <input type="text" id="bank_iban" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">SWIFT/BIC Code</label>
-                        <input type="text" id="bank_swift_code" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Branding & Social Tab -->
             <div id="tab-branding" class="tab-content hidden">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Primary Color</label>
-                        <input type="color" id="primary_color" class="w-full h-10 border rounded">
+                <form id="form-branding" data-form-type="branding">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Primary Color</label>
+                            <input type="color" name="primary_color" class="w-full h-10 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Secondary Color</label>
+                            <input type="color" name="secondary_color" class="w-full h-10 border rounded">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Logo URL</label>
+                            <input type="url" name="logo_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon URL</label>
+                            <input type="url" name="favicon_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Facebook URL</label>
+                            <input type="url" name="facebook_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Instagram URL</label>
+                            <input type="url" name="instagram_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Twitter URL</label>
+                            <input type="url" name="twitter_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Secondary Color</label>
-                        <input type="color" id="secondary_color" class="w-full h-10 border rounded">
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Branding & Social
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Logo URL</label>
-                        <input type="url" id="logo_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Favicon URL</label>
-                        <input type="url" id="favicon_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Facebook URL</label>
-                        <input type="url" id="facebook_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Instagram URL</label>
-                        <input type="url" id="instagram_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Twitter URL</label>
-                        <input type="url" id="twitter_url" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                </div>
+                </form>
             </div>
 
             <!-- Operating Hours Tab -->
             <div id="tab-hours" class="tab-content hidden">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Monday</label>
-                        <input type="text" id="monday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                <form id="form-hours" data-form-type="hours">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Monday</label>
+                            <input type="text" name="monday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tuesday</label>
+                            <input type="text" name="tuesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Wednesday</label>
+                            <input type="text" name="wednesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Thursday</label>
+                            <input type="text" name="thursday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Friday</label>
+                            <input type="text" name="friday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Saturday</label>
+                            <input type="text" name="saturday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sunday</label>
+                            <input type="text" name="sunday_hours" placeholder="Closed" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tuesday</label>
-                        <input type="text" id="tuesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <div class="flex gap-4 pt-6 border-t mt-6">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            Update Operating Hours
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Wednesday</label>
-                        <input type="text" id="wednesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Thursday</label>
-                        <input type="text" id="thursday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Friday</label>
-                        <input type="text" id="friday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Saturday</label>
-                        <input type="text" id="saturday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sunday</label>
-                        <input type="text" id="sunday_hours" placeholder="Closed" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
-                    </div>
-                </div>
+                </form>
             </div>
-
-            <!-- Form Actions -->
-            <div class="flex gap-4 pt-6 border-t mt-6">
-                <button type="submit" id="submit-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Update Shop
-                </button>
-                <a href="/admin/shops/{{ $slug }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    Cancel
-                </a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 @endsection
