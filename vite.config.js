@@ -24,6 +24,7 @@ export default defineConfig({
                 'resources/js/admin/users/show.js',
                 'resources/js/admin/categories/show.js',
                 'resources/js/admin/shops/show.js',
+                'resources/js/admin/offers/show.js',
                 // Edit pages
                 'resources/js/admin/products/edit.js',
                 'resources/js/admin/users/edit.js',

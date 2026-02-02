@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-B7i6X2Ob.css",
+    "file": "assets/app--M1MHkm-.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -59,7 +59,7 @@
     "isEntry": true
   },
   "resources/js/admin/offers.js": {
-    "file": "assets/offers-DRxwrZly.js",
+    "file": "assets/offers-BbO3R83f.js",
     "name": "offers",
     "src": "resources/js/admin/offers.js",
     "isEntry": true
@@ -98,6 +98,12 @@
     "file": "assets/edit-pY1O40vk.js",
     "name": "edit",
     "src": "resources/js/admin/offers/edit.js",
+    "isEntry": true
+  },
+  "resources/js/admin/offers/show.js": {
+    "file": "assets/show-DfHhuEG7.js",
+    "name": "show",
+    "src": "resources/js/admin/offers/show.js",
     "isEntry": true
   },
   "resources/js/admin/orders.js": {

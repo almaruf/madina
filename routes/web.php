@@ -80,6 +80,11 @@ Route::prefix('admin')->group(function () {
         return view('admin.offers');
     })->name('admin.offers');
     
+    // Offer show page
+    Route::get('/offers/{id}', function ($id) {
+        return view('admin.offers.show', ['offerId' => $id]);
+    })->name('admin.offers.show');
+    
     // Offer type selector
     Route::get('/offers/create', function () {
         return view('admin.offers.create-type-selector');

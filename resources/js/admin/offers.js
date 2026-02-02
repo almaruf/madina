@@ -32,22 +32,11 @@ function renderOffers() {
         const statusText = isValid ? 'Active' : offer.is_active ? 'Expired' : 'Inactive';
 
         return `
-            <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-6 cursor-pointer" onclick="window.location='/admin/offers/${offer.id}'">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-900 mb-1">${offer.name}</h3>
                         <span class="text-xs font-medium px-2 py-1 rounded ${statusClass}">${statusText}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.editOffer(${offer.id})" class="text-blue-600 hover:text-blue-800" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="window.toggleOfferStatus(${offer.id})" class="text-gray-600 hover:text-gray-800" title="${offer.is_active ? 'Suspend' : 'Activate'}">
-                            <i class="fas fa-${offer.is_active ? 'pause' : 'play'}-circle"></i>
-                        </button>
-                        <button onclick="window.deleteOffer(${offer.id})" class="text-red-600 hover:text-red-800" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -67,12 +56,6 @@ function renderOffers() {
                     ${offer.starts_at ? `<div><strong>Starts:</strong> ${new Date(offer.starts_at).toLocaleDateString()}</div>` : ''}
                     ${offer.ends_at ? `<div><strong>Ends:</strong> ${new Date(offer.ends_at).toLocaleDateString()}</div>` : ''}
                     ${offer.current_usage_count ? `<div><strong>Used:</strong> ${offer.current_usage_count}${offer.total_usage_limit ? `/${offer.total_usage_limit}` : ''}</div>` : ''}
-                </div>
-
-                <div class="mt-4 pt-4 border-t">
-                    <button onclick="window.manageProducts(${offer.id})" class="text-green-600 hover:text-green-700 text-sm font-medium">
-                        <i class="fas fa-box"></i> Manage Products
-                    </button>
                 </div>
             </div>
         `;
