@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-s3KpD6ur.css",
+    "file": "assets/app-B7i6X2Ob.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -11,13 +11,19 @@
     "isEntry": true
   },
   "resources/js/admin/categories.js": {
-    "file": "assets/categories-6V6-D1me.js",
+    "file": "assets/categories-8Sc3xBof.js",
     "name": "categories",
     "src": "resources/js/admin/categories.js",
     "isEntry": true
   },
+  "resources/js/admin/categories/create.js": {
+    "file": "assets/create-BZrRh6_P.js",
+    "name": "create",
+    "src": "resources/js/admin/categories/create.js",
+    "isEntry": true
+  },
   "resources/js/admin/categories/edit.js": {
-    "file": "assets/edit-DL8nm9-i.js",
+    "file": "assets/edit-0dgnKBjz.js",
     "name": "edit",
     "src": "resources/js/admin/categories/edit.js",
     "isEntry": true
@@ -107,13 +113,19 @@
     "isEntry": true
   },
   "resources/js/admin/products.js": {
-    "file": "assets/products-B0z8WxME.js",
+    "file": "assets/products-Cx8SUl5e.js",
     "name": "products",
     "src": "resources/js/admin/products.js",
     "isEntry": true
   },
+  "resources/js/admin/products/create.js": {
+    "file": "assets/create-9hlRUfiU.js",
+    "name": "create",
+    "src": "resources/js/admin/products/create.js",
+    "isEntry": true
+  },
   "resources/js/admin/products/edit.js": {
-    "file": "assets/edit-DDq3-C7_.js",
+    "file": "assets/edit-D2bssVAA.js",
     "name": "edit",
     "src": "resources/js/admin/products/edit.js",
     "isEntry": true
@@ -137,7 +149,7 @@
     "isEntry": true
   },
   "resources/js/admin/shops/create.js": {
-    "file": "assets/create-DfDJoZen.js",
+    "file": "assets/create-Cm9F8PXq.js",
     "name": "create",
     "src": "resources/js/admin/shops/create.js",
     "isEntry": true

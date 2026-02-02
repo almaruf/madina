@@ -46,6 +46,12 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'categories' => 'required|array',
             'categories.*' => 'exists:categories,id',
+            'variations' => 'required|array|min:1',
+            'variations.*.size' => 'required|string',
+            'variations.*.unit' => 'required|string',
+            'variations.*.price' => 'required|numeric|min:0',
+            'variations.*.stock_quantity' => 'required|integer|min:0',
+            'variations.*.is_default' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -56,12 +62,26 @@ class ProductController extends Controller
 
         try {
             $product = Product::create(array_merge(
-                $request->except(['categories']),
+                $request->except(['categories', 'variations']),
                 ['shop_id' => \App\Services\ShopContext::getShopId()]
             ));
 
             // Attach categories
             $product->categories()->attach($request->categories);
+
+            // Create variations
+            foreach ($request->variations as $variation) {
+                // Auto-generate name from size + unit if not provided
+                if (empty($variation['name'])) {
+                    $variation['name'] = $variation['size'] . ' ' . $variation['unit'];
+                }
+                // Map 'unit' to 'size_unit' for database
+                if (isset($variation['unit'])) {
+                    $variation['size_unit'] = $variation['unit'];
+                    unset($variation['unit']);
+                }
+                $product->variations()->create($variation);
+            }
 
             DB::commit();
 
@@ -92,6 +112,11 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|in:standard,meat,frozen,fresh,perishable',
+            'variations' => 'nullable|array',
+            'variations.*.size' => 'required_with:variations|string',
+            'variations.*.size_unit' => 'required_with:variations|string',
+            'variations.*.price' => 'required_with:variations|numeric|min:0',
+            'variations.*.stock_quantity' => 'required_with:variations|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -101,15 +126,49 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            $product->update($request->except(['categories']));
+            // Update product basic info
+            $product->update($request->except(['categories', 'variations']));
 
+            // Sync categories
             if ($request->has('categories')) {
                 $product->categories()->sync($request->categories);
             }
 
+            // Handle variations
+            if ($request->has('variations')) {
+                $variationsData = $request->variations;
+                
+                foreach ($variationsData as $variationData) {
+                    // Auto-generate name if not provided
+                    if (empty($variationData['name']) && isset($variationData['size']) && isset($variationData['size_unit'])) {
+                        $variationData['name'] = $variationData['size'] . ' ' . $variationData['size_unit'];
+                    }
+                    
+                    // Check if this is a delete operation
+                    if (isset($variationData['_delete']) && $variationData['_delete']) {
+                        if (isset($variationData['id'])) {
+                            $product->variations()->where('id', $variationData['id'])->delete();
+                        }
+                        continue;
+                    }
+                    
+                    // Update existing or create new
+                    if (isset($variationData['id'])) {
+                        // Update existing variation
+                        $variation = $product->variations()->find($variationData['id']);
+                        if ($variation) {
+                            $variation->update($variationData);
+                        }
+                    } else {
+                        // Create new variation
+                        $product->variations()->create($variationData);
+                    }
+                }
+            }
+
             DB::commit();
 
-            return response()->json($product->load(['categories', 'variations']));
+            return response()->json($product->load(['categories', 'variations']), 200);
 
         } catch (\Exception $e) {
             DB::rollBack();

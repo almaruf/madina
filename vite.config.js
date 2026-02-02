@@ -31,6 +31,8 @@ export default defineConfig({
                 'resources/js/admin/shops/edit.js',
                 // Create pages
                 'resources/js/admin/shops/create.js',
+                'resources/js/admin/products/create.js',
+                'resources/js/admin/categories/create.js',
                 'resources/js/admin/offers/create.js',
                 'resources/js/admin/offers/create-percentage-discount.js',
                 'resources/js/admin/offers/create-bxgy.js',

@@ -127,6 +127,20 @@
             </div>
         </div>
 
+        <!-- Variations -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Product Variations</h2>
+                <button type="button" onclick="addVariation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                    <i class="fas fa-plus mr-2"></i>Add Variation
+                </button>
+            </div>
+            
+            <div id="variations-container" class="space-y-4">
+                <!-- Variations will be loaded here -->
+            </div>
+        </div>
+
         <!-- Status Toggles -->
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-xl font-bold mb-6">Status</h2>
@@ -161,8 +175,5 @@
     </form>
 </div>
 
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/admin/products/edit.js'])
+@vite('resources/js/admin/products/edit.js')
 @endsection
