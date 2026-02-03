@@ -43,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
+    
+    // Customer deletion request
+    Route::post('/auth/request-deletion', [AuthController::class, 'requestDeletion']);
 });
 
 // Admin routes
@@ -56,6 +59,16 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('shops/{slug}/force', [\App\Http\Controllers\Admin\ShopController::class, 'forceDelete']);
     Route::get('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'current']);
     Route::patch('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'updateCurrent']);
+    
+    // Shop selection (session-based for admins)
+    Route::middleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+    ])->group(function () {
+        Route::get('shop-selected', [\App\Http\Controllers\Admin\ShopController::class, 'selectedShop']);
+        Route::post('shop-selected', [\App\Http\Controllers\Admin\ShopController::class, 'setSelectedShop']);
+    });
 
     // Admin user management (super admin only)
     Route::apiResource('admin-users', \App\Http\Controllers\Admin\AdminUserController::class);
@@ -67,6 +80,11 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'destroyUser']);
     Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\AdminUserController::class, 'restoreUser']);
     Route::delete('users/{id}/force', [\App\Http\Controllers\Admin\AdminUserController::class, 'forceDeleteUser']);
+    
+    // Customer management
+    Route::get('customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);
+    Route::get('customers/removal-requests', [\App\Http\Controllers\Admin\CustomerController::class, 'removalRequests']);
+    Route::delete('customers/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'destroy']);
     
     // User addresses management (admin only)
     Route::get('users/{id}/addresses', [\App\Http\Controllers\Admin\AdminUserController::class, 'getUserAddresses']);

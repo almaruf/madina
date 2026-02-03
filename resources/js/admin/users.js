@@ -8,7 +8,7 @@ async function loadUsers() {
         let url = '/api/admin/users';
         const params = new URLSearchParams();
         
-        if (role !== 'all') {
+        if (role) {
             params.append('role', role);
         }
         if (currentTab === 'archived') {
@@ -24,7 +24,7 @@ async function loadUsers() {
         renderUsers();
     } catch (error) {
         console.error('Error loading users:', error);
-        document.getElementById('users-table').innerHTML = '<tr><td colspan="5" class="text-center text-red-600 py-4">Failed to load users</td></tr>';
+        document.getElementById('users-table').innerHTML = '<tr><td colspan="6" class="text-center text-red-600 py-4">Failed to load users</td></tr>';
     }
 }
 
@@ -32,25 +32,20 @@ function renderUsers() {
     const tbody = document.getElementById('users-table');
     
     if (allUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-600 py-4">No users found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-600 py-4">No users found</td></tr>';
         return;
     }
     
     tbody.innerHTML = allUsers.map(user => {
         const roleColors = {
-            'super_admin': 'bg-red-100 text-red-800',
-            'admin': 'bg-purple-100 text-purple-800',
             'owner': 'bg-blue-100 text-blue-800',
             'staff': 'bg-green-100 text-green-800',
-            'customer': 'bg-gray-100 text-gray-800'
         };
         
         return `
             <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/admin/users/${user.id}'">
-                <td class="px-6 py-4">
-                    <div class="font-medium text-gray-900">${user.name || 'N/A'}</div>
-                    <div class="text-sm text-gray-500">${user.phone}</div>
-                </td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">${user.phone}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${user.name || 'N/A'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${user.email || 'N/A'}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 text-xs rounded ${roleColors[user.role] || 'bg-gray-100 text-gray-800'}">

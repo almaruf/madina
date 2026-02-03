@@ -23,8 +23,8 @@
             <input type="text" id="search" placeholder="Search by phone or name..." class="flex-1 px-4 py-2 border rounded-lg">
             <select id="role-filter" class="px-4 py-2 border rounded-lg">
                 <option value="">All Roles</option>
-                <option value="customer">Customers</option>
-                <option value="admin">Admins</option>
+                <option value="owner">Owner</option>
+                <option value="staff">Staff</option>
             </select>
         </div>
     </div>
@@ -36,7 +36,6 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>

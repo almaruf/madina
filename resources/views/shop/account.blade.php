@@ -161,6 +161,9 @@
                         <a href="/cart" class="block w-full text-center border border-green-600 text-green-600 hover:bg-green-50 py-2 rounded-lg font-semibold">
                             View Cart
                         </a>
+                        <button id="request-deletion-btn" class="block w-full text-center border border-red-600 text-red-600 hover:bg-red-50 py-2 rounded-lg font-semibold">
+                            Request Account Deletion
+                        </button>
                         <button id="logout-btn-account" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
@@ -568,5 +571,23 @@
 
     checkAuthStatusAccount();
     window.addEventListener('storage', checkAuthStatusAccount);
+
+    // Request deletion handler
+    document.getElementById('request-deletion-btn')?.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to request account deletion? An admin will review your request.')) {
+            return;
+        }
+        
+        try {
+            await axios.post('/api/auth/request-deletion');
+            alert('Your account deletion request has been submitted. You will be contacted soon.');
+            document.getElementById('request-deletion-btn').disabled = true;
+            document.getElementById('request-deletion-btn').textContent = 'Deletion Requested';
+            document.getElementById('request-deletion-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        } catch (error) {
+            console.error('Error requesting deletion:', error);
+            alert('Failed to submit deletion request. Please try again.');
+        }
+    });
 </script>
 @endsection

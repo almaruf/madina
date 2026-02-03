@@ -1,62 +1,7 @@
 // Admin Orders JS
-const ADMIN_SHOP_STORAGE_KEY = 'admin_selected_shop_id';
 let allOrders = [];
 let currentTab = 'active';
 let currentShopId = null;
-
-async function loadAuthUser() {
-    const response = await axios.get('/api/auth/user');
-    return response.data;
-}
-
-async function loadShops() {
-    const response = await axios.get('/api/admin/shops');
-    return response.data.data || response.data || [];
-}
-
-function resolveShopContext(shops) {
-    const params = new URLSearchParams(window.location.search);
-    const shopSlug = params.get('shop');
-    if (shopSlug) {
-        const slugMatch = shops.find(shop => shop.slug === shopSlug);
-        if (slugMatch) {
-            return { shopId: String(slugMatch.id), showSelector: false };
-        }
-    }
-
-    const host = window.location.hostname;
-    const domainMatch = shops.find(shop => shop.domain && shop.domain === host);
-    if (domainMatch) {
-        return { shopId: String(domainMatch.id), showSelector: false };
-    }
-
-    return { shopId: null, showSelector: true };
-}
-
-async function initShopSelection() {
-    try {
-        const user = await loadAuthUser();
-        if (!user || !['admin', 'super_admin'].includes(user.role)) {
-            currentShopId = null;
-            return;
-        }
-
-        const shops = await loadShops();
-        const context = resolveShopContext(shops);
-
-        if (!context.showSelector && context.shopId) {
-            currentShopId = context.shopId;
-            return;
-        }
-
-        const savedShopId = localStorage.getItem(ADMIN_SHOP_STORAGE_KEY);
-        const validSaved = savedShopId && shops.some(shop => String(shop.id) === String(savedShopId));
-        currentShopId = validSaved ? savedShopId : 'all';
-    } catch (error) {
-        console.error('Error initializing shop selection:', error);
-        currentShopId = null;
-    }
-}
 
 async function loadOrders() {
     try {
@@ -150,6 +95,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('tab-active').addEventListener('click', () => switchTab('active'));
     document.getElementById('tab-archived').addEventListener('click', () => switchTab('archived'));
     document.getElementById('status-filter').addEventListener('change', loadOrders);
-    await initShopSelection();
+    
+    try {
+        const sessionResponse = await axios.get('/api/admin/shop-selected');
+        currentShopId = sessionResponse.data.shop_id;
+    } catch (error) {
+        console.error('Error getting selected shop:', error);
+        currentShopId = null;
+    }
+    
     loadOrders();
 });

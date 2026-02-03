@@ -243,4 +243,22 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+
+    /**
+     * Request account deletion (customer only)
+     */
+    public function requestDeletion(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'customer') {
+            return response()->json(['message' => 'Only customers can request deletion'], 403);
+        }
+
+        $user->update(['deletion_requested_at' => now()]);
+
+        return response()->json([
+            'message' => 'Deletion request submitted. An admin will process your request soon.'
+        ]);
+    }
 }

@@ -168,4 +168,45 @@ class ShopController extends Controller
 
         return response()->json(['message' => 'Shop permanently deleted']);
     }
+
+    /**
+     * Get selected shop from session
+     */
+    public function selectedShop(Request $request)
+    {
+        $selectedShopId = session('admin_selected_shop_id');
+        
+        if (!$selectedShopId) {
+            return response()->json(['shop_id' => null, 'shop' => null]);
+        }
+
+        $shop = Shop::find($selectedShopId);
+        
+        return response()->json([
+            'shop_id' => $selectedShopId,
+            'shop' => $shop
+        ]);
+    }
+
+    /**
+     * Set selected shop in session
+     */
+    public function setSelectedShop(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shop_id' => 'nullable|integer|exists:shops,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if ($request->shop_id) {
+            $request->session()->put('admin_selected_shop_id', $request->shop_id);
+        } else {
+            $request->session()->forget('admin_selected_shop_id');
+        }
+
+        return response()->json(['message' => 'Shop selection updated']);
+    }
 }

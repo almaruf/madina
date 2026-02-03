@@ -21,6 +21,7 @@ class User extends Authenticatable
         'is_active',
         'phone_verified',
         'phone_verified_at',
+        'deletion_requested_at',
     ];
 
     protected $hidden = [
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'phone_verified' => 'boolean',
         'is_active' => 'boolean',
         'phone_verified_at' => 'datetime',
+        'deletion_requested_at' => 'datetime',
     ];
 
     public function shop()

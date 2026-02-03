@@ -28,6 +28,24 @@ The master table that stores all configuration for each shop:
 4. All database queries automatically scoped to `shop_id`
 5. All record creation auto-assigns `shop_id` from ShopContext
 
+### Admin Shop Selection (Session-Based)
+**Applies to `admin` and `super_admin` only.**
+
+**Behavior:**
+- Admins select a shop on the Dashboard. Selection is stored in session and persists across all admin pages.
+- The selected shop is shown in a visible banner at the top of admin pages with a “Clear Selection” action.
+- If no shop is selected, admin pages show **all shops** (aggregated data).
+- Owners/Staff do **not** use this selection; they are always scoped by `shop_id`.
+
+**API Endpoints:**
+- `GET /api/admin/shop-selected` → returns `{ shop_id, shop }`
+- `POST /api/admin/shop-selected` with `{ shop_id: <id|null> }` → set/clear session selection
+
+**Frontend Notes:**
+- Dashboard selector uses the session endpoint and should be the only place to change selection.
+- Other admin pages should read the session-selected shop via the endpoint and filter data accordingly.
+- Do not use localStorage for admin shop selection.
+
 ### User Roles and shop_id Assignment
 
 **CRITICAL:** Not all users are tied to a specific shop via `shop_id`. The architecture is:

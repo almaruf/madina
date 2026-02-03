@@ -1,6 +1,4 @@
 // Admin Dashboard JS
-const ADMIN_SHOP_STORAGE_KEY = 'admin_selected_shop_id';
-
 async function loadDashboardStats(shopId = null) {
     try {
         let url = '/api/admin/dashboard/stats';
@@ -81,25 +79,6 @@ async function loadShops() {
     return response.data.data || response.data || [];
 }
 
-function resolveShopContext(shops) {
-    const params = new URLSearchParams(window.location.search);
-    const shopSlug = params.get('shop');
-    if (shopSlug) {
-        const slugMatch = shops.find(shop => shop.slug === shopSlug);
-        if (slugMatch) {
-            return { shopId: String(slugMatch.id), showSelector: false };
-        }
-    }
-
-    const host = window.location.hostname;
-    const domainMatch = shops.find(shop => shop.domain && shop.domain === host);
-    if (domainMatch) {
-        return { shopId: String(domainMatch.id), showSelector: false };
-    }
-
-    return { shopId: null, showSelector: true };
-}
-
 function renderShopSelector(shops, selectedShopId) {
     const section = document.getElementById('shop-selector-section');
     const container = document.getElementById('shop-selector-cards');
@@ -132,11 +111,16 @@ function renderShopSelector(shops, selectedShopId) {
     }).join('');
 
     container.querySelectorAll('button[data-shop-id]').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             const shopId = button.getAttribute('data-shop-id');
-            localStorage.setItem(ADMIN_SHOP_STORAGE_KEY, shopId);
+            if (shopId === 'all') {
+                await window.clearSessionShop();
+                loadDashboardStats();
+            } else {
+                await window.setSessionShop(shopId);
+                loadDashboardStats(shopId);
+            }
             renderShopSelector(shops, shopId);
-            loadDashboardStats(shopId);
         });
     });
 }
@@ -166,19 +150,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const shops = await loadShops();
-        const context = resolveShopContext(shops);
+        const selectedShopResponse = await axios.get('/api/admin/shop-selected');
+        const { shop_id: sessionShopId } = selectedShopResponse.data;
 
-        if (!context.showSelector && context.shopId) {
-            loadDashboardStats(context.shopId);
-            return;
-        }
-
-        const savedShopId = localStorage.getItem(ADMIN_SHOP_STORAGE_KEY);
-        const validSaved = savedShopId && shops.some(shop => String(shop.id) === String(savedShopId));
-        const selectedShopId = validSaved ? savedShopId : 'all';
-
-        renderShopSelector(shops, selectedShopId);
-        loadDashboardStats(selectedShopId);
+        renderShopSelector(shops, sessionShopId || 'all');
+        loadDashboardStats(sessionShopId);
     } catch (error) {
         console.error('Error initializing dashboard:', error);
         loadDashboardStats();

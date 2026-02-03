@@ -130,6 +130,9 @@
                 <a href="/admin/users" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/users*') ? 'bg-green-600' : '' }}">
                     <i class="fas fa-users w-5"></i>
                     <span>Users</span>
+                </a>                <a href="/admin/customers" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/customers*') ? 'bg-green-600' : '' }}">
+                    <i class="fas fa-user-shield w-5"></i>
+                    <span>Customers</span>
                 </a>
                 <a href="/admin/delivery-slots" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/delivery-slots*') ? 'bg-green-600' : '' }}">
                     <i class="fas fa-clock w-5"></i>
@@ -162,6 +165,20 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Shop Selection Indicator -->
+            <div id="shop-indicator" class="hidden bg-blue-100 border-b border-blue-300 px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-store text-blue-600"></i>
+                    <div>
+                        <p class="text-sm text-blue-600 font-semibold">Selected Shop:</p>
+                        <p id="shop-indicator-name" class="text-lg font-bold text-blue-900">—</p>
+                    </div>
+                </div>
+                <button id="clear-shop-selection" class="text-blue-600 hover:text-blue-800 font-semibold text-sm">
+                    Clear Selection
+                </button>
+            </div>
+
             <!-- Top Navigation Bar -->
             <div class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-gray-800">@yield('page-title', 'Dashboard')</h2>
@@ -183,6 +200,7 @@
         </div>
     </div>
 
+    @vite('resources/js/admin/shop-selector.js')
     @vite('resources/js/admin/layout.js')
     @yield('scripts')
 </body>

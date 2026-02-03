@@ -133,28 +133,18 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Get all users (customers and admins) for shop admin
+     * Get all users (owner/staff only) for shop admin
      */
     public function allUsers(Request $request)
     {
         $shopId = ShopContext::getShopId();
         
         // Get users associated with this shop:
-        // - Owner/Staff with this shop_id
-        // - Customers who have placed orders at this shop
-        // - Admins (they can manage any shop, shown for convenience)
-        // - Exclude super_admins (they have their own management interface)
-        $query = User::where('role', '!=', 'super_admin')
-            ->where(function($q) use ($shopId) {
-                // Owner/Staff with this shop_id
-                $q->where('shop_id', $shopId)
-                // OR admins (can manage any shop)
-                  ->orWhere('role', 'admin')
-                // OR customers who have placed orders at this shop
-                  ->orWhereHas('orders', function($orderQuery) use ($shopId) {
-                      $orderQuery->where('shop_id', $shopId);
-                  });
-            })->withCount(['orders' => function($orderQuery) use ($shopId) {
+        // - Owner/Staff with this shop_id only
+        // - Customers are managed separately in CustomerController
+        $query = User::whereIn('role', ['owner', 'staff'])
+            ->where('shop_id', $shopId)
+            ->withCount(['orders' => function($orderQuery) use ($shopId) {
                 $orderQuery->where('shop_id', $shopId);
             }]);
 
