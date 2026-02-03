@@ -252,7 +252,9 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->role !== 'customer') {
-            return response()->json(['message' => 'Only customers can request deletion'], 403);
+            return response()->json([
+                'message' => 'Account deletion requests are only available for customer accounts.'
+            ], 403);
         }
 
         $user->update(['deletion_requested_at' => now()]);

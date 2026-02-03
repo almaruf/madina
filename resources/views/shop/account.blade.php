@@ -164,7 +164,7 @@
                         <button id="request-deletion-btn" class="block w-full text-center border border-red-600 text-red-600 hover:bg-red-50 py-2 rounded-lg font-semibold">
                             Request Account Deletion
                         </button>
-                        <button id="logout-btn-account" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                        <button id="logout-btn-account" class="hidden w-full text-center border border-red-600 text-red-600 hover:bg-red-50 py-2 rounded-lg font-semibold">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </button>
@@ -172,6 +172,27 @@
                 </div>
 
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Deletion Modal -->
+<div id="delete-account-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Request Account Deletion</h3>
+            <button type="button" id="delete-account-modal-close" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <p class="text-sm text-gray-600 mb-6">Are you sure you want to request account deletion? An admin will review your request.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" id="delete-account-cancel" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                Cancel
+            </button>
+            <button type="button" id="delete-account-confirm" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+                Request Deletion
+            </button>
         </div>
     </div>
 </div>
@@ -232,6 +253,26 @@
             this.loadAddresses();
             this.loadOrders();
             this.setupTabs();
+            this.configureDeletionRequest();
+        }
+
+        configureDeletionRequest() {
+            const requestBtn = document.getElementById('request-deletion-btn');
+            if (!requestBtn) return;
+
+            if (!this.user || this.user.role !== 'customer') {
+                requestBtn.disabled = true;
+                requestBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                requestBtn.textContent = 'Deletion Unavailable';
+
+                const messageBox = document.getElementById('account-message');
+                if (messageBox) {
+                    messageBox.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'text-green-700');
+                    messageBox.classList.add('bg-yellow-50', 'border', 'border-yellow-200', 'text-yellow-700');
+                    messageBox.querySelector('i').className = 'fas fa-exclamation-triangle';
+                    messageBox.querySelector('span').textContent = 'Account deletion requests are only available for customer accounts.';
+                }
+            }
         }
 
         setupTabs() {
@@ -542,7 +583,7 @@
     const logoutBtnAccount = document.getElementById('logout-btn-account');
     
     function checkAuthStatusAccount() {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('token');
         if (token) {
             if (logoutBtnAccount) logoutBtnAccount.classList.remove('hidden');
         } else {
@@ -553,14 +594,14 @@
     async function handleLogout(e) {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             await axios.post('/api/auth/logout', {}, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
         } catch (error) {
             console.error('Logout error:', error);
         }
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('token');
         localStorage.removeItem('shopping_cart');
         window.location.href = '/';
     }
@@ -573,20 +614,69 @@
     window.addEventListener('storage', checkAuthStatusAccount);
 
     // Request deletion handler
-    document.getElementById('request-deletion-btn')?.addEventListener('click', async () => {
-        if (!confirm('Are you sure you want to request account deletion? An admin will review your request.')) {
-            return;
+    const deleteModal = document.getElementById('delete-account-modal');
+    const openDeleteBtn = document.getElementById('request-deletion-btn');
+    const closeDeleteBtn = document.getElementById('delete-account-modal-close');
+    const cancelDeleteBtn = document.getElementById('delete-account-cancel');
+    const confirmDeleteBtn = document.getElementById('delete-account-confirm');
+
+    function openDeleteModal() {
+        if (deleteModal) {
+            deleteModal.classList.remove('hidden');
         }
-        
+    }
+
+    function closeDeleteModal() {
+        if (deleteModal) {
+            deleteModal.classList.add('hidden');
+        }
+    }
+
+    openDeleteBtn?.addEventListener('click', openDeleteModal);
+    closeDeleteBtn?.addEventListener('click', closeDeleteModal);
+    cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
+
+    confirmDeleteBtn?.addEventListener('click', async () => {
         try {
-            await axios.post('/api/auth/request-deletion');
-            alert('Your account deletion request has been submitted. You will be contacted soon.');
-            document.getElementById('request-deletion-btn').disabled = true;
-            document.getElementById('request-deletion-btn').textContent = 'Deletion Requested';
-            document.getElementById('request-deletion-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                const messageBox = document.getElementById('account-message');
+                if (messageBox) {
+                    messageBox.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'text-green-700');
+                    messageBox.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-700');
+                    messageBox.querySelector('i').className = 'fas fa-exclamation-circle';
+                    messageBox.querySelector('span').textContent = 'Please log in to request account deletion.';
+                }
+                closeDeleteModal();
+                return;
+            }
+
+            await axios.post('/api/auth/request-deletion', {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const messageBox = document.getElementById('account-message');
+            if (messageBox) {
+                messageBox.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'text-red-700');
+                messageBox.classList.add('bg-green-50', 'border', 'border-green-200', 'text-green-700');
+                messageBox.querySelector('i').className = 'fas fa-check-circle';
+                messageBox.querySelector('span').textContent = 'Your account deletion request has been submitted.';
+            }
+            if (openDeleteBtn) {
+                openDeleteBtn.disabled = true;
+                openDeleteBtn.textContent = 'Deletion Requested';
+                openDeleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            closeDeleteModal();
         } catch (error) {
             console.error('Error requesting deletion:', error);
-            alert('Failed to submit deletion request. Please try again.');
+            const messageBox = document.getElementById('account-message');
+            if (messageBox) {
+                messageBox.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'text-green-700');
+                messageBox.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-700');
+                messageBox.querySelector('i').className = 'fas fa-exclamation-circle';
+                messageBox.querySelector('span').textContent = 'Failed to submit deletion request. Please try again.';
+            }
+            closeDeleteModal();
         }
     });
 </script>

@@ -88,7 +88,7 @@
         
         // Check auth status
         function checkAuthStatus() {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             const logoutBtn = document.getElementById('logout-btn');
             
             if (token && logoutBtn) {
@@ -104,14 +104,14 @@
             logoutBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 try {
-                    const token = localStorage.getItem('auth_token');
+                    const token = localStorage.getItem('token');
                     await axios.post('/api/auth/logout', {}, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                 } catch (error) {
                     console.error('Logout error:', error);
                 }
-                localStorage.removeItem('auth_token');
+                localStorage.removeItem('token');
                 localStorage.removeItem('shopping_cart');
                 checkAuthStatus();
                 window.location.href = '/';
