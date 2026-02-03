@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const slug = document.getElementById('slug').value.trim();
 
             if (!name || !slug) {
-                alert('Please fill in all required fields');
+                window.toast.error('Please fill in all required fields');
                 return;
             }
 
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Category created:', response.data);
 
                 // Show success message
-                alert('Category created successfully!');
+                window.toast.success('Category created successfully!');
 
                 // Redirect to category detail page
                 window.location.href = `/admin/categories/${response.data.slug}`;
@@ -110,12 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         Object.keys(errors).forEach(field => {
                             errorMessage += `${field}: ${errors[field].join(', ')}\n`;
                         });
-                        alert(errorMessage);
+                        window.toast.error(errorMessage);
                     } else {
-                        alert(error.response.data.message || 'Failed to create category');
+                        window.toast.error(error.response.data.message || 'Failed to create category');
                     }
                 } else {
-                    alert('Failed to create category. Please try again.');
+                    window.toast.error('Failed to create category. Please try again.');
                 }
             }
         });

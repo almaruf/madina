@@ -91,7 +91,7 @@ function switchTab(tab) {
 }
 
 function showCreateModal() {
-    toast.info('User creation form coming soon!');
+    window.toast.info('User creation form coming soon!');
 }
 
 // Initialize when DOM is ready

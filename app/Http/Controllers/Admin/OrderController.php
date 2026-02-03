@@ -11,7 +11,17 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $shopId = \App\Services\ShopContext::getShopId();
+        $user = $request->user();
+        $shopId = null;
+
+        if ($user && $user->isAdmin()) {
+            $requestedShopId = $request->query('shop_id');
+            if ($requestedShopId && $requestedShopId !== 'all') {
+                $shopId = (int) $requestedShopId;
+            }
+        } else {
+            $shopId = \App\Services\ShopContext::getShopId();
+        }
         
         // Start with the base Order query
         $query = Order::query();
@@ -22,8 +32,9 @@ class OrderController extends Controller
         }
         
         // Now apply shop_id filter and other conditions
-        $query->where('shop_id', $shopId)
-            ->with(['user', 'items.product', 'deliverySlot', 'address']);
+        $query->when($shopId, function ($q) use ($shopId) {
+            $q->where('shop_id', $shopId);
+        })->with(['user', 'items.product', 'deliverySlot', 'address', 'shop']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -109,13 +120,33 @@ class OrderController extends Controller
 
     public function stats(Request $request)
     {
-        $shopId = \App\Services\ShopContext::getShopId();
+        $user = $request->user();
+        $shopId = null;
+
+        if ($user && $user->isAdmin()) {
+            $requestedShopId = $request->query('shop_id');
+            if ($requestedShopId && $requestedShopId !== 'all') {
+                $shopId = (int) $requestedShopId;
+            }
+        } else {
+            $shopId = \App\Services\ShopContext::getShopId();
+        }
         $stats = [
-            'total_orders' => Order::where('shop_id', $shopId)->count(),
-            'pending_orders' => Order::where('shop_id', $shopId)->where('status', 'pending')->count(),
-            'today_orders' => Order::where('shop_id', $shopId)->whereDate('created_at', today())->count(),
-            'total_revenue' => Order::where('shop_id', $shopId)->whereIn('status', ['delivered', 'completed'])->sum('total'),
-            'today_revenue' => Order::where('shop_id', $shopId)->whereDate('created_at', today())->sum('total'),
+            'total_orders' => Order::when($shopId, function ($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })->count(),
+            'pending_orders' => Order::when($shopId, function ($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })->where('status', 'pending')->count(),
+            'today_orders' => Order::when($shopId, function ($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })->whereDate('created_at', today())->count(),
+            'total_revenue' => Order::when($shopId, function ($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })->whereIn('status', ['delivered', 'completed'])->sum('total'),
+            'today_revenue' => Order::when($shopId, function ($query) use ($shopId) {
+                $query->where('shop_id', $shopId);
+            })->whereDate('created_at', today())->sum('total'),
         ];
 
         return response()->json($stats);

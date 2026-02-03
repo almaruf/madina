@@ -189,7 +189,7 @@ function viewException(jobId) {
         `;
         document.body.appendChild(modal);
     } else {
-        alert('Exception details not available');
+        window.toast.error('Exception details not available');
     }
 }
 

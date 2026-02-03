@@ -39,7 +39,7 @@ async function loadOffer() {
         document.getElementById('form-container').classList.remove('hidden');
     } catch (error) {
         console.error('Error loading offer:', error);
-        alert('Failed to load offer: ' + (error.response?.data?.message || error.message));
+        window.toast.error('Failed to load offer: ' + (error.response?.data?.message || error.message));
         window.location.href = '/admin/offers';
     }
 }
@@ -293,13 +293,13 @@ async function handleSubmit(event) {
     
     // Validation
     if (buyProducts.length === 0) {
-        alert('Please select at least one "Buy" product');
+        window.toast.error('Please select at least one "Buy" product');
         return;
     }
     
     const sameAsBuy = document.getElementById('same_as_buy').checked;
     if (!sameAsBuy && getProducts.length === 0) {
-        alert('Please select at least one "Get" product or check "Same as Buy products"');
+        window.toast.error('Please select at least one "Get" product or check "Same as Buy products"');
         return;
     }
     
@@ -328,15 +328,15 @@ async function handleSubmit(event) {
             headers: getAuthHeaders()
         });
         
-        alert('Offer updated successfully!');
+        window.toast.success('Offer updated successfully!');
         window.location.href = '/admin/offers';
     } catch (error) {
         console.error('Error updating offer:', error);
         if (error.response?.data?.errors) {
             const errors = Object.values(error.response.data.errors).flat();
-            alert('Validation errors:\n' + errors.join('\n'));
+            window.toast.error('Validation errors:\n' + errors.join('\n'));
         } else {
-            alert('Failed to update offer: ' + (error.response?.data?.message || error.message));
+            window.toast.error('Failed to update offer: ' + (error.response?.data?.message || error.message));
         }
     }
 }
@@ -348,11 +348,11 @@ async function deleteOffer() {
         await axios.delete(`/api/admin/offers/${offerId}`, {
             headers: getAuthHeaders()
         });
-        alert('Offer deleted successfully');
+        window.toast.success('Offer deleted successfully');
         window.location.href = '/admin/offers';
     } catch (error) {
         console.error('Error deleting offer:', error);
-        alert('Failed to delete offer');
+        window.toast.error('Failed to delete offer');
     }
 }
 

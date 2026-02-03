@@ -55,4 +55,4 @@ let d={};function l(o){document.querySelectorAll(".tab-button").forEach(e=>{e.cl
                     </button>
                 </div>
             </div>
-        `,document.body.appendChild(r)}else alert("Exception details not available")}window.switchTab=l;window.loadJobs=n;window.retryJob=c;window.retryAllFailed=p;window.deleteJob=u;window.flushAllFailed=w;window.viewException=x;document.addEventListener("DOMContentLoaded",()=>{n(),setInterval(n,3e4)});
+        `,document.body.appendChild(r)}else window.toast.error("Exception details not available")}window.switchTab=l;window.loadJobs=n;window.retryJob=c;window.retryAllFailed=p;window.deleteJob=u;window.flushAllFailed=w;window.viewException=x;document.addEventListener("DOMContentLoaded",()=>{n(),setInterval(n,3e4)});

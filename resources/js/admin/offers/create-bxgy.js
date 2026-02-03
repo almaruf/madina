@@ -35,7 +35,7 @@ async function loadInitialData() {
         });
     } catch (error) {
         console.error('Error loading data:', error);
-        alert('Failed to load products and categories');
+        window.toast.error('Failed to load products and categories');
     }
 }
 
@@ -259,13 +259,13 @@ async function handleSubmit(event) {
     
     // Validation
     if (buyProducts.length === 0) {
-        alert('Please select at least one "Buy" product');
+        window.toast.error('Please select at least one "Buy" product');
         return;
     }
     
     const sameAsBuy = document.getElementById('same_as_buy').checked;
     if (!sameAsBuy && getProducts.length === 0) {
-        alert('Please select at least one "Get" product or check "Same as Buy products"');
+        window.toast.error('Please select at least one "Get" product or check "Same as Buy products"');
         return;
     }
     
@@ -297,15 +297,15 @@ async function handleSubmit(event) {
             headers: getAuthHeaders()
         });
         
-        alert('Offer created successfully!');
+        window.toast.success('Offer created successfully!');
         window.location.href = '/admin/offers';
     } catch (error) {
         console.error('Error creating offer:', error);
         if (error.response?.data?.errors) {
             const errors = Object.values(error.response.data.errors).flat();
-            alert('Validation errors:\n' + errors.join('\n'));
+            window.toast.error('Validation errors:\n' + errors.join('\n'));
         } else {
-            alert('Failed to create offer: ' + (error.response?.data?.message || error.message));
+            window.toast.error('Failed to create offer: ' + (error.response?.data?.message || error.message));
         }
     }
 }

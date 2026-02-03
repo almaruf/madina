@@ -13,7 +13,7 @@ class ShopController extends Controller
     public function __construct()
     {
         // Only super admins can create, update, delete shops
-        $this->middleware('super_admin')->except(['current', 'updateCurrent']);
+        $this->middleware('super_admin')->except(['current', 'updateCurrent', 'index']);
     }
 
     public function index(Request $request)

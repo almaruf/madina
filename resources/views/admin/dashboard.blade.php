@@ -6,6 +6,16 @@
 
 @section('content')
 
+<div id="shop-selector-section" class="hidden mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Select Shop</h3>
+            <p class="text-sm text-gray-500">Choose a shop to manage or view all</p>
+        </div>
+        <div id="shop-selector-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+</div>
+
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-6 rounded-lg shadow">
         <p class="text-gray-600 text-sm">Total Orders</p>
