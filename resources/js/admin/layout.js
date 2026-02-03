@@ -46,8 +46,33 @@ function removeToast(toastEl) {
 // Expose toast to window
 window.toast = toast;
 
+// Fetch user role and apply role restrictions
+async function fetchUserAndApplyRoleRestrictions() {
+    try {
+        const response = await axios.get('/api/auth/user');
+        const user = response.data;
+        
+        // Show role-restricted links based on user role
+        document.querySelectorAll('.role-restricted').forEach(link => {
+            const requiredRoles = link.dataset.roleRequired.split(',');
+            if (requiredRoles.includes(user.role)) {
+                link.style.display = 'flex';
+            }
+        });
+    } catch (error) {
+        console.error('Failed to fetch user role:', error);
+        // If can't fetch user, redirect to login
+        if (error.response && error.response.status === 401) {
+            window.location.href = '/admin/login';
+        }
+    }
+}
+
 // Initialize layout handlers
 document.addEventListener('DOMContentLoaded', () => {
+    // Fetch user role and show/hide role-restricted links
+    fetchUserAndApplyRoleRestrictions();
+
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('sidebar');

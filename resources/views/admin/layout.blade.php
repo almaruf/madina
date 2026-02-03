@@ -98,13 +98,12 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div id="sidebar" class="sidebar fixed md:static w-64 h-screen bg-gray-900 text-white overflow-y-auto z-30 md:z-0 flex flex-col">
-            <div class="p-6 border-b border-gray-700">
+            <!-- <div class="p-6 border-b border-gray-700">
                 <h1 class="text-2xl font-bold flex items-center gap-2">
                     <i class="fas fa-store text-green-500"></i>
                     Admin Panel
                 </h1>
-                <p class="text-gray-400 text-sm mt-2">{{ app(\App\Services\ShopConfigService::class)->name() }}</p>
-            </div>
+            </div> -->
 
             <nav class="flex-1 p-4 space-y-2">
                 <a href="/admin" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin') && !request()->is('admin/*') ? 'bg-green-600' : '' }}">
@@ -138,19 +137,19 @@
                     <i class="fas fa-clock w-5"></i>
                     <span>Delivery Slots</span>
                 </a>
-                <a href="/admin/queue" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/queue*') ? 'bg-green-600' : '' }}">
-                    <i class="fas fa-tasks w-5"></i>
-                    <span>Queue Jobs</span>
-                </a>
 
                 <div class="pt-4 border-t border-gray-700 mt-4">
-                    <a href="/admin/shops" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/shops*') ? 'bg-green-600' : '' }}">
+                    <a href="/admin/shops" data-role-required="admin,super_admin" class="nav-link role-restricted flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/shops*') ? 'bg-green-600' : '' }}" style="display: none;">
                         <i class="fas fa-store-alt w-5"></i>
                         <span>Shops</span>
                     </a>
-                    <a href="/admin/admin-users" class="nav-link flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/admin-users*') ? 'bg-green-600' : '' }}">
+                    <a href="/admin/admin-users" data-role-required="super_admin" class="nav-link role-restricted flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/admin-users*') ? 'bg-green-600' : '' }}" style="display: none;">
                         <i class="fas fa-users-cog w-5"></i>
                         <span>Admin Users</span>
+                    </a>
+                    <a href="/admin/queue" data-role-required="super_admin" class="nav-link role-restricted flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition {{ request()->is('admin/queue*') ? 'bg-green-600' : '' }}" style="display: none;">
+                        <i class="fas fa-tasks w-5"></i>
+                        <span>Queued Jobs</span>
                     </a>
                 </div>
             </nav>
