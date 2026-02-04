@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-2vaQJJQA.css",
+    "file": "assets/app-DA4DJw5H.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -137,7 +137,7 @@
     "isEntry": true
   },
   "resources/js/admin/products/show.js": {
-    "file": "assets/show-BY4cthu0.js",
+    "file": "assets/show-D8TCcKi-.js",
     "name": "show",
     "src": "resources/js/admin/products/show.js",
     "isEntry": true
@@ -167,7 +167,7 @@
     "isEntry": true
   },
   "resources/js/admin/shops/show.js": {
-    "file": "assets/show-B0RE5t_E.js",
+    "file": "assets/show-D5X28jpE.js",
     "name": "show",
     "src": "resources/js/admin/shops/show.js",
     "isEntry": true

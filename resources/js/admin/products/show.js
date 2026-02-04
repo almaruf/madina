@@ -65,16 +65,10 @@ function renderProduct() {
         
         ${isArchived ? '<div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg"><i class="fas fa-exclamation-triangle mr-2"></i>This product is archived</div>' : ''}
         
-        <!-- Product Details -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Primary Image -->
+        <!-- Product Details and Images -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left: Product Info -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-bold mb-4">Primary Image</h3>
-                <img src="${productData.primary_image?.signed_url || productData.primary_image?.url || '/placeholder.png'}" alt="${productData.name}" class="w-full h-64 object-cover rounded-lg">
-            </div>
-            
-            <!-- Basic Info -->
-            <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
                 <h3 class="text-2xl font-bold mb-4">${productData.name}</h3>
                 
                 <div class="grid grid-cols-2 gap-4 mb-6">
@@ -110,57 +104,57 @@ function renderProduct() {
                     </div>
                 ` : ''}
             </div>
-        </div>
 
-        <!-- Product Images Section -->
-        ${!isArchived ? `
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-bold mb-4">Product Images (${imageCount}/5)</h3>
-                
-                <!-- Upload Section -->
-                <div class="mb-6">
-                    <div class="flex items-center gap-4">
-                        <input type="file" id="image-upload" accept="image/jpeg,image/png,image/webp" multiple class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${imageCount >= 5 ? 'disabled' : ''}>
-                        <button id="upload-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold ${imageCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}" ${imageCount >= 5 ? 'disabled' : ''}>
-                            <i class="fas fa-upload mr-2"></i>Upload Images ${remainingSlots > 0 ? `(${remainingSlots} remaining)` : '(Maximum reached)'}
-                        </button>
-                    </div>
+            <!-- Right: Product Images Section -->
+            ${!isArchived ? `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-bold mb-4">Product Images (${imageCount}/5)</h3>
                     
-                    <!-- Progress Bar -->
-                    <div id="upload-progress" class="hidden mt-3">
-                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                            <div id="progress-bar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
+                    <!-- Upload Section -->
+                    <div class="mb-6">
+                        <div class="flex flex-col gap-3">
+                            <input type="file" id="image-upload" accept="image/jpeg,image/png,image/webp" multiple class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${imageCount >= 5 ? 'disabled' : ''}>
+                            <button id="upload-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold ${imageCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}" ${imageCount >= 5 ? 'disabled' : ''}>
+                                <i class="fas fa-upload mr-2"></i>Upload Images ${remainingSlots > 0 ? `(${remainingSlots} remaining)` : '(Maximum reached)'}
+                            </button>
                         </div>
-                        <p id="progress-text" class="text-sm text-gray-600 mt-1">Uploading...</p>
-                    </div>
-                    
-                    <!-- Validation Errors -->
-                    <div id="validation-errors" class="hidden mt-3 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm"></div>
-                </div>
-                
-                <!-- Image Gallery -->
-                <div id="image-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    ${productData.images && productData.images.length > 0 ? productData.images.map(img => `
-                        <div class="relative group cursor-move" draggable="true" data-image-id="${img.id}" data-image-order="${img.order}">
-                            <img src="${img.signed_thumbnail_url || img.signed_url || img.thumbnail_url || img.url}" alt="${img.alt_text || productData.name}" class="w-full h-[150px] object-cover rounded-lg border-2 ${img.is_primary ? 'border-blue-500' : 'border-gray-200'}">
-                            
-                            <!-- Primary Badge -->
-                            ${img.is_primary ? '<div class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Primary</div>' : ''}
-                            
-                            <!-- Hover Controls -->
-                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                                ${!img.is_primary ? `<button class="set-primary-btn bg-blue-600 hover:bg-blue-700 text-white p-2 rounded" data-image-id="${img.id}" title="Set as Primary">
-                                    <i class="fas fa-star"></i>
-                                </button>` : ''}
-                                <button class="delete-image-btn bg-red-600 hover:bg-red-700 text-white p-2 rounded" data-image-id="${img.id}" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        
+                        <!-- Progress Bar -->
+                        <div id="upload-progress" class="hidden mt-3">
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div id="progress-bar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
                             </div>
+                            <p id="progress-text" class="text-sm text-gray-600 mt-1">Uploading...</p>
                         </div>
-                    `).join('') : '<p class="text-gray-500 text-center col-span-full py-8">No images uploaded yet</p>'}
+                        
+                        <!-- Validation Errors -->
+                        <div id="validation-errors" class="hidden mt-3 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm"></div>
+                    </div>
+                    
+                    <!-- Image Gallery -->
+                    <div id="image-gallery" class="grid grid-cols-3 gap-3">
+                        ${productData.images && productData.images.length > 0 ? productData.images.map(img => `
+                            <div class="relative group cursor-move" draggable="true" data-image-id="${img.id}" data-image-order="${img.order}">
+                                <img src="${img.signed_thumbnail_url || img.signed_url || img.thumbnail_url || img.url}" alt="${img.alt_text || productData.name}" class="w-full h-[100px] object-cover rounded-lg border-2 ${img.is_primary ? 'border-blue-500' : 'border-gray-200'}">
+                                
+                                <!-- Primary Badge -->
+                                ${img.is_primary ? '<div class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">Primary</div>' : ''}
+                                
+                                <!-- Hover Controls -->
+                                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                                    ${!img.is_primary ? `<button class="set-primary-btn bg-blue-600 hover:bg-blue-700 text-white p-2 rounded" data-image-id="${img.id}" title="Set as Primary">
+                                        <i class="fas fa-star"></i>
+                                    </button>` : ''}
+                                    <button class="delete-image-btn bg-red-600 hover:bg-red-700 text-white p-2 rounded" data-image-id="${img.id}" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-gray-500 text-center col-span-full py-8">No images uploaded yet</p>'}
+                    </div>
                 </div>
-            </div>
-        ` : ''}
+            ` : ''}
+        </div>
         
         <!-- Variations -->
         ${productData.variations && productData.variations.length > 0 ? `

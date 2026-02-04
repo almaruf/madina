@@ -265,6 +265,10 @@ class ProductController extends Controller
                 // TODO: Add proper thumbnail generation when GD is available
                 $thumbnailPath = $path;
 
+                // Generate full S3 URLs
+                $url = Storage::disk('s3')->url($path);
+                $thumbnailUrl = Storage::disk('s3')->url($thumbnailPath);
+
                 // Set first uploaded image as primary if no primary exists
                 $isPrimary = $isFirstImage && $index === 0;
 
@@ -275,7 +279,9 @@ class ProductController extends Controller
                 $image = ProductImage::create([
                     'product_id' => $product->id,
                     'path' => $path,
+                    'url' => $url,
                     'thumbnail_path' => $thumbnailPath,
+                    'thumbnail_url' => $thumbnailUrl,
                     'alt_text' => $request->alt_text,
                     'is_primary' => $isPrimary,
                     'order' => $nextOrder,

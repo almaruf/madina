@@ -62,7 +62,17 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('shops/{slug}/force', [\App\Http\Controllers\Admin\ShopController::class, 'forceDelete']);
     Route::get('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'current']);
     Route::patch('shops/current', [\App\Http\Controllers\Admin\ShopController::class, 'updateCurrent']);
-    
+});
+
+// Shop banner management (accessible by admin, super_admin, owner, staff)
+Route::prefix('admin')->middleware(['auth:sanctum', 'shop_admin'])->group(function () {
+    Route::post('shops/{shop}/banners', [\App\Http\Controllers\Admin\ShopController::class, 'uploadBanner']);
+    Route::delete('shops/{shop}/banners/{bannerId}', [\App\Http\Controllers\Admin\ShopController::class, 'deleteBanner']);
+    Route::patch('shops/{shop}/banners/{bannerId}/set-primary', [\App\Http\Controllers\Admin\ShopController::class, 'setPrimaryBanner']);
+    Route::post('shops/{shop}/banners/reorder', [\App\Http\Controllers\Admin\ShopController::class, 'reorderBanners']);
+});
+
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     // Shop selection (session-based for admins)
     Route::middleware([
         \Illuminate\Cookie\Middleware\EncryptCookies::class,

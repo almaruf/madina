@@ -500,8 +500,353 @@ function formatTime(time24) {
     return `${hour}:${minute} ${period}`;
 }
 
+// ===== BANNER MANAGEMENT =====
+
+function renderBannersSection(shop) {
+    const banners = shop.banners || [];
+    const bannerCount = banners.length;
+    const remainingSlots = 5 - bannerCount;
+
+    const bannersContainer = document.getElementById('shop-banners-section');
+    bannersContainer.innerHTML = `
+        <h3 class="text-lg font-bold mb-4">Shop Banners (${bannerCount}/5)</h3>
+        
+        <!-- Upload Section -->
+        <div class="mb-6">
+            <div class="flex flex-col gap-3">
+                <input type="file" id="banner-upload" accept="image/jpeg,image/png,image/webp" multiple class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" ${bannerCount >= 5 ? 'disabled' : ''}>
+                <button id="upload-banner-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold ${bannerCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}" ${bannerCount >= 5 ? 'disabled' : ''}>
+                    <i class="fas fa-upload mr-2"></i>Upload Banners ${remainingSlots > 0 ? `(${remainingSlots} remaining)` : '(Maximum reached)'}
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div id="banner-upload-progress" class="hidden mt-3">
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div id="banner-progress-bar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="banner-progress-text" class="text-sm text-gray-600 mt-1">Uploading...</p>
+            </div>
+            
+            <!-- Validation Errors -->
+            <div id="banner-validation-errors" class="hidden mt-3 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm"></div>
+        </div>
+        
+        <!-- Banner Gallery -->
+        <div id="banner-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            ${banners.length > 0 ? banners.map(banner => `
+                <div class="relative group cursor-move" draggable="true" data-banner-id="${banner.id}" data-banner-order="${banner.order}">
+                    <img src="${banner.signed_thumbnail_url || banner.signed_url || banner.thumbnail_url || banner.url}" alt="${banner.title || shop.name}" class="w-full h-[150px] object-cover rounded-lg border-2 ${banner.is_primary ? 'border-blue-500' : 'border-gray-200'}">
+                    
+                    <!-- Primary Badge -->
+                    ${banner.is_primary ? '<div class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Primary</div>' : ''}
+                    
+                    <!-- Hover Controls -->
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                        ${!banner.is_primary ? `<button class="set-primary-banner-btn bg-blue-600 hover:bg-blue-700 text-white p-2 rounded" data-banner-id="${banner.id}" title="Set as Primary">
+                            <i class="fas fa-star"></i>
+                        </button>` : ''}
+                        <button class="delete-banner-btn bg-red-600 hover:bg-red-700 text-white p-2 rounded" data-banner-id="${banner.id}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-gray-500 text-center col-span-full py-8">No banners uploaded yet</p>'}
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-banner-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                <h3 class="text-lg font-bold mb-4">Delete Banner</h3>
+                <p class="text-gray-600 mb-6">Are you sure you want to delete this banner? This action cannot be undone.</p>
+                <div class="flex gap-4 justify-end">
+                    <button id="cancel-delete-banner" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button id="confirm-delete-banner" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Delete</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Attach event listeners
+    attachBannerEventListeners();
+}
+
+function attachBannerEventListeners() {
+    // Upload button
+    const uploadBtn = document.getElementById('upload-banner-btn');
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', handleBannerUpload);
+    }
+
+    // Delete buttons
+    document.querySelectorAll('.delete-banner-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const bannerId = e.currentTarget.dataset.bannerId;
+            showDeleteBannerModal(bannerId);
+        });
+    });
+
+    // Set primary buttons
+    document.querySelectorAll('.set-primary-banner-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const bannerId = e.currentTarget.dataset.bannerId;
+            await setPrimaryBanner(bannerId);
+        });
+    });
+
+    // Drag and drop for reordering
+    attachBannerDragAndDropListeners();
+}
+
+function validateBannerFiles(files) {
+    const errors = [];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    
+    const currentBannerCount = document.querySelectorAll('[data-banner-id]').length;
+    
+    if (currentBannerCount + files.length > 5) {
+        errors.push(`Can only upload ${5 - currentBannerCount} more banner(s). Maximum is 5 banners per shop.`);
+        return errors;
+    }
+    
+    for (let file of files) {
+        if (!allowedTypes.includes(file.type)) {
+            errors.push(`${file.name}: Invalid file type. Only JPEG, PNG, and WebP are allowed.`);
+        }
+        if (file.size > maxSize) {
+            errors.push(`${file.name}: File too large. Maximum size is 5MB.`);
+        }
+    }
+    
+    return errors;
+}
+
+async function handleBannerUpload() {
+    const fileInput = document.getElementById('banner-upload');
+    const files = Array.from(fileInput.files);
+    
+    if (files.length === 0) {
+        window.toast.error('Please select at least one image');
+        return;
+    }
+    
+    // Validate files
+    const errors = validateBannerFiles(files);
+    const errorsDiv = document.getElementById('banner-validation-errors');
+    
+    if (errors.length > 0) {
+        errorsDiv.innerHTML = errors.map(err => `<p>• ${err}</p>`).join('');
+        errorsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    errorsDiv.classList.add('hidden');
+    
+    // Prepare form data
+    const formData = new FormData();
+    files.forEach(file => {
+        formData.append('image[]', file);
+    });
+    
+    // Show progress
+    const progressDiv = document.getElementById('banner-upload-progress');
+    const progressBar = document.getElementById('banner-progress-bar');
+    const progressText = document.getElementById('banner-progress-text');
+    progressDiv.classList.remove('hidden');
+    
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                    progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                }
+            });
+            
+            xhr.addEventListener('load', () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(JSON.parse(xhr.responseText));
+                }
+            });
+            
+            xhr.addEventListener('error', () => reject({ message: 'Upload failed' }));
+            
+            xhr.open('POST', `/api/admin/shops/${currentShop.slug}/banners`);
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            if (token) {
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            }
+            xhr.send(formData);
+        });
+        
+        progressDiv.classList.add('hidden');
+        progressBar.style.width = '0%';
+        fileInput.value = '';
+        
+        window.toast.success('Banners uploaded successfully!');
+        
+        // Reload shop data to refresh banner list
+        await loadShop();
+        
+        // Switch to banners tab to show the new banners
+        const bannersTab = document.querySelector('[data-tab="banners"]');
+        if (bannersTab) bannersTab.click();
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        progressDiv.classList.add('hidden');
+        window.toast.error(error.message || 'Failed to upload banners');
+        
+        if (error.errors) {
+            const errorMessages = Object.values(error.errors).flat();
+            errorsDiv.innerHTML = errorMessages.map(err => `<p>• ${err}</p>`).join('');
+            errorsDiv.classList.remove('hidden');
+        }
+    }
+}
+
+let bannerToDelete = null;
+
+function showDeleteBannerModal(bannerId) {
+    bannerToDelete = bannerId;
+    const modal = document.getElementById('delete-banner-modal');
+    modal.classList.remove('hidden');
+    
+    document.getElementById('cancel-delete-banner').onclick = () => {
+        modal.classList.add('hidden');
+        bannerToDelete = null;
+    };
+    
+    document.getElementById('confirm-delete-banner').onclick = async () => {
+        await deleteBanner(bannerToDelete);
+        modal.classList.add('hidden');
+        bannerToDelete = null;
+    };
+}
+
+async function deleteBanner(bannerId) {
+    try {
+        await axios.delete(`/api/admin/shops/${currentShop.slug}/banners/${bannerId}`);
+        window.toast.success('Banner deleted successfully!');
+        await loadShop();
+        
+        // Re-render banners tab
+        const bannersTab = document.querySelector('[data-tab="banners"]');
+        if (bannersTab) bannersTab.click();
+        
+    } catch (error) {
+        console.error('Delete error:', error);
+        window.toast.error(error.response?.data?.message || 'Failed to delete banner');
+    }
+}
+
+async function setPrimaryBanner(bannerId) {
+    try {
+        await axios.patch(`/api/admin/shops/${currentShop.slug}/banners/${bannerId}/set-primary`);
+        window.toast.success('Primary banner updated!');
+        await loadShop();
+        
+        // Re-render banners tab
+        const bannersTab = document.querySelector('[data-tab="banners"]');
+        if (bannersTab) bannersTab.click();
+        
+    } catch (error) {
+        console.error('Set primary error:', error);
+        window.toast.error(error.response?.data?.message || 'Failed to set primary banner');
+    }
+}
+
+function attachBannerDragAndDropListeners() {
+    const bannerItems = document.querySelectorAll('[data-banner-id]');
+    let draggedElement = null;
+    
+    bannerItems.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedElement = this;
+            this.style.opacity = '0.4';
+        });
+        
+        item.addEventListener('dragend', function(e) {
+            this.style.opacity = '1';
+            bannerItems.forEach(i => i.classList.remove('border-4', 'border-blue-400'));
+        });
+        
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('border-4', 'border-blue-400');
+        });
+        
+        item.addEventListener('dragleave', function(e) {
+            this.classList.remove('border-4', 'border-blue-400');
+        });
+        
+        item.addEventListener('drop', async function(e) {
+            e.preventDefault();
+            this.classList.remove('border-4', 'border-blue-400');
+            
+            if (draggedElement !== this) {
+                // Get all banner items
+                const allBanners = Array.from(document.querySelectorAll('[data-banner-id]'));
+                const draggedIndex = allBanners.indexOf(draggedElement);
+                const targetIndex = allBanners.indexOf(this);
+                
+                // Reorder in DOM
+                if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedElement, this);
+                }
+                
+                // Update order on server
+                await updateBannerOrder();
+            }
+        });
+    });
+}
+
+async function updateBannerOrder() {
+    const bannerItems = document.querySelectorAll('[data-banner-id]');
+    const bannersData = Array.from(bannerItems).map((item, index) => ({
+        id: parseInt(item.dataset.bannerId),
+        order: index
+    }));
+    
+    try {
+        await axios.post(`/api/admin/shops/${currentShop.slug}/banners/reorder`, {
+            banners: bannersData
+        });
+        
+        window.toast.success('Banners reordered successfully!');
+        
+    } catch (error) {
+        console.error('Reorder error:', error);
+        window.toast.error(error.response?.data?.message || 'Failed to reorder banners');
+        
+        // Reload to get correct order
+        await loadShop();
+        const bannersTab = document.querySelector('[data-tab="banners"]');
+        if (bannersTab) bannersTab.click();
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeTabs();
     loadShop();
+    
+    // Re-render banners section when banners tab is clicked
+    const bannersTabBtn = document.querySelector('[data-tab="banners"]');
+    if (bannersTabBtn) {
+        bannersTabBtn.addEventListener('click', () => {
+            if (currentShop) {
+                renderBannersSection(currentShop);
+            }
+        });
+    }
 });

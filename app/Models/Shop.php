@@ -159,6 +159,11 @@ class Shop extends Model
         return $this->hasMany(Address::class);
     }
 
+    public function banners()
+    {
+        return $this->hasMany(ShopBanner::class)->orderBy('order');
+    }
+
     public function fullAddress(): string
     {
         $parts = array_filter([
