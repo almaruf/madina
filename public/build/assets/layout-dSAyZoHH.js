@@ -1,7 +1,0 @@
-const s={success:e=>a(e,"success"),error:e=>a(e,"error"),warning:e=>a(e,"warning"),info:e=>a(e,"info")};function a(e,t="info"){const o=document.getElementById("toast-container"),n=document.createElement("div");n.className=`toast ${t}`;const i={success:"fa-check-circle",error:"fa-exclamation-circle",warning:"fa-exclamation-triangle",info:"fa-info-circle"};n.innerHTML=`
-        <i class="fas ${i[t]} toast-icon"></i>
-        <span class="flex-1">${e}</span>
-        <button class="toast-close" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
-    `,o.appendChild(n),setTimeout(()=>{c(n)},4e3)}function c(e){e.classList.add("removing"),setTimeout(()=>{e.remove()},300)}window.toast=s;document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("mobile-menu-btn"),t=document.getElementById("sidebar");e&&t&&e.addEventListener("click",()=>{t.classList.toggle("active")}),document.querySelectorAll(".nav-link").forEach(n=>{n.addEventListener("click",()=>{window.innerWidth<768&&t&&t.classList.remove("active")})});const o=document.getElementById("logout-btn");o&&o.addEventListener("click",async()=>{try{await axios.post("/api/admin/logout"),localStorage.removeItem("auth_token"),sessionStorage.removeItem("auth_token"),window.location.href="/admin/login"}catch{localStorage.removeItem("auth_token"),sessionStorage.removeItem("auth_token"),window.location.href="/admin/login"}})});

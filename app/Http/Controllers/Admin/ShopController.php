@@ -89,6 +89,28 @@ class ShopController extends Controller
             'bank_sort_code' => 'nullable|string|max:20',
             'bank_iban' => 'nullable|string|max:50',
             'bank_swift_code' => 'nullable|string|max:20',
+            // Operating hours validation
+            'monday_open' => 'nullable|date_format:H:i',
+            'monday_close' => 'nullable|date_format:H:i',
+            'monday_closed' => 'nullable|boolean',
+            'tuesday_open' => 'nullable|date_format:H:i',
+            'tuesday_close' => 'nullable|date_format:H:i',
+            'tuesday_closed' => 'nullable|boolean',
+            'wednesday_open' => 'nullable|date_format:H:i',
+            'wednesday_close' => 'nullable|date_format:H:i',
+            'wednesday_closed' => 'nullable|boolean',
+            'thursday_open' => 'nullable|date_format:H:i',
+            'thursday_close' => 'nullable|date_format:H:i',
+            'thursday_closed' => 'nullable|boolean',
+            'friday_open' => 'nullable|date_format:H:i',
+            'friday_close' => 'nullable|date_format:H:i',
+            'friday_closed' => 'nullable|boolean',
+            'saturday_open' => 'nullable|date_format:H:i',
+            'saturday_close' => 'nullable|date_format:H:i',
+            'saturday_closed' => 'nullable|boolean',
+            'sunday_open' => 'nullable|date_format:H:i',
+            'sunday_close' => 'nullable|date_format:H:i',
+            'sunday_closed' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -100,13 +122,29 @@ class ShopController extends Controller
         
         // Explicitly handle boolean fields to ensure they update even when false
         $booleanFields = ['vat_registered', 'prices_include_vat', 'is_active', 'delivery_enabled', 
-                          'collection_enabled', 'online_payment', 'has_halal_products', 'has_organic_products'];
+                          'collection_enabled', 'online_payment', 'has_halal_products', 'has_organic_products',
+                          'monday_closed', 'tuesday_closed', 'wednesday_closed', 'thursday_closed',
+                          'friday_closed', 'saturday_closed', 'sunday_closed'];
         
         foreach ($booleanFields as $field) {
             if ($request->has($field)) {
                 $value = $request->input($field);
                 // Convert to boolean: true/1/"1"/"true" -> true, false/0/"0"/"false"/null -> false
                 $data[$field] = ($value === true || $value === 1 || $value === '1' || $value === 'true');
+            } else {
+                // If not present in request (checkbox unchecked), set to false
+                if (str_ends_with($field, '_closed')) {
+                    $data[$field] = false;
+                }
+            }
+        }
+        
+        // If a day is marked as closed, clear the open/close times
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        foreach ($days as $day) {
+            if (isset($data["{$day}_closed"]) && $data["{$day}_closed"] === true) {
+                $data["{$day}_open"] = null;
+                $data["{$day}_close"] = null;
             }
         }
 

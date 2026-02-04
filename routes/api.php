@@ -103,6 +103,9 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::patch('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'update']);
     Route::delete('products/{slug}', [\App\Http\Controllers\Admin\ProductController::class, 'destroy']);
     Route::post('products/{slug}/images', [\App\Http\Controllers\Admin\ProductController::class, 'uploadImage']);
+    Route::delete('products/{slug}/images/{imageId}', [\App\Http\Controllers\Admin\ProductController::class, 'deleteImage']);
+    Route::patch('products/{slug}/images/{imageId}/set-primary', [\App\Http\Controllers\Admin\ProductController::class, 'setPrimaryImage']);
+    Route::post('products/{slug}/images/reorder', [\App\Http\Controllers\Admin\ProductController::class, 'reorderImages']);
     Route::post('products/{slug}/restore', [\App\Http\Controllers\Admin\ProductController::class, 'restore']);
     Route::delete('products/{slug}/force', [\App\Http\Controllers\Admin\ProductController::class, 'forceDelete']);
 

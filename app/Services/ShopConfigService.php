@@ -125,18 +125,17 @@ class ShopConfigService
         }
         
         if ($day) {
-            $field = strtolower($day) . '_hours';
-            return $this->shop->{$field};
+            return $this->shop->getFormattedHours(strtolower($day));
         }
 
         return [
-            'monday' => $this->shop->monday_hours,
-            'tuesday' => $this->shop->tuesday_hours,
-            'wednesday' => $this->shop->wednesday_hours,
-            'thursday' => $this->shop->thursday_hours,
-            'friday' => $this->shop->friday_hours,
-            'saturday' => $this->shop->saturday_hours,
-            'sunday' => $this->shop->sunday_hours,
+            'monday' => $this->shop->getFormattedHours('monday'),
+            'tuesday' => $this->shop->getFormattedHours('tuesday'),
+            'wednesday' => $this->shop->getFormattedHours('wednesday'),
+            'thursday' => $this->shop->getFormattedHours('thursday'),
+            'friday' => $this->shop->getFormattedHours('friday'),
+            'saturday' => $this->shop->getFormattedHours('saturday'),
+            'sunday' => $this->shop->getFormattedHours('sunday'),
         ];
     }
 

@@ -59,13 +59,27 @@ class Shop extends Model
         'bank_sort_code',
         'bank_iban',
         'bank_swift_code',
-        'monday_hours',
-        'tuesday_hours',
-        'wednesday_hours',
-        'thursday_hours',
-        'friday_hours',
-        'saturday_hours',
-        'sunday_hours',
+        'monday_open',
+        'monday_close',
+        'monday_closed',
+        'tuesday_open',
+        'tuesday_close',
+        'tuesday_closed',
+        'wednesday_open',
+        'wednesday_close',
+        'wednesday_closed',
+        'thursday_open',
+        'thursday_close',
+        'thursday_closed',
+        'friday_open',
+        'friday_close',
+        'friday_closed',
+        'saturday_open',
+        'saturday_close',
+        'saturday_closed',
+        'sunday_open',
+        'sunday_close',
+        'sunday_closed',
         'domain',
         'is_active',
     ];
@@ -82,6 +96,13 @@ class Shop extends Model
         'online_payment' => 'boolean',
         'loyalty_program' => 'boolean',
         'reviews_enabled' => 'boolean',
+        'monday_closed' => 'boolean',
+        'tuesday_closed' => 'boolean',
+        'wednesday_closed' => 'boolean',
+        'thursday_closed' => 'boolean',
+        'friday_closed' => 'boolean',
+        'saturday_closed' => 'boolean',
+        'sunday_closed' => 'boolean',
         'min_order_amount' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'free_delivery_threshold' => 'decimal:2',
@@ -167,5 +188,64 @@ class Shop extends Model
     public function scopeBySlug($query, $slug)
     {
         return $query->where('slug', $slug);
+    }
+
+    /**
+     * Check if shop is currently open
+     */
+    public function isCurrentlyOpen(): bool
+    {
+        $now = now();
+        $dayName = strtolower($now->format('l')); // monday, tuesday, etc.
+        
+        $closedField = "{$dayName}_closed";
+        if ($this->$closedField) {
+            return false;
+        }
+        
+        $openField = "{$dayName}_open";
+        $closeField = "{$dayName}_close";
+        
+        if (!$this->$openField || !$this->$closeField) {
+            return false;
+        }
+        
+        $currentTime = $now->format('H:i:s');
+        return $currentTime >= $this->$openField && $currentTime <= $this->$closeField;
+    }
+
+    /**
+     * Get formatted operating hours for a specific day
+     */
+    public function getFormattedHours(string $day): string
+    {
+        $closedField = "{$day}_closed";
+        if ($this->$closedField) {
+            return 'Closed';
+        }
+        
+        $openField = "{$day}_open";
+        $closeField = "{$day}_close";
+        
+        if (!$this->$openField || !$this->$closeField) {
+            return 'Not set';
+        }
+        
+        return $this->formatTime($this->$openField) . ' - ' . $this->formatTime($this->$closeField);
+    }
+
+    /**
+     * Format time from 24-hour to 12-hour with AM/PM
+     */
+    private function formatTime(string $time): string
+    {
+        $parts = explode(':', $time);
+        $hour = (int)$parts[0];
+        $minute = $parts[1];
+        
+        $period = $hour >= 12 ? 'PM' : 'AM';
+        $hour = $hour > 12 ? $hour - 12 : ($hour == 0 ? 12 : $hour);
+        
+        return sprintf('%d:%s %s', $hour, $minute, $period);
     }
 }

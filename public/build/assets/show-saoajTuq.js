@@ -69,16 +69,16 @@ var h;const c=(h=document.querySelector("[data-offer-id]"))==null?void 0:h.datas
         <button id="delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
             <i class="fas fa-trash"></i> Delete
         </button>
-    `;document.getElementById("offer-actions").innerHTML=a,_()}function $(){const t=e.products_count||0,s=e.products||[];let r=`
+    `;document.getElementById("offer-actions").innerHTML=a,_()}function $(){const t=e.products||[],s=t.length;let r=`
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h2 class="text-xl font-bold">Associated Products</h2>
-                <p class="text-sm text-gray-600">${t} product${t!==1?"s":""}</p>
+                <p class="text-sm text-gray-600">${s} product${s!==1?"s":""}</p>
             </div>
         </div>
-    `;s.length>0?r+=`
+    `;t.length>0?r+=`
             <div class="space-y-2">
-                ${s.map(a=>{var n,u,y,x;const i=((n=a.variations)==null?void 0:n.find(m=>m.is_default))||((u=a.variations)==null?void 0:u[0]),d=i?`£${parseFloat(i.price).toFixed(2)}`:"N/A",o=(y=a.primary_image)==null?void 0:y.url;return`
+                ${t.map(a=>{var n,u,y,x;const i=((n=a.variations)==null?void 0:n.find(m=>m.is_default))||((u=a.variations)==null?void 0:u[0]),d=i?`£${parseFloat(i.price).toFixed(2)}`:"N/A",o=(y=a.primary_image)==null?void 0:y.url;return`
                         <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="window.location='/admin/products/${a.slug}'">
                             <div class="flex-shrink-0">
                                 ${o?`<img src="${o}" class="w-16 h-16 object-cover rounded" alt="${a.name}">`:'<div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div>'}

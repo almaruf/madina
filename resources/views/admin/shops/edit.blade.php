@@ -323,43 +323,194 @@
             <!-- Operating Hours Tab -->
             <div id="tab-hours" class="tab-content hidden">
                 <form id="form-hours" data-form-type="hours">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Monday</label>
-                            <input type="text" name="monday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+                    <div class="space-y-4">
+                        <!-- Quick Actions -->
+                        <div class="flex gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                            <button type="button" onclick="applyToAll()" class="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                                Apply Monday to All Weekdays
+                            </button>
+                            <button type="button" onclick="copyToAll()" class="px-4 py-2 bg-purple-500 text-white text-sm rounded hover:bg-purple-600">
+                                Copy Monday to All Days
+                            </button>
+                            <button type="button" onclick="closeWeekends()" class="px-4 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600">
+                                Close Weekends
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tuesday</label>
-                            <input type="text" name="tuesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Monday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition" data-day="monday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Monday</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="monday" name="monday_closed" value="1" onchange="toggleDayClosed('monday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="monday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="monday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Wednesday</label>
-                            <input type="text" name="wednesday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Tuesday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition" data-day="tuesday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Tuesday</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="tuesday" name="tuesday_closed" value="1" onchange="toggleDayClosed('tuesday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="tuesday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="tuesday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Thursday</label>
-                            <input type="text" name="thursday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Wednesday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition" data-day="wednesday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Wednesday</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="wednesday" name="wednesday_closed" value="1" onchange="toggleDayClosed('wednesday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="wednesday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="wednesday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Friday</label>
-                            <input type="text" name="friday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Thursday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition" data-day="thursday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Thursday</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="thursday" name="thursday_closed" value="1" onchange="toggleDayClosed('thursday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="thursday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="thursday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Saturday</label>
-                            <input type="text" name="saturday_hours" placeholder="9:00 AM - 6:00 PM" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Friday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition" data-day="friday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Friday</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="friday" name="friday_closed" value="1" onchange="toggleDayClosed('friday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="friday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="friday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sunday</label>
-                            <input type="text" name="sunday_hours" placeholder="Closed" class="w-full border rounded px-4 py-2 focus:ring-2 focus:ring-green-500">
+
+                        <!-- Saturday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition bg-yellow-50" data-day="saturday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Saturday <span class="text-xs text-yellow-700 font-normal">(Weekend)</span></label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="saturday" name="saturday_closed" value="1" onchange="toggleDayClosed('saturday', this)">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="saturday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="saturday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sunday -->
+                        <div class="border rounded-lg p-4 hover:bg-gray-50 transition bg-yellow-50" data-day="sunday">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-base font-semibold text-gray-900">Sunday <span class="text-xs text-yellow-700 font-normal">(Weekend)</span></label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="closed-checkbox mr-2" data-day="sunday" name="sunday_closed" value="1" onchange="toggleDayClosed('sunday')">
+                                    <span class="text-sm text-gray-600">Closed</span>
+                                </label>
+                            </div>
+                            <div class="time-inputs grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                    <input type="time" name="sunday_open" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                    <input type="time" name="sunday_close" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                     <div class="flex gap-4 pt-6 border-t mt-6">
                         <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                            Update Operating Hours
+                            <i class="fas fa-save mr-2"></i>Update Operating Hours
+                        </button>
+                        <button type="button" onclick="previewHours()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            <i class="fas fa-eye mr-2"></i>Preview
                         </button>
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- General Purpose Modal -->
+<div id="general-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg max-w-md w-full p-6 relative">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+        <div id="modal-content" class="text-gray-700 whitespace-pre-wrap"></div>
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                Close
+            </button>
         </div>
     </div>
 </div>

@@ -287,11 +287,21 @@ function renderShop(shop) {
     // Operating Hours Tab
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const hoursHtml = days.map(day => {
-        const hours = shop[`${day}_hours`];
+        const closed = shop[`${day}_closed`];
+        let hours = 'Closed';
+        
+        if (!closed && shop[`${day}_open`] && shop[`${day}_close`]) {
+            hours = formatTime(shop[`${day}_open`]) + ' - ' + formatTime(shop[`${day}_close`]);
+        } else if (closed) {
+            hours = 'Closed';
+        } else {
+            hours = 'Not set';
+        }
+        
         return `
             <div>
                 <h3 class="text-sm font-medium text-gray-500 mb-2">${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
-                <p class="text-lg text-gray-900">${hours || 'Closed'}</p>
+                <p class="text-lg text-gray-900">${hours}</p>
             </div>
         `;
     }).join('');
@@ -475,6 +485,19 @@ async function permanentDeleteShop() {
         console.error('Error deleting shop:', error);
         window.toast.error(error.response?.data?.message || 'Failed to delete shop');
     }
+}
+
+// Format time from 24-hour to 12-hour with AM/PM
+function formatTime(time24) {
+    if (!time24) return '';
+    const parts = time24.split(':');
+    let hour = parseInt(parts[0]);
+    const minute = parts[1];
+    
+    const period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    
+    return `${hour}:${minute} ${period}`;
 }
 
 // Initialize on page load

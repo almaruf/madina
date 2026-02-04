@@ -119,40 +119,66 @@ function populateForm(shop) {
     formBranding.querySelector('[name="instagram_url"]').value = shop.instagram_url || '';
     formBranding.querySelector('[name="twitter_url"]').value = shop.twitter_url || '';
     
-    // Operating Hours
+    // Operating Hours - Use new separate time fields
     const formHours = document.getElementById('form-hours');
-    formHours.querySelector('[name="monday_hours"]').value = shop.monday_hours || '';
-    formHours.querySelector('[name="tuesday_hours"]').value = shop.tuesday_hours || '';
-    formHours.querySelector('[name="wednesday_hours"]').value = shop.wednesday_hours || '';
-    formHours.querySelector('[name="thursday_hours"]').value = shop.thursday_hours || '';
-    formHours.querySelector('[name="friday_hours"]').value = shop.friday_hours || '';
-    formHours.querySelector('[name="saturday_hours"]').value = shop.saturday_hours || '';
-    formHours.querySelector('[name="sunday_hours"]').value = shop.sunday_hours || '';
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    days.forEach(day => {
+        const openInput = formHours.querySelector(`[name="${day}_open"]`);
+        const closeInput = formHours.querySelector(`[name="${day}_close"]`);
+        const closedCheckbox = formHours.querySelector(`[name="${day}_closed"]`);
+        
+        // Set values from new separate fields
+        if (openInput && shop[`${day}_open`]) {
+            openInput.value = shop[`${day}_open`].substring(0, 5); // Remove seconds
+        }
+        if (closeInput && shop[`${day}_close`]) {
+            closeInput.value = shop[`${day}_close`].substring(0, 5); // Remove seconds
+        }
+        if (closedCheckbox) {
+            closedCheckbox.checked = shop[`${day}_closed`] || false;
+            if (closedCheckbox.checked) {
+                toggleDayClosed(day);
+            }
+        }
+    });
 }
 
 // Get form data for a specific form
 function getFormData(form) {
-    const formData = new FormData(form);
     const data = {};
     
-    // First, process all FormData entries (text inputs, numbers, etc.)
-    for (const [key, value] of formData.entries()) {
-        const input = form.querySelector(`[name="${key}"]`);
+    // Process all form inputs manually (not using FormData to avoid issues)
+    form.querySelectorAll('input, select, textarea').forEach(input => {
+        if (!input.name) return;
         
-        if (input && input.type === 'checkbox') {
-            data[key] = input.checked;
-        } else if (input && input.type === 'number') {
-            data[key] = value ? parseFloat(value) : null;
+        if (input.type === 'checkbox') {
+            // Handle checkboxes explicitly as booleans
+            data[input.name] = input.checked;
+        } else if (input.type === 'number') {
+            data[input.name] = input.value ? parseFloat(input.value) : null;
+        } else if (input.type === 'time') {
+            // Handle time inputs - only add if not disabled
+            if (!input.disabled) {
+                data[input.name] = input.value || null;
+            }
         } else {
-            data[key] = value || null;
+            data[input.name] = input.value || null;
         }
-    }
-    
-    // Explicitly add all checkboxes (including unchecked ones)
-    form.querySelectorAll('input[type="checkbox"][name]').forEach(checkbox => {
-        data[checkbox.name] = checkbox.checked;
     });
     
+    // For operating hours: if day is closed, clear the open/close times
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    days.forEach(day => {
+        const closedField = `${day}_closed`;
+        if (data[closedField] === true) {
+            console.log(`Day ${day} is closed, clearing times`);
+            data[`${day}_open`] = null;
+            data[`${day}_close`] = null;
+        }
+    });
+    
+    console.log('Final form data:', data);
     return data;
 }
 
@@ -221,6 +247,152 @@ function getFormTypeLabel(formType) {
         'hours': 'Operating Hours'
     };
     return labels[formType] || formType;
+}
+
+// Operating Hours Helper Functions
+window.toggleDayClosed = function(day, checkboxElement = null) {
+    console.log(`toggleDayClosed called for ${day}, element passed:`, !!checkboxElement);
+    
+    // Use setTimeout to ensure checkbox state has updated before we query it
+    setTimeout(() => {
+        // If checkbox element was passed, use it directly; otherwise query for it
+        const closedCheckbox = checkboxElement || document.querySelector(`input[name="${day}_closed"]`);
+        const openInput = document.querySelector(`input[name="${day}_open"]`);
+        const closeInput = document.querySelector(`input[name="${day}_close"]`);
+        
+        console.log(`toggleDayClosed(${day}): checkbox found = ${!!closedCheckbox}, checked = ${closedCheckbox?.checked}`);
+        
+        if (closedCheckbox && closedCheckbox.checked) {
+            // Day is closed, disable and clear the time inputs
+            if (openInput) {
+                openInput.disabled = true;
+                openInput.value = '';
+                openInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+            if (closeInput) {
+                closeInput.disabled = true;
+                closeInput.value = '';
+                closeInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+        } else {
+            // Day is open, enable the time inputs
+            if (openInput) {
+                openInput.disabled = false;
+                openInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+            if (closeInput) {
+                closeInput.disabled = false;
+                closeInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+    }, 0);
+}
+
+window.applyToAll = function() {
+    const mondayOpen = document.querySelector('[name="monday_open"]').value;
+    const mondayClose = document.querySelector('[name="monday_close"]').value;
+    const mondayClosed = document.querySelector('[name="monday_closed"]').checked;
+    
+    if (!mondayOpen || !mondayClose) {
+        window.toast.error('Please set Monday hours first before applying to other days');
+        return;
+    }
+    
+    const weekdays = ['tuesday', 'wednesday', 'thursday', 'friday'];
+    weekdays.forEach(day => {
+        document.querySelector(`[name="${day}_open"]`).value = mondayOpen;
+        document.querySelector(`[name="${day}_close"]`).value = mondayClose;
+        document.querySelector(`[name="${day}_closed"]`).checked = mondayClosed;
+        toggleDayClosed(day);
+    });
+    
+    window.toast.success('Applied Monday hours to all weekdays');
+}
+
+window.copyToAll = function() {
+    const mondayOpen = document.querySelector('[name="monday_open"]').value;
+    const mondayClose = document.querySelector('[name="monday_close"]').value;
+    const mondayClosed = document.querySelector('[name="monday_closed"]').checked;
+    
+    if (!mondayOpen || !mondayClose) {
+        window.toast.error('Please set Monday hours first before copying to other days');
+        return;
+    }
+    
+    const allDays = ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    allDays.forEach(day => {
+        document.querySelector(`[name="${day}_open"]`).value = mondayOpen;
+        document.querySelector(`[name="${day}_close"]`).value = mondayClose;
+        document.querySelector(`[name="${day}_closed"]`).checked = mondayClosed;
+        toggleDayClosed(day);
+    });
+    
+    window.toast.success('Copied Monday hours to all days');
+}
+
+window.closeWeekends = function() {
+    ['saturday', 'sunday'].forEach(day => {
+        const checkbox = document.querySelector(`[name="${day}_closed"]`);
+        if (checkbox) {
+            checkbox.checked = true;
+            toggleDayClosed(day);
+        }
+    });
+    
+    window.toast.success('Weekends marked as closed');
+}
+
+window.previewHours = function() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let preview = '';
+    
+    days.forEach((day, index) => {
+        const closedCheckbox = document.querySelector(`[name="${day}_closed"]`);
+        if (closedCheckbox && closedCheckbox.checked) {
+            preview += `${dayNames[index]}: Closed\n`;
+        } else {
+            const openTime = document.querySelector(`[name="${day}_open"]`).value;
+            const closeTime = document.querySelector(`[name="${day}_close"]`).value;
+            if (openTime && closeTime) {
+                preview += `${dayNames[index]}: ${formatTime(openTime)} - ${formatTime(closeTime)}\n`;
+            } else {
+                preview += `${dayNames[index]}: Not set\n`;
+            }
+        }
+    });
+    
+    showModal('Operating Hours Preview', preview);
+}
+
+function formatTime(time24) {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    let hour = parseInt(hours);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    if (hour > 12) hour -= 12;
+    if (hour === 0) hour = 12;
+    return `${hour}:${minutes} ${period}`;
+}
+
+// Modal helper functions
+function showModal(title, content) {
+    const modal = document.getElementById('general-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    
+    if (modal && modalTitle && modalContent) {
+        modalTitle.textContent = title;
+        modalContent.textContent = content;
+        modal.classList.remove('hidden');
+    }
+}
+
+window.closeModal = function() {
+    const modal = document.getElementById('general-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 // Initialize on page load

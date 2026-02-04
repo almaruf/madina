@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app--M1MHkm-.css",
+    "file": "assets/app-2vaQJJQA.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -35,7 +35,7 @@
     "isEntry": true
   },
   "resources/js/admin/dashboard.js": {
-    "file": "assets/dashboard-DpChtOJq.js",
+    "file": "assets/dashboard-nJ1L9DD9.js",
     "name": "dashboard",
     "src": "resources/js/admin/dashboard.js",
     "isEntry": true
@@ -47,7 +47,7 @@
     "isEntry": true
   },
   "resources/js/admin/layout.js": {
-    "file": "assets/layout-dSAyZoHH.js",
+    "file": "assets/layout-CZoEXQzg.js",
     "name": "layout",
     "src": "resources/js/admin/layout.js",
     "isEntry": true
@@ -101,13 +101,13 @@
     "isEntry": true
   },
   "resources/js/admin/offers/show.js": {
-    "file": "assets/show-Ce54fHFJ.js",
+    "file": "assets/show-saoajTuq.js",
     "name": "show",
     "src": "resources/js/admin/offers/show.js",
     "isEntry": true
   },
   "resources/js/admin/orders.js": {
-    "file": "assets/orders-C7x4WZuj.js",
+    "file": "assets/orders-DOITB_2S.js",
     "name": "orders",
     "src": "resources/js/admin/orders.js",
     "isEntry": true
@@ -137,7 +137,7 @@
     "isEntry": true
   },
   "resources/js/admin/products/show.js": {
-    "file": "assets/show-BP6jzju5.js",
+    "file": "assets/show-BY4cthu0.js",
     "name": "show",
     "src": "resources/js/admin/products/show.js",
     "isEntry": true
@@ -161,19 +161,19 @@
     "isEntry": true
   },
   "resources/js/admin/shops/edit.js": {
-    "file": "assets/edit-I1FmnDGS.js",
+    "file": "assets/edit-ChIZHz-Z.js",
     "name": "edit",
     "src": "resources/js/admin/shops/edit.js",
     "isEntry": true
   },
   "resources/js/admin/shops/show.js": {
-    "file": "assets/show-CpukIyD_.js",
+    "file": "assets/show-B0RE5t_E.js",
     "name": "show",
     "src": "resources/js/admin/shops/show.js",
     "isEntry": true
   },
   "resources/js/admin/users.js": {
-    "file": "assets/users-BOmhrNZi.js",
+    "file": "assets/users-BS3Q2F-g.js",
     "name": "users",
     "src": "resources/js/admin/users.js",
     "isEntry": true
