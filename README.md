@@ -1,6 +1,33 @@
-# ABC Grocery Shop - Multi-Tenant Online Grocery Platform
+# ABC Grocery Shop - Multi-Tenant E-Commerce Platform
 
-A comprehensive Laravel 12 e-commerce application for managing multiple grocery stores from a single deployment. This platform uses database-driven multi-tenancy to serve unlimited shops with complete data isolation.
+> **A Production-Ready Laravel 12 Multi-Tenant Grocery E-commerce Platform**
+
+Comprehensive e-commerce solution enabling unlimited grocery shops from a single deployment with complete database-driven data isolation, phone-based authentication, and AWS integration.
+
+---
+
+## 📖 Table of Contents
+
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Technology Stack](#technology-stack)
+4. [Multi-Tenancy Architecture](#multi-tenancy-architecture)
+5. [Quick Start](#quick-start)
+6. [Installation](#installation)
+7. [Configuration](#configuration)
+8. [User Roles & Access Control](#user-roles--access-control)
+9. [API Documentation](#api-documentation)
+10. [Database Schema](#database-schema)
+11. [Development Guidelines](#development-guidelines)
+12. [Deployment](#deployment)
+13. [Troubleshooting](#troubleshooting)
+14. [Documentation Index](#documentation-index)
+
+---
+
+## Overview
+
+ABC Grocery Shop is a **production-ready multi-tenant e-commerce platform** designed for grocery businesses. Deploy once, serve unlimited shops with complete data isolation.
 
 ## Multi-Shop Architecture
 
