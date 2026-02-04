@@ -67,13 +67,13 @@ class Shop extends Model
         'saturday_hours',
         'sunday_hours',
         'domain',
+        'is_active',
+    ];
+
+    protected $casts = [
         'vat_registered' => 'boolean',
         'prices_include_vat' => 'boolean',
         'is_active' => 'boolean',
-        'min_order_amount' => 'decimal:2',
-        'delivery_fee' => 'decimal:2',
-        'free_delivery_threshold' => 'decimal:2',
-        'vat_rate' => 'decimal:2',
         'has_halal_products' => 'boolean',
         'has_organic_products' => 'boolean',
         'has_international_products' => 'boolean',
@@ -82,11 +82,31 @@ class Shop extends Model
         'online_payment' => 'boolean',
         'loyalty_program' => 'boolean',
         'reviews_enabled' => 'boolean',
-        'is_active' => 'boolean',
         'min_order_amount' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'free_delivery_threshold' => 'decimal:2',
+        'vat_rate' => 'decimal:2',
+        'delivery_radius_km' => 'decimal:2',
     ];
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     * Include trashed models for admin routes.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)
+            ->withTrashed()
+            ->firstOrFail();
+    }
 
     public function users()
     {
@@ -147,10 +167,5 @@ class Shop extends Model
     public function scopeBySlug($query, $slug)
     {
         return $query->where('slug', $slug);
-    }
-
-    public function getRouteKeyName()
-    {
-        return 'slug';
     }
 }

@@ -75,7 +75,7 @@ function populateForm(shop) {
     formBasic.querySelector('[name="city"]').value = shop.city || '';
     formBasic.querySelector('[name="postcode"]').value = shop.postcode || '';
     formBasic.querySelector('[name="country"]').value = shop.country || 'United Kingdom';
-    formBasic.querySelector('[name="is_active"]').checked = shop.is_active;
+    formBasic.querySelector('[name="is_active"]').checked = !!shop.is_active;
     
     // Delivery & Pricing
     const formDelivery = document.getElementById('form-delivery');
@@ -85,20 +85,20 @@ function populateForm(shop) {
     formDelivery.querySelector('[name="min_order_amount"]').value = shop.min_order_amount || 0;
     formDelivery.querySelector('[name="free_delivery_threshold"]').value = shop.free_delivery_threshold || 0;
     formDelivery.querySelector('[name="delivery_radius_km"]').value = shop.delivery_radius_km || 10;
-    formDelivery.querySelector('[name="delivery_enabled"]').checked = shop.delivery_enabled;
-    formDelivery.querySelector('[name="collection_enabled"]').checked = shop.collection_enabled;
-    formDelivery.querySelector('[name="online_payment"]').checked = shop.online_payment;
-    formDelivery.querySelector('[name="has_halal_products"]').checked = shop.has_halal_products;
-    formDelivery.querySelector('[name="has_organic_products"]').checked = shop.has_organic_products;
+    formDelivery.querySelector('[name="delivery_enabled"]').checked = !!shop.delivery_enabled;
+    formDelivery.querySelector('[name="collection_enabled"]').checked = !!shop.collection_enabled;
+    formDelivery.querySelector('[name="online_payment"]').checked = !!shop.online_payment;
+    formDelivery.querySelector('[name="has_halal_products"]').checked = !!shop.has_halal_products;
+    formDelivery.querySelector('[name="has_organic_products"]').checked = !!shop.has_organic_products;
     
     // Legal & VAT
     const formLegal = document.getElementById('form-legal');
     formLegal.querySelector('[name="legal_company_name"]').value = shop.legal_company_name || '';
     formLegal.querySelector('[name="company_registration_number"]').value = shop.company_registration_number || '';
-    formLegal.querySelector('[name="vat_registered"]').checked = shop.vat_registered || false;
+    formLegal.querySelector('[name="vat_registered"]').checked = !!shop.vat_registered;
     formLegal.querySelector('[name="vat_number"]').value = shop.vat_number || '';
     formLegal.querySelector('[name="vat_rate"]').value = shop.vat_rate || '';
-    formLegal.querySelector('[name="prices_include_vat"]').checked = shop.prices_include_vat !== false;
+    formLegal.querySelector('[name="prices_include_vat"]').checked = !!shop.prices_include_vat;
     
     // Bank Details
     const formBank = document.getElementById('form-bank');
@@ -135,6 +135,7 @@ function getFormData(form) {
     const formData = new FormData(form);
     const data = {};
     
+    // First, process all FormData entries (text inputs, numbers, etc.)
     for (const [key, value] of formData.entries()) {
         const input = form.querySelector(`[name="${key}"]`);
         
@@ -146,6 +147,11 @@ function getFormData(form) {
             data[key] = value || null;
         }
     }
+    
+    // Explicitly add all checkboxes (including unchecked ones)
+    form.querySelectorAll('input[type="checkbox"][name]').forEach(checkbox => {
+        data[checkbox.name] = checkbox.checked;
+    });
     
     return data;
 }
@@ -173,10 +179,13 @@ async function handleFormSubmit(e) {
             delete data.vat_rate;
         }
         
-        await axios.patch(`/api/admin/shops/${shopSlug}`, data);
+        const response = await axios.patch(`/api/admin/shops/${shopSlug}`, data);
         
-        // Update currentShop with new data
-        Object.assign(currentShop, data);
+        // Update currentShop with response data to ensure sync with backend
+        currentShop = response.data;
+        
+        // Refresh the form with the updated data from backend
+        populateForm(currentShop);
         
         window.toast.success(`${getFormTypeLabel(formType)} updated successfully!`);
         

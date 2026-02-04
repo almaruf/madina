@@ -31,6 +31,10 @@
                         <span>Discounts:</span>
                         <span id="discounts">-£0.00</span>
                     </div>
+                    <div id="vat-line" class="flex justify-between text-sm text-gray-600" style="display: none;">
+                        <span id="vat-label">VAT (20%):</span>
+                        <span id="vat-amount">£0.00</span>
+                    </div>
                     <div class="flex justify-between">
                         <span>Delivery Fee:</span>
                         <span id="delivery-fee">£0.00</span>
@@ -62,7 +66,28 @@
         constructor() {
             this.items = this.loadCart();
             this.deliveryFee = 5.00; // Default delivery fee
+            this.shopConfig = null;
+            this.init();
+        }
+
+        async init() {
+            await this.loadShopConfig();
             this.render();
+        }
+
+        async loadShopConfig() {
+            try {
+                const response = await axios.get('/api/shop/config');
+                this.shopConfig = response.data;
+                this.deliveryFee = parseFloat(this.shopConfig.delivery_fee) || 5.00;
+            } catch (error) {
+                console.error('Failed to load shop config:', error);
+                // Use defaults
+                this.shopConfig = {
+                    currency_symbol: '£',
+                    vat: { registered: false, rate: 20.00, prices_include_vat: true }
+                };
+            }
         }
 
         loadCart() {
@@ -365,12 +390,32 @@
             }, 0);
             
             const deliveryFee = subtotal > 0 ? this.deliveryFee : 0;
-            const total = subtotal + deliveryFee;
+            const currencySymbol = this.shopConfig?.currency_symbol || '£';
+            
+            // Calculate VAT if prices DON'T include VAT (need to add VAT on top)
+            let vatAmount = 0;
+            if (this.shopConfig?.vat?.prices_include_vat === false) {
+                const vatRate = parseFloat(this.shopConfig.vat.rate) || 20.00;
+                
+                // Prices exclude VAT - add VAT on top
+                vatAmount = subtotal * (vatRate / 100);
+                
+                // Update VAT display
+                document.getElementById('vat-label').textContent = `VAT (${vatRate}%):`;
+                document.getElementById('vat-amount').textContent = currencySymbol + vatAmount.toFixed(2);
+                document.getElementById('vat-line').style.display = 'flex';
+            } else {
+                // VAT already included in prices or not applicable
+                document.getElementById('vat-line').style.display = 'none';
+            }
+            
+            // Calculate total (add VAT if prices don't include it)
+            const total = subtotal + vatAmount + deliveryFee;
 
-            document.getElementById('subtotal').textContent = '£' + subtotal.toFixed(2);
-            document.getElementById('discounts').textContent = '-£' + discounts.toFixed(2);
-            document.getElementById('delivery-fee').textContent = '£' + deliveryFee.toFixed(2);
-            document.getElementById('total').textContent = '£' + total.toFixed(2);
+            document.getElementById('subtotal').textContent = currencySymbol + subtotal.toFixed(2);
+            document.getElementById('discounts').textContent = '-' + currencySymbol + discounts.toFixed(2);
+            document.getElementById('delivery-fee').textContent = currencySymbol + deliveryFee.toFixed(2);
+            document.getElementById('total').textContent = currencySymbol + total.toFixed(2);
         }
     }
 

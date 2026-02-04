@@ -125,6 +125,10 @@
                     <span>Subtotal:</span>
                     <span id="summary-subtotal">£0.00</span>
                 </div>
+                <div id="vat-line" class="flex justify-between text-sm text-gray-600" style="display: none;">
+                    <span id="vat-label">VAT (20%):</span>
+                    <span id="vat-amount">£0.00</span>
+                </div>
                 <div class="flex justify-between">
                     <span>Delivery Fee:</span>
                     <span id="summary-delivery-fee">£5.00</span>
@@ -156,6 +160,7 @@
             this.deliveryFee = 5.00;
             this.user = null;
             this.selectedAddressId = null;
+            this.shopConfig = null;
             this.checkAuthAndInit();
         }
 
@@ -216,10 +221,28 @@
         }
 
         async init() {
+            await this.loadShopConfig();
             await this.loadUserAddresses();
             await this.loadDeliverySlots();
             await this.renderOrderSummary();
             this.setupFormSubmission();
+        }
+
+        async loadShopConfig() {
+            try {
+                const response = await axios.get('/api/shop/config');
+                this.shopConfig = response.data;
+                this.deliveryFee = parseFloat(this.shopConfig.delivery_fee) || 5.00;
+                document.getElementById('summary-delivery-fee').textContent = 
+                    (this.shopConfig.currency_symbol || '£') + this.deliveryFee.toFixed(2);
+            } catch (error) {
+                console.error('Failed to load shop config:', error);
+                // Use defaults
+                this.shopConfig = {
+                    currency_symbol: '£',
+                    vat: { registered: false, rate: 20.00, prices_include_vat: true }
+                };
+            }
         }
 
         async loadUserAddresses() {
@@ -331,20 +354,40 @@
                 const response = await axios.post('/api/cart/validate', { items: this.cart });
                 const items = response.data.items;
                 const subtotal = response.data.subtotal;
+                const currencySymbol = this.shopConfig?.currency_symbol || '£';
 
                 const itemsHtml = items.map(item => `
                     <div class="flex justify-between">
                         <span>${item.product_name} (${item.variation_name}) x ${item.quantity}</span>
-                        <span>£${item.total.toFixed(2)}</span>
+                        <span>${currencySymbol}${item.total.toFixed(2)}</span>
                     </div>
                 `).join('');
 
                 document.getElementById('order-items').innerHTML = itemsHtml;
 
-                const total = subtotal + this.deliveryFee;
-                document.getElementById('summary-subtotal').textContent = '£' + subtotal.toFixed(2);
-                document.getElementById('summary-delivery-fee').textContent = '£' + this.deliveryFee.toFixed(2);
-                document.getElementById('summary-total').textContent = '£' + total.toFixed(2);
+                // Calculate VAT if prices DON'T include VAT (need to add VAT on top)
+                let vatAmount = 0;
+                if (this.shopConfig?.vat?.prices_include_vat === false) {
+                    const vatRate = parseFloat(this.shopConfig.vat.rate) || 20.00;
+                    
+                    // Prices exclude VAT - add VAT on top
+                    vatAmount = subtotal * (vatRate / 100);
+                    
+                    // Update VAT display
+                    document.getElementById('vat-label').textContent = `VAT (${vatRate}%):`;
+                    document.getElementById('vat-amount').textContent = currencySymbol + vatAmount.toFixed(2);
+                    document.getElementById('vat-line').style.display = 'flex';
+                } else {
+                    // VAT already included in prices or not applicable
+                    document.getElementById('vat-line').style.display = 'none';
+                }
+
+                // Calculate total (add VAT if prices don't include it)
+                const total = subtotal + vatAmount + this.deliveryFee;
+                
+                document.getElementById('summary-subtotal').textContent = currencySymbol + subtotal.toFixed(2);
+                document.getElementById('summary-delivery-fee').textContent = currencySymbol + this.deliveryFee.toFixed(2);
+                document.getElementById('summary-total').textContent = currencySymbol + total.toFixed(2);
 
                 this.subtotal = subtotal;
             } catch (error) {

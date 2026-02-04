@@ -58,16 +58,13 @@ class ShopController extends Controller
         return response()->json($shop, 201);
     }
 
-    public function show($slug)
+    public function show(Shop $shop)
     {
-        $shop = Shop::withTrashed()->where('slug', $slug)->firstOrFail();
         return response()->json($shop);
     }
 
-    public function update(Request $request, $slug)
+    public function update(Request $request, Shop $shop)
     {
-        $shop = Shop::where('slug', $slug)->firstOrFail();
-
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'legal_company_name' => 'nullable|string|max:255',
@@ -76,10 +73,16 @@ class ShopController extends Controller
             'domain' => 'nullable|string|unique:shops,domain,' . $shop->id,
             'phone' => 'sometimes|required|string|max:20',
             'email' => 'sometimes|required|email',
-            'vat_registered' => 'boolean',
+            'is_active' => 'sometimes|boolean',
+            'vat_registered' => 'sometimes|boolean',
             'vat_number' => 'nullable|string|max:50',
             'vat_rate' => 'nullable|numeric|min:0|max:100',
-            'prices_include_vat' => 'boolean',
+            'prices_include_vat' => 'sometimes|boolean',
+            'delivery_enabled' => 'sometimes|boolean',
+            'collection_enabled' => 'sometimes|boolean',
+            'online_payment' => 'sometimes|boolean',
+            'has_halal_products' => 'sometimes|boolean',
+            'has_organic_products' => 'sometimes|boolean',
             'bank_name' => 'nullable|string|max:255',
             'bank_account_name' => 'nullable|string|max:255',
             'bank_account_number' => 'nullable|string|max:50',
@@ -92,7 +95,22 @@ class ShopController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $shop->update($request->all());
+        // Get validated data
+        $data = $request->all();
+        
+        // Explicitly handle boolean fields to ensure they update even when false
+        $booleanFields = ['vat_registered', 'prices_include_vat', 'is_active', 'delivery_enabled', 
+                          'collection_enabled', 'online_payment', 'has_halal_products', 'has_organic_products'];
+        
+        foreach ($booleanFields as $field) {
+            if ($request->has($field)) {
+                $value = $request->input($field);
+                // Convert to boolean: true/1/"1"/"true" -> true, false/0/"0"/"false"/null -> false
+                $data[$field] = ($value === true || $value === 1 || $value === '1' || $value === 'true');
+            }
+        }
+
+        $shop->update($data);
 
         ShopContext::clearCache();
 
@@ -139,9 +157,8 @@ class ShopController extends Controller
         return response()->json($shop);
     }
 
-    public function destroy($slug)
+    public function destroy(Shop $shop)
     {
-        $shop = Shop::where('slug', $slug)->firstOrFail();
         $shop->delete();
 
         ShopContext::clearCache();
@@ -151,7 +168,7 @@ class ShopController extends Controller
 
     public function restore($slug)
     {
-        $shop = Shop::onlyTrashed()->where('slug', $slug)->firstOrFail();
+        $shop = Shop::withTrashed()->where('slug', $slug)->firstOrFail();
         $shop->restore();
 
         ShopContext::clearCache();

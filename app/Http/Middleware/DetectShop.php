@@ -10,10 +10,13 @@ class DetectShop
 {
     public function handle(Request $request, Closure $next)
     {
-        // Skip shop detection for admin routes
-        if ($request->is('admin') || $request->is('admin/*')) {
+        // Skip shop detection for auth API routes only
+        if ($request->is('api/auth/*')) {
             return $next($request);
         }
+
+        // For admin routes, allow inactive shops
+        $isAdminRoute = $request->is('admin') || $request->is('admin/*') || $request->is('api/admin/*');
 
         // Get the host/domain
         $domain = $request->getHost();
@@ -26,18 +29,22 @@ class DetectShop
             $shop = ShopContext::findBySlug($request->query('shop'));
         }
 
-        // If not found, try to get first active shop
+        // If not found, try to get first shop (active or inactive based on route type)
         if (!$shop) {
-            $shop = \App\Models\Shop::active()->first();
+            $shop = $isAdminRoute 
+                ? \App\Models\Shop::first() 
+                : \App\Models\Shop::active()->first();
         }
 
         // If still no shop found, abort (only for public shop routes)
-        if (!$shop) {
+        if (!$shop && !$isAdminRoute) {
             return response()->json(['message' => 'Shop not found'], 404);
         }
 
-        // Set the current shop in context
-        ShopContext::setShop($shop);
+        // Set the current shop in context (even if null for admin routes)
+        if ($shop) {
+            ShopContext::setShop($shop);
+        }
 
         return $next($request);
     }

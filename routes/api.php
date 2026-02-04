@@ -13,6 +13,9 @@ Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 Route::post('/admin/verify-otp', [AuthController::class, 'adminVerifyOtp']);
 
+// Shop configuration (public)
+Route::get('/shop/config', [\App\Http\Controllers\Api\ShopController::class, 'config']);
+
 // Product routes (public)
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
