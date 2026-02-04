@@ -143,7 +143,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::delete('categories/{slug}', [\App\Http\Controllers\Admin\CategoryController::class, 'destroy']);
     Route::post('categories/{slug}/restore', [\App\Http\Controllers\Admin\CategoryController::class, 'restore']);
     Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
-    Route::delete('categories/{slug}/force', [\App\Http\Controllers\Admin\CategoryController::class, 'forceDelete']);
+    
+    // Category image management
+    Route::post('categories/{slug}/image', [\App\Http\Controllers\Admin\CategoryController::class, 'uploadImage']);
+    Route::delete('categories/{slug}/image', [\App\Http\Controllers\Admin\CategoryController::class, 'deleteImage']);
     
     // Offers
     Route::get('offers', [\App\Http\Controllers\Admin\OfferController::class, 'index']);

@@ -37,12 +37,12 @@
                     @if($product->images->count() > 0)
                         @foreach($product->images as $index => $image)
                         <img x-show="currentImage === {{ $index }}" 
-                             src="{{ $image->url }}" 
+                             src="{{ $image->signed_url ?? $image->url }}" 
                              alt="{{ $product->name }}" 
                              class="w-full h-full object-cover">
                         @endforeach
                     @elseif($product->primaryImage)
-                        <img src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                        <img src="{{ $product->primaryImage->signed_url ?? $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                     @endif
                 </div>
 
@@ -53,7 +53,7 @@
                     <button @click="currentImage = {{ $index }}" 
                             :class="currentImage === {{ $index }} ? 'ring-2 ring-green-600' : ''"
                             class="aspect-square bg-gray-200 rounded overflow-hidden hover:opacity-75 transition">
-                        <img src="{{ $image->url }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-full object-cover">
+                        <img src="{{ $image->signed_thumbnail_url ?? $image->thumbnail_url ?? $image->signed_url }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-full object-cover">
                     </button>
                     @endforeach
                 </div>

@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-DA4DJw5H.css",
+    "file": "assets/app-PMFFpf5X.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -29,7 +29,7 @@
     "isEntry": true
   },
   "resources/js/admin/categories/show.js": {
-    "file": "assets/show-va-wDLbZ.js",
+    "file": "assets/show-C8QzdDKz.js",
     "name": "show",
     "src": "resources/js/admin/categories/show.js",
     "isEntry": true

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
@@ -16,7 +17,10 @@ class Category extends Model
         'name',
         'slug',
         'description',
-        'image',
+        'path',
+        'url',
+        'thumbnail_path',
+        'thumbnail_url',
         'parent_id',
         'order',
         'is_active',
@@ -28,6 +32,8 @@ class Category extends Model
         'is_featured' => 'boolean',
     ];
 
+    protected $appends = ['signed_url', 'signed_thumbnail_url'];
+
     protected static function boot()
     {
         parent::boot();
@@ -37,6 +43,40 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+    }
+
+    public function getSignedUrlAttribute()
+    {
+        if (!$this->path) {
+            return null;
+        }
+
+        try {
+            return Storage::disk('s3')->temporaryUrl(
+                $this->path,
+                now()->addHour()
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate signed URL for category: ' . $e->getMessage());
+            return $this->url;
+        }
+    }
+
+    public function getSignedThumbnailUrlAttribute()
+    {
+        if (!$this->thumbnail_path) {
+            return $this->getSignedUrlAttribute();
+        }
+
+        try {
+            return Storage::disk('s3')->temporaryUrl(
+                $this->thumbnail_path,
+                now()->addHour()
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate signed thumbnail URL for category: ' . $e->getMessage());
+            return $this->thumbnail_url ?? $this->url;
+        }
     }
 
     public function shop()

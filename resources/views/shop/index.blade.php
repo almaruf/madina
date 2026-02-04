@@ -51,7 +51,7 @@
                      x-transition:enter-start="opacity-0 transform translate-x-full"
                      x-transition:enter-end="opacity-100 transform translate-x-0"
                      class="relative h-96">
-                    <img src="{{ $banner->image }}" alt="{{ $banner->title }}" class="w-full h-full object-cover">
+                    <img src="{{ $banner->signed_url ?? $banner->url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
                         <div class="p-8 text-white max-w-2xl">
                             @if($banner->title)
@@ -209,8 +209,8 @@
                 <a href="/products?category={{ $category->slug }}" 
                    class="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition">
                     <div class="aspect-video bg-gray-200">
-                        @if($category->image)
-                        <img src="{{ $category->image }}" alt="{{ $category->name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                        @if($category->signed_thumbnail_url ?? $category->thumbnail_url ?? $category->signed_url)
+                        <img src="{{ $category->signed_thumbnail_url ?? $category->thumbnail_url ?? $category->signed_url }}" alt="{{ $category->name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
                         @endif
                     </div>
                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
@@ -244,7 +244,7 @@
                     <a href="/products/{{ $product->slug }}" class="block">
                         <div class="aspect-square bg-gray-200 rounded-t-lg overflow-hidden">
                             @if($product->primaryImage)
-                            <img src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            <img src="{{ $product->primaryImage->signed_thumbnail_url ?? $product->primaryImage->thumbnail_url ?? $product->primaryImage->signed_url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             @endif
                         </div>
                         <div class="p-4">
@@ -278,7 +278,7 @@
                     <a href="/products/{{ $product->slug }}" class="block">
                         <div class="aspect-square bg-gray-200 rounded-t-lg overflow-hidden">
                             @if($product->primaryImage)
-                            <img src="{{ $product->primaryImage->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            <img src="{{ $product->primaryImage->signed_thumbnail_url ?? $product->primaryImage->thumbnail_url ?? $product->primaryImage->signed_url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             @endif
                         </div>
                         <div class="p-3">

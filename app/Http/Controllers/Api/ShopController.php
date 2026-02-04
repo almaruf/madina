@@ -18,6 +18,11 @@ class ShopController extends Controller
             return response()->json(['message' => 'Shop not found'], 404);
         }
 
+        // Load active banners
+        $shop->load(['banners' => function($query) {
+            $query->where('is_active', true)->orderBy('order');
+        }]);
+
         return response()->json([
             'name' => $shop->name,
             'currency' => $shop->currency ?? 'GBP',
@@ -30,6 +35,7 @@ class ShopController extends Controller
                 'rate' => $shop->vat_rate ?? 20.00,
                 'prices_include_vat' => (bool) ($shop->prices_include_vat ?? true),
             ],
+            'banners' => $shop->banners,
         ]);
     }
 }

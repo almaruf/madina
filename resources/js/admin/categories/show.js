@@ -50,6 +50,8 @@ function renderCategory(category) {
     `;
 
     // Info
+    const hasImage = category.path !== null;
+    
     document.getElementById('category-info').innerHTML = `
         <div>
             <h3 class="text-sm font-medium text-gray-500 mb-2">Category Name</h3>
@@ -73,7 +75,50 @@ function renderCategory(category) {
             <h3 class="text-sm font-medium text-gray-500 mb-2">Created</h3>
             <p class="text-gray-900">${new Date(category.created_at).toLocaleString()}</p>
         </div>
+        ${!isArchived ? `
+            <div class="md:col-span-2">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Category Image</h3>
+                
+                ${hasImage ? `
+                    <div class="flex items-start gap-4">
+                        <img src="${category.signed_url || category.url}" alt="${category.name}" class="w-32 h-32 object-cover rounded-lg border-2 border-gray-200">
+                        <button id="delete-image-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                            <i class="fas fa-trash mr-2"></i>Delete Image
+                        </button>
+                    </div>
+                ` : `
+                    <div class="flex flex-col gap-3">
+                        <input type="file" id="image-upload" accept="image/jpeg,image/png,image/webp" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <button id="upload-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold w-fit">
+                            <i class="fas fa-upload mr-2"></i>Upload Image
+                        </button>
+                        <div id="upload-progress" class="hidden mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div id="progress-bar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <p id="progress-text" class="text-sm text-gray-600 mt-1">Uploading...</p>
+                        </div>
+                        <div id="validation-errors" class="hidden mt-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm"></div>
+                    </div>
+                `}
+            </div>
+        ` : ''}
     `;
+
+    // Attach image event listeners if not archived
+    if (!isArchived) {
+        if (hasImage) {
+            const deleteBtn = document.getElementById('delete-image-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', deleteImage);
+            }
+        } else {
+            const uploadBtn = document.getElementById('upload-btn');
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', handleImageUpload);
+            }
+        }
+    }
 
     // Products section
     const productsCount = category.products_count || 0;
@@ -258,6 +303,111 @@ async function permanentlyDeleteCategory() {
     } catch (error) {
         console.error('Error deleting category:', error);
         window.toast.error(error.response?.data?.message || 'Failed to delete category');
+    }
+}
+
+// Handle image upload
+async function handleImageUpload() {
+    const fileInput = document.getElementById('image-upload');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        window.toast.error('Please select an image');
+        return;
+    }
+    
+    // Validate file
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const errorsDiv = document.getElementById('validation-errors');
+    
+    if (!allowedTypes.includes(file.type)) {
+        errorsDiv.innerHTML = '<p>Invalid file type. Only JPEG, PNG, and WebP are allowed.</p>';
+        errorsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        errorsDiv.innerHTML = '<p>File too large. Maximum size is 5MB.</p>';
+        errorsDiv.classList.remove('hidden');
+        return;
+    }
+    
+    errorsDiv.classList.add('hidden');
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // Show progress
+    const progressDiv = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    progressDiv.classList.remove('hidden');
+    
+    try {
+        const response = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                    progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
+                }
+            });
+            
+            xhr.addEventListener('load', () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(JSON.parse(xhr.responseText));
+                }
+            });
+            
+            xhr.addEventListener('error', () => reject({ message: 'Upload failed' }));
+            
+            xhr.open('POST', `/api/admin/categories/${currentCategory.slug}/image`);
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            if (token) {
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            }
+            xhr.send(formData);
+        });
+        
+        progressDiv.classList.add('hidden');
+        progressBar.style.width = '0%';
+        fileInput.value = '';
+        
+        window.toast.success('Image uploaded successfully!');
+        await loadCategory();
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        progressDiv.classList.add('hidden');
+        window.toast.error(error.message || 'Failed to upload image');
+        
+        if (error.errors) {
+            const errorMessages = Object.values(error.errors).flat();
+            errorsDiv.innerHTML = errorMessages.map(err => `<p>• ${err}</p>`).join('');
+            errorsDiv.classList.remove('hidden');
+        }
+    }
+}
+
+// Delete image
+async function deleteImage() {
+    if (!confirm('Are you sure you want to delete this image?')) {
+        return;
+    }
+    
+    try {
+        await axios.delete(`/api/admin/categories/${currentCategory.slug}/image`);
+        window.toast.success('Image deleted successfully!');
+        await loadCategory();
+    } catch (error) {
+        console.error('Delete error:', error);
+        window.toast.error(error.response?.data?.message || 'Failed to delete image');
     }
 }
 

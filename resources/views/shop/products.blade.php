@@ -216,7 +216,10 @@
 
         grid.innerHTML = filteredProducts.map(product => {
             const minPrice = getMinPrice(product);
-            const imageUrl = product.primary_image?.url || product.images?.[0]?.url || '/images/placeholder.jpg';
+            // Use thumbnail from primary image for better performance on listing pages
+            const imageUrl = product.primary_image?.thumbnail_url || product.primary_image?.signed_thumbnail_url || 
+                             product.images?.[0]?.thumbnail_url || product.images?.[0]?.signed_thumbnail_url || 
+                             '/images/placeholder.jpg';
             
             return `
                 <div class="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer h-full flex flex-col" onclick="window.location.href='/products/${product.slug}'">
