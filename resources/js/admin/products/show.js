@@ -44,26 +44,7 @@ function renderProduct() {
     const remainingSlots = 5 - imageCount;
     
     document.getElementById('product-container').innerHTML = `
-        <!-- Action Buttons -->
-        <div class="flex gap-3">
-            ${!isArchived ? `
-                <a href="/admin/products/${productSlug}/edit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold inline-flex items-center">
-                    <i class="fas fa-edit mr-2"></i>Edit Product
-                </a>
-                <button id="archive-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
-                    <i class="fas fa-archive mr-2"></i>Archive
-                </button>
-            ` : `
-                <button id="restore-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
-                    <i class="fas fa-undo mr-2"></i>Restore
-                </button>
-                <button id="permanent-delete-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
-                    <i class="fas fa-trash mr-2"></i>Permanent Delete
-                </button>
-            `}
-        </div>
-        
-        ${isArchived ? '<div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg"><i class="fas fa-exclamation-triangle mr-2"></i>This product is archived</div>' : ''}
+        ${isArchived ? '<div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg mb-6"><i class="fas fa-exclamation-triangle mr-2"></i>This product is archived</div>' : ''}
         
         <!-- Product Details and Images -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -98,9 +79,38 @@ function renderProduct() {
                 </div>
                 
                 ${productData.description ? `
-                    <div>
+                    <div class="mb-4">
                         <p class="text-sm text-gray-600 mb-1">Description</p>
                         <p class="text-base">${productData.description}</p>
+                    </div>
+                ` : ''}
+                
+                <!-- Variations -->
+                ${productData.variations && productData.variations.length > 0 ? `
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <h4 class="text-lg font-bold mb-4">Variations</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    ${productData.variations.map(v => `
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm">${v.name}</td>
+                                            <td class="px-4 py-3 text-sm font-semibold">£${parseFloat(v.price).toFixed(2)}</td>
+                                            <td class="px-4 py-3 text-sm">${v.stock_quantity || 0}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">${v.sku || 'N/A'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 ` : ''}
             </div>
@@ -156,34 +166,100 @@ function renderProduct() {
             ` : ''}
         </div>
         
-        <!-- Variations -->
-        ${productData.variations && productData.variations.length > 0 ? `
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-bold mb-4">Variations</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            ${productData.variations.map(v => `
-                                <tr>
-                                    <td class="px-4 py-3 text-sm">${v.name}</td>
-                                    <td class="px-4 py-3 text-sm font-semibold">£${parseFloat(v.price).toFixed(2)}</td>
-                                    <td class="px-4 py-3 text-sm">${v.stock_quantity || 0}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-500">${v.sku || 'N/A'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+        <!-- Additional Product Information -->
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <h3 class="text-xl font-bold mb-6">Additional Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                ${productData.short_description ? `
+                    <div class="md:col-span-2">
+                        <p class="text-sm font-semibold text-gray-600 mb-1">Short Description</p>
+                        <p class="text-base text-gray-900">${productData.short_description}</p>
+                    </div>
+                ` : ''}
+                
+                ${productData.brand ? `
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 mb-1">Brand</p>
+                        <p class="text-base text-gray-900">${productData.brand}</p>
+                    </div>
+                ` : ''}
+                
+                ${productData.country_of_origin ? `
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 mb-1">Country of Origin</p>
+                        <p class="text-base text-gray-900">${productData.country_of_origin}</p>
+                    </div>
+                ` : ''}
+                
+                ${productData.type === 'meat' ? `
+                    ${productData.meat_type ? `
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600 mb-1">Meat Type</p>
+                            <p class="text-base text-gray-900 capitalize">${productData.meat_type}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${productData.cut_type ? `
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600 mb-1">Cut Type</p>
+                            <p class="text-base text-gray-900">${productData.cut_type}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 mb-1">Halal Certified</p>
+                        <span class="inline-block px-3 py-1 text-sm rounded ${productData.is_halal ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${productData.is_halal ? 'Yes' : 'No'}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                <div class="md:col-span-2">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Ingredients</p>
+                    <p class="text-base text-gray-900">${productData.ingredients || '<span class="text-gray-400">Not specified</span>'}</p>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Allergen Information</p>
+                    <p class="text-base text-gray-900 bg-yellow-50 border border-yellow-200 p-3 rounded">${productData.allergen_info || '<span class="text-gray-400">Not specified</span>'}</p>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Storage Instructions</p>
+                    <p class="text-base text-gray-900">${productData.storage_instructions || '<span class="text-gray-400">Not specified</span>'}</p>
+                </div>
+                
+                <!-- Status Badges -->
+                <div class="md:col-span-2">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">Product Flags</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${productData.is_featured ? '<span class="px-3 py-1 text-sm rounded bg-yellow-100 text-yellow-800"><i class="fas fa-star mr-1"></i>Featured</span>' : ''}
+                        ${productData.is_on_sale ? '<span class="px-3 py-1 text-sm rounded bg-red-100 text-red-800"><i class="fas fa-tag mr-1"></i>On Sale</span>' : ''}
+                        ${!productData.is_featured && !productData.is_on_sale ? '<span class="text-gray-500 text-sm">No special flags</span>' : ''}
+                    </div>
                 </div>
             </div>
-        ` : ''}
+        </div>
+        
+        <!-- Action Buttons (Bottom) -->
+        <div class="flex gap-3 mt-6">
+            ${!isArchived ? `
+                <a href="/admin/products/${productSlug}/edit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold inline-flex items-center">
+                    <i class="fas fa-edit mr-2"></i>Edit Product
+                </a>
+                <button id="archive-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <i class="fas fa-archive mr-2"></i>Archive
+                </button>
+            ` : `
+                <button id="restore-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <i class="fas fa-undo mr-2"></i>Restore
+                </button>
+                <button id="permanent-delete-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold">
+                    <i class="fas fa-trash mr-2"></i>Permanent Delete
+                </button>
+            `}
+        </div>
     `;
 
     // Attach event listeners after rendering

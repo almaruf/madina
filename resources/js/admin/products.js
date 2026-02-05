@@ -25,11 +25,16 @@ function renderProducts() {
     tbody.innerHTML = allProducts.map(product => {
         const defaultVariation = product.variations?.find(v => v.is_default) || product.variations?.[0];
         
+        // Check for image in order of preference: thumbnail (smaller), then full image
+        const imageUrl = product.primary_image 
+            ? (product.primary_image.signed_thumbnail_url || product.primary_image.thumbnail_url || product.primary_image.signed_url || product.primary_image.url)
+            : null;
+        
         return `
             <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/admin/products/${product.slug}'">
                 <td class="px-6 py-4">
-                    ${product.primary_image 
-                        ? `<img src="${product.primary_image.url}" class="w-16 h-16 object-cover rounded">`
+                    ${imageUrl 
+                        ? `<img src="${imageUrl}" class="w-16 h-16 object-cover rounded">`
                         : '<div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div>'
                     }
                 </td>
