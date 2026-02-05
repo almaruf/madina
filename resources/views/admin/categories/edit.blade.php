@@ -50,11 +50,6 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
-                    <input type="url" id="image" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500" placeholder="https://...">
-                </div>
-
-                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Display Order</label>
                     <input type="number" id="order" min="0" value="0" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500">
                     <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>

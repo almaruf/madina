@@ -22,26 +22,31 @@ function renderCategories() {
         return;
     }
     
-    tbody.innerHTML = allCategories.map(category => `
-        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/admin/categories/${category.slug}'">
-            <td class="px-6 py-4">
-                ${category.image_url 
-                    ? `<img src="${category.image_url}" class="w-12 h-12 object-cover rounded">`
-                    : '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div>'
-                }
-            </td>
-            <td class="px-6 py-4">
-                <div class="font-medium text-gray-900">${category.name}</div>
-                <div class="text-sm text-gray-500">${category.description || 'No description'}</div>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">${category.products_count || 0}</td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 text-xs rounded ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                    ${category.is_active ? 'Active' : 'Inactive'}
-                </span>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = allCategories.map(category => {
+        // Check for image in order of preference: thumbnail (smaller), then full image
+        const imageUrl = category.signed_thumbnail_url || category.thumbnail_url || category.signed_url || category.url;
+        
+        return `
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/admin/categories/${category.slug}'">
+                <td class="px-6 py-4">
+                    ${imageUrl 
+                        ? `<img src="${imageUrl}" class="w-12 h-12 object-cover rounded">`
+                        : '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div>'
+                    }
+                </td>
+                <td class="px-6 py-4">
+                    <div class="font-medium text-gray-900">${category.name}</div>
+                    <div class="text-sm text-gray-500">${category.description || 'No description'}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${category.products_count || 0}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 text-xs rounded ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        ${category.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function switchTab(tab) {

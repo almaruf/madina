@@ -30,7 +30,6 @@ function populateForm() {
     document.getElementById('name').value = categoryData.name || '';
     document.getElementById('slug').value = categoryData.slug || '';
     document.getElementById('description').value = categoryData.description || '';
-    document.getElementById('image').value = categoryData.image || '';
     document.getElementById('order').value = categoryData.order || 0;
     document.getElementById('is_active').checked = categoryData.is_active || false;
     document.getElementById('is_featured').checked = categoryData.is_featured || false;
@@ -53,7 +52,6 @@ async function handleSubmit(e) {
         slug: document.getElementById('slug').value || null,
         parent_id: document.getElementById('parent_id').value || null,
         description: document.getElementById('description').value || null,
-        image: document.getElementById('image').value || null,
         order: parseInt(document.getElementById('order').value) || 0,
         is_active: document.getElementById('is_active').checked,
         is_featured: document.getElementById('is_featured').checked

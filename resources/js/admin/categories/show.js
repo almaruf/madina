@@ -80,11 +80,14 @@ function renderCategory(category) {
                 <h3 class="text-sm font-medium text-gray-500 mb-2">Category Image</h3>
                 
                 ${hasImage ? `
-                    <div class="flex items-start gap-4">
-                        <img src="${category.signed_url || category.url}" alt="${category.name}" class="w-32 h-32 object-cover rounded-lg border-2 border-gray-200">
-                        <button id="delete-image-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
-                            <i class="fas fa-trash mr-2"></i>Delete Image
-                        </button>
+                    <div class="relative inline-block group">
+                        <img src="${category.signed_url || category.url}" alt="${category.name}" class="w-48 h-48 object-cover rounded-lg border-2 border-gray-200">
+                        <!-- Hover overlay with delete button -->
+                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <button id="delete-image-btn" class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg">
+                                <i class="fas fa-trash mr-2"></i>Delete
+                            </button>
+                        </div>
                     </div>
                 ` : `
                     <div class="flex flex-col gap-3">
