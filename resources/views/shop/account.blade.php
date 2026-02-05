@@ -34,6 +34,9 @@
                 <button class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="orders">
                     Order History
                 </button>
+                <button class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="privacy">
+                    Privacy & Consents
+                </button>
             </nav>
         </div>
 
@@ -133,6 +136,77 @@
                         <p class="text-gray-600">Loading your orders...</p>
                     </div>
                 </div>
+
+                <!-- Privacy & Consents -->
+                <div id="tab-privacy" class="tab-panel bg-white rounded-lg shadow-md p-6 hidden">
+                    <h2 class="text-xl font-bold mb-4">Privacy & Consent Preferences</h2>
+                    <p class="text-sm text-gray-600 mb-6">Control how we can contact you with marketing information. You can change these preferences at any time.</p>
+                    
+                    <form id="consent-form" class="space-y-6">
+                        <!-- Email Marketing Consent -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" id="consent-email" class="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500">
+                                <div class="flex-1">
+                                    <label for="consent-email" class="block font-medium text-gray-900 cursor-pointer">
+                                        Email Marketing
+                                    </label>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Receive promotional emails about special offers, new products, and exclusive deals.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SMS Marketing Consent -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" id="consent-sms" class="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500">
+                                <div class="flex-1">
+                                    <label for="consent-sms" class="block font-medium text-gray-900 cursor-pointer">
+                                        SMS Marketing
+                                    </label>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Receive promotional text messages about special offers and time-sensitive deals.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex gap-2">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-medium mb-1">Important Note</p>
+                                    <p>You will still receive essential transactional messages (order confirmations, delivery updates) regardless of your marketing preferences.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold">
+                            Save Preferences
+                        </button>
+                    </form>
+
+                    <!-- Account Deletion Section (separated for safety) -->
+                    <div class="mt-10 pt-8 border-t-2 border-red-200">
+                        <div class="bg-red-50 border-2 border-red-200 rounded-lg p-6">
+                            <div class="flex items-start gap-3 mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 text-xl mt-1"></i>
+                                <div>
+                                    <h3 class="font-bold text-red-900 text-lg mb-2">Danger Zone</h3>
+                                    <p class="text-sm text-red-800 mb-4">
+                                        Once you request account deletion, an admin will review your request. This action will permanently remove all your personal information including addresses, order history, and preferences. This cannot be undone.
+                                    </p>
+                                </div>
+                            </div>
+                            <button id="request-deletion-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition">
+                                <i class="fas fa-trash-alt mr-2"></i>
+                                Request Account Deletion
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="lg:col-span-1 space-y-8">
@@ -161,9 +235,6 @@
                         <a href="/cart" class="block w-full text-center border border-green-600 text-green-600 hover:bg-green-50 py-2 rounded-lg font-semibold">
                             View Cart
                         </a>
-                        <button id="request-deletion-btn" class="block w-full text-center border border-red-600 text-red-600 hover:bg-red-50 py-2 rounded-lg font-semibold">
-                            Request Account Deletion
-                        </button>
                         <button id="logout-btn-account" class="hidden w-full text-center border border-red-600 text-red-600 hover:bg-red-50 py-2 rounded-lg font-semibold">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
@@ -252,6 +323,8 @@
             this.bindAddressForm();
             this.loadAddresses();
             this.loadOrders();
+            this.loadConsents();
+            this.bindConsentForm();
             this.setupTabs();
             this.configureDeletionRequest();
         }
@@ -574,6 +647,52 @@
             } catch (error) {
                 document.getElementById('orders-list').innerHTML = '<p class="text-red-600">Failed to load orders</p>';
             }
+        }
+
+        async loadConsents() {
+            try {
+                const response = await axios.get('/api/consents');
+                const consents = response.data.consents || [];
+                
+                const emailConsent = consents.find(c => c.type === 'email_marketing');
+                const smsConsent = consents.find(c => c.type === 'sms_marketing');
+                
+                document.getElementById('consent-email').checked = emailConsent ? emailConsent.is_granted : false;
+                document.getElementById('consent-sms').checked = smsConsent ? smsConsent.is_granted : false;
+            } catch (error) {
+                console.error('Error loading consents:', error);
+                this.showMessage('error', 'Failed to load consent preferences');
+            }
+        }
+
+        bindConsentForm() {
+            const form = document.getElementById('consent-form');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const emailConsent = document.getElementById('consent-email').checked;
+                    const smsConsent = document.getElementById('consent-sms').checked;
+                    
+                    const response = await axios.post('/api/consents', {
+                        consents: [
+                            { type: 'email_marketing', is_granted: emailConsent },
+                            { type: 'sms_marketing', is_granted: smsConsent }
+                        ]
+                    });
+                    
+                    this.showMessage('success', 'Consent preferences updated successfully');
+                    
+                    // Scroll to message
+                    document.getElementById('account-message')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (error) {
+                    console.error('Error updating consents:', error);
+                    const message = error.response?.data?.message || 'Failed to update consent preferences';
+                    this.showMessage('error', message);
+                }
+            });
         }
     }
 

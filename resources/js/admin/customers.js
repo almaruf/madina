@@ -15,6 +15,7 @@ async function loadCustomers() {
         const response = await axios.get(url);
         const customers = response.data.data || response.data;
         
+        console.log('Loaded customers with consent info:', customers);
         renderCustomers(customers);
     } catch (error) {
         console.error('Error loading customers:', error);
@@ -27,7 +28,7 @@ function renderCustomers(customers) {
     const tbody = document.getElementById('customers-table');
     
     if (customers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-600 py-4">No customers found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-600 py-4">No customers found</td></tr>';
         return;
     }
     
@@ -37,6 +38,15 @@ function renderCustomers(customers) {
                  Permanently Remove
                </button>`
             : `<span class="text-gray-400 text-sm">—</span>`;
+        
+        // Consent badges
+        const emailConsentBadge = customer.consent_email 
+            ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check mr-1 text-xs"></i>Yes</span>'
+            : '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"><i class="fas fa-times mr-1 text-xs"></i>No</span>';
+        
+        const smsConsentBadge = customer.consent_sms 
+            ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check mr-1 text-xs"></i>Yes</span>'
+            : '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"><i class="fas fa-times mr-1 text-xs"></i>No</span>';
             
         return `
             <tr class="hover:bg-gray-50">
@@ -44,6 +54,8 @@ function renderCustomers(customers) {
                 <td class="px-6 py-4 text-sm text-gray-900">${customer.email || '—'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${customer.city || '—'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${customer.orders_count}</td>
+                <td class="px-6 py-4 text-sm text-center">${emailConsentBadge}</td>
+                <td class="px-6 py-4 text-sm text-center">${smsConsentBadge}</td>
                 <td class="px-6 py-4 text-sm text-gray-500">${new Date(customer.created_at).toLocaleDateString()}</td>
                 <td class="px-6 py-4">${actionButton}</td>
             </tr>

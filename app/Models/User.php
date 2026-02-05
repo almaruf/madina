@@ -50,6 +50,32 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function consents()
+    {
+        return $this->hasMany(UserConsent::class);
+    }
+
+    /**
+     * Check if user has granted a specific consent type
+     */
+    public function hasConsent(string $type): bool
+    {
+        return $this->consents()
+            ->where('consent_type', $type)
+            ->where('is_granted', true)
+            ->exists();
+    }
+
+    /**
+     * Get user's consent for a specific type
+     */
+    public function getConsent(string $type)
+    {
+        return $this->consents()
+            ->where('consent_type', $type)
+            ->first();
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';

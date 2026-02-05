@@ -30,6 +30,7 @@ class CustomerController extends Controller
 
         $query = User::where('role', 'customer')
             ->whereNull('deletion_requested_at')
+            ->with('consents') // Eager load consents
             ->withCount(['orders' => function($q) use ($shopId) {
                 if ($shopId) {
                     $q->where('shop_id', $shopId);
@@ -47,6 +48,10 @@ class CustomerController extends Controller
 
         // Strip PII from response
         $customers->getCollection()->transform(function ($customer) {
+            // Get consent status
+            $emailConsent = $customer->consents->firstWhere('consent_type', 'email_marketing');
+            $smsConsent = $customer->consents->firstWhere('consent_type', 'sms_marketing');
+            
             return [
                 'id' => $customer->id,
                 'phone' => $this->maskPhone($customer->phone),
@@ -54,6 +59,8 @@ class CustomerController extends Controller
                 'city' => $this->getCityFromOrders($customer),
                 'orders_count' => $customer->orders_count,
                 'created_at' => $customer->created_at,
+                'consent_email' => $emailConsent ? $emailConsent->is_granted : false,
+                'consent_sms' => $smsConsent ? $smsConsent->is_granted : false,
             ];
         });
 
@@ -79,6 +86,7 @@ class CustomerController extends Controller
 
         $query = User::where('role', 'customer')
             ->whereNotNull('deletion_requested_at')
+            ->with('consents') // Eager load consents
             ->withCount(['orders' => function($q) use ($shopId) {
                 if ($shopId) {
                     $q->where('shop_id', $shopId);
@@ -95,6 +103,10 @@ class CustomerController extends Controller
 
         // Strip PII from response
         $customers->getCollection()->transform(function ($customer) {
+            // Get consent status
+            $emailConsent = $customer->consents->firstWhere('consent_type', 'email_marketing');
+            $smsConsent = $customer->consents->firstWhere('consent_type', 'sms_marketing');
+            
             return [
                 'id' => $customer->id,
                 'phone' => $this->maskPhone($customer->phone),
@@ -103,6 +115,8 @@ class CustomerController extends Controller
                 'orders_count' => $customer->orders_count,
                 'deletion_requested_at' => $customer->deletion_requested_at,
                 'created_at' => $customer->created_at,
+                'consent_email' => $emailConsent ? $emailConsent->is_granted : false,
+                'consent_sms' => $smsConsent ? $smsConsent->is_granted : false,
             ];
         });
 
@@ -117,6 +131,9 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $customer = User::where('role', 'customer')->findOrFail($id);
+
+            // Delete all consents (cascade will handle this, but being explicit)
+            $customer->consents()->delete();
 
             // Delete all addresses
             $customer->addresses()->forceDelete();

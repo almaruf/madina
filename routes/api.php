@@ -38,6 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/user', [AuthController::class, 'user']);
     Route::patch('/auth/profile', [AuthController::class, 'updateProfile']);
 
+    // Consents
+    Route::get('/consents', [\App\Http\Controllers\Api\ConsentController::class, 'index']);
+    Route::post('/consents', [\App\Http\Controllers\Api\ConsentController::class, 'update']);
+    Route::post('/consents/single', [\App\Http\Controllers\Api\ConsentController::class, 'updateSingle']);
+
     // Addresses
     Route::apiResource('addresses', AddressController::class);
 
